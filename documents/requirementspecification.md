@@ -1,0 +1,55 @@
+# ThePlotPot
+## Objective  
+"ThePlotPot" is a collaborative story-writing platform where users contribute to ongoing stories by adding branches or chapters. Through community voting, stories evolve in various directions, enabling a myriad of narrative possibilities.
+
+## Core Features
+
+#### User Profiles:
+* Sign up and log in.
+* Display the user's stories and contributions.
+#### Story Creation:
+* Any user can start a new story by writing the initial chapter.
+* Title, genre and content for each story/chapter.
+#### Collaborative Writing:
+* After an initial chapter is posted, users can suggest continuations for a set number of branches by writing a next chapter (e.g., two or three).
+* For each chapter, the system should show a branching option, allowing users to either continue Branch 1 or Branch 2.
+#### Voting and Selection:
+* Users can upvote their preferred continuation for each branch.
+* After a certain time period (e.g., 48 hours), the continuation with the most votes for each branch becomes official. Other contributions are archived as alternative paths.
+#### Story Viewing:
+* Stories can be read linearly.
+* At the end of each chapter, readers are presented with options to explore each branch.
+#### Commenting (Optional):
+* Readers can leave comments or feedback on each chapter.
+
+## Technical Requirements
+
+#### Backend
+
+##### Database
+* users table: Store user data, including login details and profile information.
+* stories table: Store individual stories with reference to its author.
+* chapters table: Storing individual chapters, with references to parent chapters and their respective branches.
+
+##### GraphQL Schema
+* Queries: Fetch user details, stories, chapters, and comments.
+* Mutations: Add or update user details, stories, chapters, upvotes, and comments.
+* Subscriptions: Real-time updates when a new chapter is added or when a chapter gets upvotes.
+
+#### Frontend
+* React for building the UI components.
+* QuillJS for the rich text editor interface.
+* Apollo Client to handle GraphQL requests.
+
+#### Authentication
+* Basic authentication system using GraphQL and Apollo.
+* Secure sign-up, login, and session management.
+
+## Challenges and Constraints
+* Maintaining content quality.
+* Managing spam contributions and ensuring platform integrity.
+
+## Future Scope 
+* Implementation of user profiles with more details and achievements.
+* Introduction of a tree view to visualize story progression.
+* Enhanced collaborative editing and real-time interactions.
