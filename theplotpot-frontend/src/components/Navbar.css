@@ -1,3 +1,21 @@
-.dropdown-menu {
-    margin-left: -30px
+
+.navbar-dark .dropdown-menu {
+    background-color: #343a40;  
+}
+
+
+.navbar-dark .dropdown-menu .dropdown-item {
+    color: #fff; 
+}
+
+
+.navbar-dark .dropdown-menu .dropdown-item:hover, 
+.navbar-dark .dropdown-menu .dropdown-item:focus {
+    color: #343a40;  
+    background-color: #e9ecef;  
+}
+.navbar-dark .dropdown-menu .no-hover-effect:hover, 
+.navbar-dark .dropdown-menu .no-hover-effect:focus {
+    color: #fff;  
+    background-color: #343a40;  
 }

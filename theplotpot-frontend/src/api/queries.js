@@ -42,5 +42,63 @@ query Me {
 }
 
 `
-
-export { LOGIN_MUTATION, SIGNUP_MUTATION, LOGOUT_MUTATION, ME }
+const CREATE_STORY = gql`
+  mutation CreateStory($title: String!, $description: String!, $genre: String!, $firstChapterContent: String!) {
+    createStory(
+      input: {
+        title: $title, 
+        description: $description, 
+        genre: $genre, 
+        firstChapterContent: $firstChapterContent
+      }
+    ) {
+      success
+      message
+      story {
+        id
+      }
+    }
+  }
+`
+const GET_ALL_STORIES = gql`
+  query GetAllStories {
+    getAllStories {
+      title
+      genre
+      description
+      id
+      author {
+        username
+      }
+    }
+  }
+`
+const GET_STORY_BY_ID = gql`
+query GetStory($id: ID!) {
+  getStory(id: $id) {
+    title
+    chapters {
+      content
+      title
+      branch
+      id
+      parentChapterId
+      upvotes
+    }
+    author {
+      username
+    }
+    description
+    genre
+    id
+  }
+}
+`
+const CREATE_CHAPTER = gql`
+mutation CreateChapter($content: String!, $storyId: ID!, $title: String!, $branch: Int!, $parentChapterId: ID!) {
+  createChapter(content: $content, storyId: $storyId, title: $title, branch: $branch, parentChapterId: $parentChapterId) {
+    id
+  }
+}
+`
+export { LOGIN_MUTATION, SIGNUP_MUTATION, LOGOUT_MUTATION,CREATE_STORY,GET_ALL_STORIES,GET_STORY_BY_ID, ME, CREATE_CHAPTER }

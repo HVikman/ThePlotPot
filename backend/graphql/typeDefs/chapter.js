@@ -4,9 +4,9 @@ module.exports = gql`
     type Chapter {
     id: ID!
     content: String!
-    Title: String
+    title: String
     story: Story!
-    parentChapter: ID
+    parentChapterId: ID
     branch: Int!
     upvotes: Int
     }

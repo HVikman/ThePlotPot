@@ -6,11 +6,17 @@ import genres from './genres'
 import ReactQuill from 'react-quill'
 import 'quill/dist/quill.snow.css'
 import '../../utils/wordcounter'
+import { useMutation } from '@apollo/client'
+import { CREATE_STORY } from '../../api/queries'
+import { useAuth } from '../auth/AuthContext'
 
 const StoryForm = () => {
+  const { user } = useAuth()
+  const isAuthenticated = !!user
+
   const MAX_WORDS = 2000
   const [disabledPanels, setDisabledPanels] = useState('disabled')
-
+  const [createStory] = useMutation(CREATE_STORY)
 
 
   const formik = useFormik({
@@ -26,13 +32,28 @@ const StoryForm = () => {
         .max(100, 'Must be 100 characters or less'),
       description: Yup.string()
         .required('Required')
-        .max(500, 'Must be 500 characters or less'),
+        .max(500, 'Must be 450 characters or less'),
       content: Yup.string().required('Required'),
       genre: Yup.string().required('Required')
     }),
     onSubmit: (values) => {
-      console.log(values)
-      // TODO: Call the backend API to submit the story data
+      createStory({
+        variables: {
+          title: values.title,
+          description: values.description,
+          genre: values.genre,
+          firstChapterContent: values.content
+        }
+      }).then(response => {
+        console.log(response.data)
+        if (response.data.createStory.success) {
+          console.log('Story created successfully with ID:', response.data.createStory.story.id)
+        } else {
+          console.log('Error creating story:', response.data.createStory.message)
+        }
+      }).catch(err => {
+        console.error('There was an error creating the story:', err)
+      })
     },
   })
   useEffect(() => {
@@ -42,7 +63,7 @@ const StoryForm = () => {
       setDisabledPanels('disabled')
     }
   }, [formik.values.title, formik.values.description, formik.values.genre])
-
+  if(!isAuthenticated){return <p>You are not logged in.</p>}
   const items = [
     {
       key: '1',

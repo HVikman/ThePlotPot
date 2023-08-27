@@ -1,0 +1,13 @@
+.chapter-content {
+    font-family: 'Georgia', serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #333;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+.chapter{
+    margin: auto;
+    max-width: 800px;
+}

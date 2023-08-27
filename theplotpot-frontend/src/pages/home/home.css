@@ -1,0 +1,35 @@
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+  }
+  
+  .home-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .carousel-heading{
+    text-align: center;
+  }
+  .carousel-section{
+    width:100%
+  }
+  .card-grid-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around; 
+  }
+  
+  .card-grid-container .card {
+    flex: 0 0 calc(33.3333% - 30px); 
+    margin: 15px;
+  }
+  
+  /* Responsive breakpoint for smaller screens */
+  @media (max-width: 767px) {
+    .card-grid-container .card {
+      flex: 0 0 100%;
+      margin: 10px 0;
+    }
+  }

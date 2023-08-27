@@ -3,12 +3,14 @@ import {
   BrowserRouter as Router,
   Routes, Route
 } from 'react-router-dom'
-import Home from './pages/Home'
+import Home from './pages/home/Home'
 import Login from './pages/auth/Login'
 import Signup from './pages/auth/Signup'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import StoryForm from './pages/story/StoryForm'
+import StoryForm from './pages/newstory/StoryForm'
+import StoryPage from './pages/storypage/StoryPage'
+import AddChapter from './pages/newstory/AddChapter'
 import { ME } from './api/queries'
 import { useQuery } from '@apollo/client'
 
@@ -50,6 +52,8 @@ const App = () => {
               <Route path="/login" element={<Login />} />
               <Route path='/story' element={<StoryForm />} />
               <Route path="/" element={<Home />} />
+              <Route path="/story/:storyId" element={<StoryPage />} />
+              <Route path="/add-chapter" element={<AddChapter />} />
             </Routes>
           </div>
 
