@@ -3,6 +3,8 @@ const db = require('../../db/mysql')
 const Hashids = require('hashids/cjs')
 const hashids = new Hashids(process.env.IDSECRET, 20)
 
+const sanitizeHtml = require('sanitize-html')
+
 const StoryResolvers = {
   Query: {
     getStory: async (_, { id }) => {
@@ -31,29 +33,54 @@ const StoryResolvers = {
   },
 
   Mutation: {
-    createStory: async (_, { title },context) => {
-      console.log(context.req.session.user)
+    async createStory(_, { input }, context) {
       const original = hashids.decode(context.req.session.user)
       const userId = original[0]
       if (!userId) {
-        throw new Error('You must be logged in to create a story.')
+        throw new Error('You must be logged in to delete stories.')
       }
 
-      const insertQuery = 'INSERT INTO stories (title, authorId) VALUES (?, ?)'
+      const { title, description, genre, firstChapterContent } = input
 
-      const result = await new Promise((resolve, reject) => {
-        db.query(insertQuery, [title, userId], (error, results) => {
+      const sanitizedContent = sanitizeHtml(firstChapterContent)
+
+      return new Promise((resolve, reject) => {
+        // Start a transaction
+        db.beginTransaction(async (error) => {
           if (error) reject(error)
 
-          const selectQuery = 'SELECT * FROM stories WHERE id = ?'
-          db.query(selectQuery, [results.insertId], (error, storyResults) => {
-            if (error) reject(error)
-            resolve(storyResults[0])
-          })
+          try {
+            let insertStoryQuery = 'INSERT INTO stories (title, description, genre, authorId) VALUES (?, ?, ?, ?)'
+            const [storyResults] = await db.promise().query(insertStoryQuery, [title, description, genre, userId])
+            const storyId = storyResults.insertId
+
+            let insertChapterQuery = 'INSERT INTO chapters (storyId, content, branch, authorId) VALUES (?, ?, ?, ?)'
+            await db.promise().query(insertChapterQuery, [storyId, sanitizedContent, 0, userId])
+
+            db.commit((err) => {
+              if (err) {
+                db.rollback(() => {
+                  reject(err)
+                })
+              }
+              resolve({
+                success: true,
+                message: 'Story and first chapter created successfully',
+                story: {
+                  id: storyId,
+                  title,
+                  description,
+                  genre,
+                },
+              })
+            })
+          } catch (err) {
+            db.rollback(() => {
+              reject(err)
+            })
+          }
         })
       })
-
-      return result
     },
 
     deleteStory: async (_, { id }, context) => {
@@ -87,6 +114,18 @@ const StoryResolvers = {
         })
       })
       return author
+    },
+    chapters: async (parent) => {
+      const storyId = parent.id
+      const selectQuery = 'SELECT * FROM chapters WHERE storyId = ?'
+
+      const chapters = await new Promise((resolve, reject) => {
+        db.query(selectQuery, [storyId], (error, results) => {
+          if (error) reject(error)
+          resolve(results)
+        })
+      })
+      return chapters
     }
   }
 }

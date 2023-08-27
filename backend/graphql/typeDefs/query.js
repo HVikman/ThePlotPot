@@ -8,5 +8,6 @@ type Query {
     getAllStories: [Story]
     getChapter(id: ID!): Chapter
     getAllChapters: [Chapter]
+    me: User
 }
 `

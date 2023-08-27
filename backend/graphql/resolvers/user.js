@@ -14,6 +14,8 @@ const UserResolvers = {
           resolve(results[0])
         })
       })
+      console.log(user.email)
+      user.email = require('crypto').createHash('md5').update(user.email).digest('hex')
       return user
     },
     getAllUsers: async () => {
@@ -25,6 +27,23 @@ const UserResolvers = {
         })
       })
       return users
+    },
+    me: async (_, args, context) => {
+      const original = hashids.decode(context.req.session.user)
+      const userId = original[0]
+      if (!userId) {
+        throw new Error('You are not logged in.')
+      }
+      const selectQuery = 'SELECT * FROM users WHERE id = ?'
+
+      const user = await new Promise((resolve, reject) => {
+        db.query(selectQuery, [userId], (error, results) => {
+          if (error) reject(error)
+          resolve(results[0])
+        })
+      })
+
+      return user
     }
   },
   Mutation: {
@@ -73,7 +92,8 @@ const UserResolvers = {
       }
 
       context.req.session.user = hashids.encode(user.id)
-
+      context.req.session.save()
+      console.log(context.req.session.user)
       return {
         success: true,
         message: 'Logged in successfully',

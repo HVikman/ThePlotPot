@@ -2,6 +2,7 @@ const express = require('express')
 const { ApolloServer } = require('apollo-server-express')
 const session = require('express-session')
 const SQLiteStore = require('connect-sqlite3')(session)
+
 //const morgan = require('morgan')
 const app = express()
 //app.use(morgan('combined'))
@@ -15,10 +16,13 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
+    domain:'localhost',
+    sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     maxAge: 7 * 24 * 60 * 60 * 1000
   }
 }))
+
 
 const { resolvers, typeDefs } = require('./graphql')
 const server = new ApolloServer({
@@ -36,7 +40,6 @@ const server = new ApolloServer({
 ; (async () => {
   await server.start()
   server.applyMiddleware({ app, path: '/graphql' })
-
   const PORT = process.env.PORT || 4000
   app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}${server.graphqlPath}`)
