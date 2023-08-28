@@ -9,12 +9,12 @@ class WordCounter {
     this.container = document.querySelector(options.container)
 
     quill.on('text-change', this.update.bind(this))
-    this.update()  // Account for initial contents
+    this.update()
   }
 
   calculate() {
     let text = this.quill.getText()
-    return text.split(/\s+/).filter(Boolean).length  // Split by whitespace and filter out empty strings
+    return text.split(/\s+/).filter(Boolean).length
   }
 
   update() {
@@ -24,7 +24,7 @@ class WordCounter {
       let newText = currentText.split(/\s+/).slice(0, this.options.maxWords).join(' ')
       this.quill.setText(newText)
     }
-    this.container.innerText = wordCount + ' / ' + this.options.maxWords  // Update word count display
+    this.container.innerText = wordCount + ' / ' + this.options.maxWords
   }
 }
 

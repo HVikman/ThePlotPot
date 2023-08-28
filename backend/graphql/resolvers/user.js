@@ -47,9 +47,24 @@ const UserResolvers = {
     }
   },
   Mutation: {
-    createUser: async (_, { username, password, email }) => {
+    createUser: async (_, { username, password, email },context) => {
       const salt = await bcrypt.genSalt(10)
       const hashedPassword = await bcrypt.hash(password, salt)
+
+      const selectQuery = 'SELECT * FROM users WHERE email = ?'
+      const user = await new Promise((resolve, reject) => {
+        db.query(selectQuery, [email], (error, results) => {
+          if (error) reject(error)
+          resolve(results[0])
+        })
+      })
+
+      if(user){
+        return {
+          success: false,
+          message: 'email already in use'
+        }
+      }
 
       const insertQuery = 'INSERT INTO users (username, password, email) VALUES (?, ?, ?)'
 
@@ -64,7 +79,13 @@ const UserResolvers = {
         })
       })
 
-      return result
+      context.req.session.user = hashids.encode(result.id)
+
+      return {
+        success: true,
+        message: 'sign up successful',
+        user: result
+      }
     },
 
     login: async (_, { email, password }, context) => {
@@ -92,7 +113,6 @@ const UserResolvers = {
       }
 
       context.req.session.user = hashids.encode(user.id)
-      context.req.session.save()
       console.log(context.req.session.user)
       return {
         success: true,

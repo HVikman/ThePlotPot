@@ -1,4 +1,4 @@
-import React from 'react'
+import { useState } from 'react'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { useMutation } from '@apollo/client'
@@ -14,8 +14,9 @@ const SignupSchema = Yup.object().shape({
 })
 
 const Signup = () => {
+  const [signupError, setSignupError] = useState(null)
   const [signup, { error }] = useMutation(SIGNUP_MUTATION)
-  const { user } = useAuth()
+  const { user, setUser } = useAuth()
   const isAuthenticated = !!user
   const navigate = useNavigate()
   const formik = useFormik({
@@ -27,8 +28,11 @@ const Signup = () => {
     validationSchema: SignupSchema,
     onSubmit: async (values) => {
       const response = await signup({ variables: values })
-      console.log(response)
-      navigate('/login')
+      if(response.data.createUser.success){
+        console.log(response)
+        setUser(response.data.createUser.user)
+        navigate('/')}
+      else{setSignupError(response.data.createUser.message)}
     },
   })
   if(isAuthenticated){navigate('/'); return <p>You are already logged in.</p>}
@@ -89,6 +93,7 @@ const Signup = () => {
       </Form>
       {/* Handle any error messages here */}
       {error && <Alert variant="danger" className="mt-3">{error.message}</Alert>}
+      {signupError && <Alert variant="danger" className="mt-3">{signupError}</Alert>}
     </Container>
   )
 }

@@ -8,7 +8,7 @@ const sanitizeHtml = require('sanitize-html')
 const StoryResolvers = {
   Query: {
     getStory: async (_, { id }) => {
-      const query = 'SELECT * FROM stories WHERE id = ?'
+      const query = 'SELECT * FROM stories WHERE id = ? AND deleted_at IS NULL'
       const result = await new Promise((resolve, reject) => {
         db.query(query, [id], (error, results) => {
           if (error) reject(error)
@@ -20,7 +20,7 @@ const StoryResolvers = {
     },
 
     getAllStories: async () => {
-      const query = 'SELECT * FROM stories'
+      const query = 'SELECT * FROM stories WHERE deleted_at IS NULL'
       const results = await new Promise((resolve, reject) => {
         db.query(query, (error, results) => {
           if (error) reject(error)
@@ -71,6 +71,7 @@ const StoryResolvers = {
                   title,
                   description,
                   genre,
+                  authorId: userId
                 },
               })
             })
@@ -89,16 +90,29 @@ const StoryResolvers = {
       if (!userId) {
         throw new Error('You must be logged in to delete stories.')
       }
-      const query = 'delete FROM stories WHERE id = ? and authorId=?'
-      const result = await new Promise((resolve, reject) => {
-        db.query(query, [id,userId], (error, results) => {
-          if (error) reject(error)
+      const chapterQuery = 'delete from chapters where storyId = ?'
+      await new Promise((resolve, reject) => {
+        db.query(chapterQuery, [id,userId], (error, results) => {
+          if (error) reject (error)
           console.log(results)
           resolve(results)
         })
       })
 
-      return { 'success' : !!result.affectedRows }
+      const query = 'delete FROM stories WHERE id = ? and authorId=?'
+      const result = await new Promise((resolve, reject) => {
+        db.query(query, [id,userId], (error, results) => {
+          if (error) reject (error)
+          console.log(results)
+          resolve(results)
+        })
+      })
+
+      return (result.affectedRows ?
+        { 'success' : !!result.affectedRows,
+          'message' : 'story deleted successfully' }:
+        { 'success': false,
+          'message': 'You can only delete your own stories' })
     }
   },
 
@@ -117,7 +131,7 @@ const StoryResolvers = {
     },
     chapters: async (parent) => {
       const storyId = parent.id
-      const selectQuery = 'SELECT * FROM chapters WHERE storyId = ?'
+      const selectQuery = 'SELECT * FROM chapters WHERE storyId = ? AND deleted_at IS NULL'
 
       const chapters = await new Promise((resolve, reject) => {
         db.query(selectQuery, [storyId], (error, results) => {

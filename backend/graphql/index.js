@@ -22,7 +22,8 @@ const resolvers = {
     ...ChapterResolvers.Mutation
   },
   User: UserResolvers.User,
-  Story: StoryResolvers.Story
+  Story: StoryResolvers.Story,
+  Chapter: ChapterResolvers.Chapter
 }
 
 const typeDefs = [

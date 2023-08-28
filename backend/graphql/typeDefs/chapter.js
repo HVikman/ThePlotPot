@@ -9,5 +9,6 @@ module.exports = gql`
     parentChapterId: ID
     branch: Int!
     upvotes: Int
+    author: User!
     }
 `

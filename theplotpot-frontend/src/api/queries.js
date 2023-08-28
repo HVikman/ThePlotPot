@@ -3,9 +3,13 @@ import { gql } from '@apollo/client'
 const SIGNUP_MUTATION = gql`
 mutation Mutation($username: String!, $email: String!, $password: String!) {
     createUser(username: $username, email: $email, password: $password) {
-      email
-      id
-      username
+      message
+      success
+      user {
+        id
+        username
+        email
+      }
     }
   }
 `
@@ -55,7 +59,13 @@ const CREATE_STORY = gql`
       success
       message
       story {
+        title
+        genre
+        description
         id
+        author {
+          username
+        }
       }
     }
   }
@@ -84,6 +94,9 @@ query GetStory($id: ID!) {
       id
       parentChapterId
       upvotes
+      author{
+        username
+      }
     }
     author {
       username
@@ -97,7 +110,15 @@ query GetStory($id: ID!) {
 const CREATE_CHAPTER = gql`
 mutation CreateChapter($content: String!, $storyId: ID!, $title: String!, $branch: Int!, $parentChapterId: ID!) {
   createChapter(content: $content, storyId: $storyId, title: $title, branch: $branch, parentChapterId: $parentChapterId) {
+    branch
+    content
     id
+    parentChapterId
+    title
+    upvotes
+    author {
+      username
+    }
   }
 }
 `

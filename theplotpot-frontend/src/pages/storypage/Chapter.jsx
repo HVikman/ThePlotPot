@@ -3,29 +3,36 @@ import DOMPurify from 'dompurify'
 import './chapter.css'
 import { Button } from 'react-bootstrap'
 import { useAuth } from '../auth/AuthContext'
+import { ArrowLeft } from 'react-bootstrap-icons'
+import { useNavigate } from 'react-router-dom'
 
 const Chapter = ({ chapter, chapters, onNavigate, onAddChapter }) => {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const isAuthenticated = !!user
   const sanitizedHTML = DOMPurify.sanitize(chapter.content)
 
-  // Find child chapters for this chapter
   const childChapters = chapters.filter(chap => chap.parentChapterId === chapter.id)
+
+  const target = chapter.parentChapterId ?
+    () => onNavigate(chapter.parentChapterId) :
+    () => navigate('/')
 
   return (
     <div className="chapter">
 
-      {chapter.parentChapterId ? <Button variant='secondary' className="m-3" onClick={() => onNavigate(chapter.parentChapterId)}>
-            back
-      </Button>: ''}
+      {chapter.parentChapterId ? <Button variant='secondary' className="mb-3" onClick={target}>
+        < ArrowLeft />
+      </Button>: <Button variant='secondary' className="mb-3" onClick={() => navigate('/')}>
+        < ArrowLeft />
+      </Button>}
       <div className='chapter-content' dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />
-      {/* Display links or buttons to the next chapters */}
-      <div className="next-chapters m-2">
+      <div className="next-chapters mt-2">
         {isAuthenticated && childChapters.length < 3 && chapter.branch < 10 && (
-          <Button variant='secondary' className="m-2" onClick={() => onAddChapter(chapter.id, chapter.branch)}>Add Chapter</Button>
+          <Button variant='secondary' className="mr-2" onClick={() => onAddChapter(chapter.id, chapter.branch)}>Add Chapter</Button>
         )}
         {childChapters.map(child => (
-          <Button variant='secondary' className="m-2" key={child.id} onClick={() => onNavigate(child.id)}>
+          <Button variant='secondary' className="mx-2" key={child.id} onClick={() => onNavigate(child.id)}>
             Continue to: {child.title}
           </Button>
         ))}

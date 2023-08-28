@@ -3,11 +3,11 @@
 |  day  | hours | things done  |
 | :----:|:-----| :-----|
 | 25.8  | 2    | creating documentation and planning the project |
-| 26.8  | 6    | designed sql database, started backend: created some graphql resolvers and session management|
+| 26.8  | 8    | designed sql database, started backend: created some graphql resolvers and session management, learning about session based authentication and options|
 | 27.8 |   6 |    frontend basic functionality, login and signup. story writing form. small changes to backend to make frontend functionalities work
-| 27.8 |   7 | story and chapter forms, storypage with chapter display and navigation, a lot of ui improvements, graphql resolver for adding chapters
-| 28.8 |
+| 27.8 |   9 | story and chapter forms, storypage with chapter display and navigation, a lot of ui improvements, graphql resolver for adding chapters, learning about quillJS
+| 28.8 | 11  | apollo cache updating when adding stories/chapters, refactored chapter navigation and story display, few ui improvements, added some validations for graphql resolvers, loading component to display while loading longer stories
 | 29.8 |
 | 30.8 |
 | 31.8 |
-|      | 21     | 
+|      | 36     | 

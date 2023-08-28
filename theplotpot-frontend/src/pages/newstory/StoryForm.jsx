@@ -7,18 +7,31 @@ import ReactQuill from 'react-quill'
 import 'quill/dist/quill.snow.css'
 import '../../utils/wordcounter'
 import { useMutation } from '@apollo/client'
-import { CREATE_STORY } from '../../api/queries'
+import { CREATE_STORY, GET_ALL_STORIES } from '../../api/queries'
 import { useAuth } from '../auth/AuthContext'
+import { useNavigate } from 'react-router-dom'
 
 const StoryForm = () => {
   const { user } = useAuth()
   const isAuthenticated = !!user
-
-  const MAX_WORDS = 2000
+  const navigate = useNavigate()
   const [disabledPanels, setDisabledPanels] = useState('disabled')
-  const [createStory] = useMutation(CREATE_STORY)
+  const [createStory] = useMutation(CREATE_STORY, {
+    update: (cache, { data: { createStory } }) => {
+      if (createStory.success) {
+        console.log('New Story ID:', createStory.story.id)
+      } else {
+        console.log('Failed to create story:', createStory.message)
+      }
 
-
+      const { getAllStories } = cache.readQuery({ query: GET_ALL_STORIES })
+      const updatedStories = [...getAllStories, createStory.story]
+      cache.writeQuery({
+        query: GET_ALL_STORIES,
+        data: { getAllStories: updatedStories }
+      })
+    }
+  })
   const formik = useFormik({
     initialValues: {
       title: '',
@@ -48,6 +61,7 @@ const StoryForm = () => {
         console.log(response.data)
         if (response.data.createStory.success) {
           console.log('Story created successfully with ID:', response.data.createStory.story.id)
+          navigate(`/story/${response.data.createStory.story.id}`)
         } else {
           console.log('Error creating story:', response.data.createStory.message)
         }
@@ -120,7 +134,7 @@ const StoryForm = () => {
             modules={{
               wordCounter: {
                 container: '#word-count',
-                maxWords: MAX_WORDS
+                maxWords: 2000
               },
               toolbar: [
                 [{ 'header': [1, 2, 3, false] }],

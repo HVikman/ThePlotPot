@@ -1,20 +1,52 @@
-import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import { Input, Form, Button } from 'antd'
+import { Input, Form, Button, Alert } from 'antd'
 import { useMutation } from '@apollo/client'
 import ReactQuill from 'react-quill'
 import 'quill/dist/quill.snow.css'
 import '../../utils/wordcounter'
-import { CREATE_CHAPTER } from '../../api/queries'
+import { CREATE_CHAPTER, GET_STORY_BY_ID } from '../../api/queries'
 
 const AddChapter = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const { storyId, parentChapterId, branch } = location.state
 
-  const [createChapter] = useMutation(CREATE_CHAPTER)
+  const [createChapter, { error }] = useMutation(CREATE_CHAPTER, {
+    update: (cache, { data: { createChapter } }) => {
+      try {
+        const { getStory } = cache.readQuery({
+          query: GET_STORY_BY_ID,
+          variables: { id: storyId }
+        })
+
+        const updatedChapters = [...getStory.chapters, createChapter]
+
+        cache.writeQuery({
+          query: GET_STORY_BY_ID,
+          variables: { id: storyId },
+          data: {
+            getStory: {
+              ...getStory,
+              chapters: updatedChapters
+            }
+          }
+        })
+
+        console.log(createChapter)
+        navigate(`/story/${storyId}`, {
+          state: {
+            chapter: createChapter
+          }
+        })
+      } catch (error) {
+        console.error('Error updating cache after adding chapter:', error)
+      }
+    }
+  })
+
+
 
   const formik = useFormik({
     initialValues: {
@@ -39,7 +71,6 @@ const AddChapter = () => {
       }).then(response => {
         if (response.data.createChapter.id) {
           console.log('Chapter created successfully with ID:', response.data.createChapter.id)
-          navigate(`/story/${storyId}`)
         } else {
           console.log('Error creating chapter:', response.data.createChapter.message)
         }
@@ -72,7 +103,7 @@ const AddChapter = () => {
             modules={{
               wordCounter: {
                 container: '#word-count',
-                maxWords: 2000 // Adjust this if needed
+                maxWords: 2000
               },
               toolbar: [
                 [{ 'header': [1, 2, 3, false] }],
@@ -85,6 +116,7 @@ const AddChapter = () => {
         </Form.Item>
         <Button type="primary" onClick={() => formik.handleSubmit()}>Submit</Button>
       </Form>
+      {error && <Alert type="error" message={error.message} className="mt-3" />}
     </div>
   )
 }

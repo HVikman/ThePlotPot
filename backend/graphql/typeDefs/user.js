@@ -12,7 +12,11 @@ module.exports = gql`
         message: String!
         user: User
     }
-    
+    type SignupResponse {
+        success: Boolean!
+        message: String!
+        user: User
+    }
     type LogoutResponse {
         success: Boolean!
         message: String!
