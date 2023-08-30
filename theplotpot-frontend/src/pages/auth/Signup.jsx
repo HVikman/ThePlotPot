@@ -55,7 +55,7 @@ const Signup = () => {
           </Form.Control.Feedback>
         </Form.Group>
 
-        <Form.Group controlId="formBasicEmail">
+        <Form.Group controlId="formBasicEmail" className='mt-4'>
           <Form.Label>Email address</Form.Label>
           <Form.Control
             type="email"
@@ -71,7 +71,7 @@ const Signup = () => {
           </Form.Control.Feedback>
         </Form.Group>
 
-        <Form.Group controlId="formBasicPassword">
+        <Form.Group controlId="formBasicPassword" className='mt-4'>
           <Form.Label>Password</Form.Label>
           <Form.Control
             type="password"
@@ -87,11 +87,10 @@ const Signup = () => {
           </Form.Control.Feedback>
         </Form.Group>
 
-        <Button variant="primary" type="submit">
+        <Button variant="secondary" className='mt-2' type="submit">
         Signup
         </Button>
       </Form>
-      {/* Handle any error messages here */}
       {error && <Alert variant="danger" className="mt-3">{error.message}</Alert>}
       {signupError && <Alert variant="danger" className="mt-3">{signupError}</Alert>}
     </Container>

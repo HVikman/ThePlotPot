@@ -120,6 +120,46 @@ const UserResolvers = {
         user
       }
     },
+    changePassword: async (_,{ oldPassword, newPassword }, context) => {
+      const original = hashids.decode(context.req.session.user)
+      const userId = original[0]
+      if (!userId) {
+        throw new Error('You are not logged in.')
+      }
+      const selectQuery = 'SELECT password FROM users WHERE id = ?'
+
+      const user = await new Promise((resolve, reject) => {
+        db.query(selectQuery, [userId], (error, results) => {
+          if (error) reject(error)
+          resolve(results[0])
+        })
+      })
+
+      const salt = await bcrypt.genSalt(10)
+      const hashedPassword = await bcrypt.hash(newPassword, salt)
+
+      const valid = await bcrypt.compare(oldPassword, user.password)
+      if (!valid) {
+        return {
+          success: false,
+          message: 'Incorrect password.'
+        }
+      }
+
+      const updateQuery = 'UPDATE users SET password = ? WHERE id = ?'
+      await new Promise((resolve, reject) => {
+        db.query(updateQuery, [hashedPassword, userId], (error, results) => {
+          if (error) reject(error)
+          resolve(results)
+        })
+      })
+      return {
+        success: true,
+        message: 'Password changed.'
+      }
+
+    }
+    ,
 
     logout: (_, __, context) => {
       return new Promise((resolve) => {
@@ -139,6 +179,26 @@ const UserResolvers = {
           })
         })
       })
+    },
+    editCoffee: async (_,{ link },context) => {
+      const original = hashids.decode(context.req.session.user)
+      const userId = original[0]
+      if (!userId) {
+        throw new Error('You are not logged in.')
+      }
+      const updateQuery = 'UPDATE users SET coffee = ? WHERE id = ?'
+
+      await new Promise((resolve, reject) => {
+        db.query(updateQuery, [link, userId], (error, results) => {
+          if (error) reject(error)
+          resolve(results)
+        })
+      })
+      return {
+        success: true,
+        message: 'Buy Me a Coffee link updated.'
+      }
+
     }
   },
   User: {

@@ -131,8 +131,7 @@ const StoryResolvers = {
     },
     chapters: async (parent) => {
       const storyId = parent.id
-      const selectQuery = 'SELECT * FROM chapters WHERE storyId = ? AND deleted_at IS NULL'
-
+      const selectQuery = 'SELECT * FROM chapters WHERE storyId = ? AND parentChapterId IS NULL AND deleted_at IS NULL'
       const chapters = await new Promise((resolve, reject) => {
         db.query(selectQuery, [storyId], (error, results) => {
           if (error) reject(error)

@@ -23,6 +23,7 @@ const LOGIN_MUTATION = gql`
           id
           username
           email
+          coffee
         }
       }
   }
@@ -42,6 +43,7 @@ query Me {
       id
       username
       email
+      coffee
   }
 }
 
@@ -65,6 +67,7 @@ const CREATE_STORY = gql`
         id
         author {
           username
+          coffee
         }
       }
     }
@@ -79,6 +82,7 @@ const GET_ALL_STORIES = gql`
       id
       author {
         username
+        coffee
       }
     }
   }
@@ -96,10 +100,12 @@ query GetStory($id: ID!) {
       upvotes
       author{
         username
+        coffee
       }
     }
     author {
       username
+      coffee
     }
     description
     genre
@@ -118,8 +124,26 @@ mutation CreateChapter($content: String!, $storyId: ID!, $title: String!, $branc
     upvotes
     author {
       username
+      coffee
     }
   }
 }
 `
-export { LOGIN_MUTATION, SIGNUP_MUTATION, LOGOUT_MUTATION,CREATE_STORY,GET_ALL_STORIES,GET_STORY_BY_ID, ME, CREATE_CHAPTER }
+
+const GET_CHAPTER_CHILDREN = gql `
+  query GetChapterChildren($id: ID!) {
+    getChapterChildren(id: $id) {
+      id
+      content
+      title
+      parentChapterId
+      branch
+      upvotes
+      author {
+        username
+        coffee
+      }
+    }
+  }
+`
+export { LOGIN_MUTATION, SIGNUP_MUTATION, LOGOUT_MUTATION,CREATE_STORY,GET_ALL_STORIES,GET_STORY_BY_ID, ME, CREATE_CHAPTER, GET_CHAPTER_CHILDREN }

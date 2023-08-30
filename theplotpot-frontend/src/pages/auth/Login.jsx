@@ -6,6 +6,7 @@ import { LOGIN_MUTATION } from '../../api/queries'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from './AuthContext'
 import { Form, Button, Container, Alert } from 'react-bootstrap'
+import { useNotifications } from '../../components/NotificationsContext'
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email('Invalid email').required('Email is required'),
@@ -13,6 +14,7 @@ const LoginSchema = Yup.object().shape({
 })
 
 const Login = () => {
+  const { addNotification } = useNotifications()
   const [loginError, setLoginError] = useState(null)
   const { user, setUser } = useAuth()
   const isAuthenticated = !!user
@@ -29,6 +31,7 @@ const Login = () => {
       const response = await login({ variables: values })
       if (response.data.login.success) {
         setUser(response.data.login.user)
+        addNotification(`Welcome back ${response.data.login.user.username}`)
         navigate('/')
       } else {
         setLoginError('Wrong username/password.')
@@ -39,7 +42,7 @@ const Login = () => {
   return (
     <Container style={{ maxWidth: '400px', marginTop: '50px' }}>
       <Form onSubmit={formik.handleSubmit}>
-        <Form.Group controlId="formBasicEmail">
+        <Form.Group controlId="formBasicEmail" className='mt-2'>
           <Form.Label>Email address</Form.Label>
           <Form.Control
             type="email"
@@ -55,7 +58,7 @@ const Login = () => {
           </Form.Control.Feedback>
         </Form.Group>
 
-        <Form.Group controlId="formBasicPassword">
+        <Form.Group controlId="formBasicPassword" className='mt-4'>
           <Form.Label>Password</Form.Label>
           <Form.Control
             type="password"
@@ -71,7 +74,7 @@ const Login = () => {
           </Form.Control.Feedback>
         </Form.Group>
 
-        <Button variant="primary" type="submit">
+        <Button variant="secondary" className='mt-2' type="submit">
           Login
         </Button>
       </Form>

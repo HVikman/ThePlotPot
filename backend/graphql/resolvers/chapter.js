@@ -12,7 +12,17 @@ const ChapterResolvers = {
           resolve(results[0])
         })
       })
-
+      return result
+    },
+    getChapterChildren: async (_, { id }) => {
+      const query = 'SELECT * FROM chapters WHERE parentChapterId = ? AND deleted_at IS NULL'
+      const result = await new Promise((resolve, reject) => {
+        db.query(query, [id], (error, results) => {
+          if (error) reject(error)
+          resolve(results)
+        })
+      })
+      console.log(result)
       return result
     }
 
@@ -28,9 +38,9 @@ const ChapterResolvers = {
       if (branch >= 10) {
         throw new Error('Stories can only go 10 branches deep for now')
       }
-      const countQuery = 'SELECT COUNT(*) as count FROM chapters WHERE storyId = ? AND branch = ? AND deleted_at IS NULL'
+      const countQuery = 'SELECT COUNT(*) as count FROM chapters WHERE storyId = ? AND parentChapterId = ? AND deleted_at IS NULL'
       const countResult = await new Promise((resolve, reject) => {
-        db.query(countQuery, [storyId, branch], (error, result) => {
+        db.query(countQuery, [storyId, parentChapterId], (error, result) => {
           if (error) {
             reject(error)
           } else {
@@ -40,7 +50,7 @@ const ChapterResolvers = {
       })
 
       if (countResult.count >= 3) {
-        throw new Error('You can only have a maximum of 3 chapters for the same branch in a story.')
+        throw new Error('You can only have a maximum of 3 next chapters for chapter.')
       }
 
       const insertQuery = 'INSERT INTO chapters (title, content, storyId, branch, parentChapterId, authorId) VALUES (?, ?, ?, ?, ?, ?)'

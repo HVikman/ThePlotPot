@@ -7,6 +7,7 @@ type Query {
     getStory(id: ID!): Story
     getAllStories: [Story]
     getChapter(id: ID!): Chapter
+    getChapterChildren(id: ID!): [Chapter]
     getAllChapters: [Chapter]
     me: User
 }

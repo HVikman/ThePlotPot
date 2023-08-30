@@ -4,31 +4,23 @@ import './chapter.css'
 import { Button } from 'react-bootstrap'
 import { useAuth } from '../auth/AuthContext'
 import { ArrowLeft } from 'react-bootstrap-icons'
-import { useNavigate } from 'react-router-dom'
 
-const Chapter = ({ chapter, chapters, onNavigate, onAddChapter }) => {
-  const navigate = useNavigate()
+
+const Chapter = ({ chapter, childChapters, onNavigate, onAddChapter, onGoBack, isLoading }) => {
+
   const { user } = useAuth()
   const isAuthenticated = !!user
   const sanitizedHTML = DOMPurify.sanitize(chapter.content)
 
-  const childChapters = chapters.filter(chap => chap.parentChapterId === chapter.id)
-
-  const target = chapter.parentChapterId ?
-    () => onNavigate(chapter.parentChapterId) :
-    () => navigate('/')
-
   return (
     <div className="chapter">
 
-      {chapter.parentChapterId ? <Button variant='secondary' className="mb-3" onClick={target}>
+      <Button variant='secondary' className="mb-3" onClick={() => onGoBack()}>
         < ArrowLeft />
-      </Button>: <Button variant='secondary' className="mb-3" onClick={() => navigate('/')}>
-        < ArrowLeft />
-      </Button>}
+      </Button>
       <div className='chapter-content' dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />
       <div className="next-chapters mt-2">
-        {isAuthenticated && childChapters.length < 3 && chapter.branch < 10 && (
+        {!isLoading && isAuthenticated && childChapters.length < 3 && chapter.branch < 9 && (
           <Button variant='secondary' className="mr-2" onClick={() => onAddChapter(chapter.id, chapter.branch)}>Add Chapter</Button>
         )}
         {childChapters.map(child => (

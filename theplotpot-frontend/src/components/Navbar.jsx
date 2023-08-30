@@ -6,12 +6,14 @@ import { useMutation } from '@apollo/client'
 import { LOGOUT_MUTATION } from '../api/queries'
 import { useAuth } from '../pages/auth/AuthContext'
 import './Navbar.css'
+import { useNotifications } from '../components/NotificationsContext'
+
 
 const Navigation = () => {
   const navigate = useNavigate()
   const { user, setUser } = useAuth()
   const isAuthenticated = !!user
-
+  const { addNotification } = useNotifications()
   const [logout] = useMutation(LOGOUT_MUTATION, {
     onCompleted: (data) => {
       if (data) {
@@ -24,13 +26,15 @@ const Navigation = () => {
   const handleLogout = async () => {
     try {
       await logout()
+      addNotification('Logged out successfully',3000, 'success')
     } catch (error) {
       console.error('Error logging out:', error)
+      addNotification('Something went wrong with logging out',3000, 'error')
     }
   }
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg">
+    <Navbar bg="dark" variant="dark" expand="lg" style={{ height:'80px' }}>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="mr-auto">
@@ -44,6 +48,7 @@ const Navigation = () => {
               <NavDropdown  title={<Gravatar style={{ borderRadius: 25 }} md5={user.email}/>} align='end'>
                 <NavDropdown.Item className="no-hover-effect">Hi, {user.username}</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/dashboard">Dashboard</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/usersettings">Edit profile</NavDropdown.Item>
                 <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
               </NavDropdown>
             </>

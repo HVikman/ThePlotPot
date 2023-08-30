@@ -5,6 +5,7 @@ module.exports = gql`
         id: ID!
         username: String!
         email: String!
+        coffee: String
         stories: [Story]
     }
     type LoginResponse {
@@ -16,9 +17,5 @@ module.exports = gql`
         success: Boolean!
         message: String!
         user: User
-    }
-    type LogoutResponse {
-        success: Boolean!
-        message: String!
     }
 `

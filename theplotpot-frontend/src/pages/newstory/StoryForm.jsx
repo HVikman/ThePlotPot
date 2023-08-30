@@ -10,8 +10,10 @@ import { useMutation } from '@apollo/client'
 import { CREATE_STORY, GET_ALL_STORIES } from '../../api/queries'
 import { useAuth } from '../auth/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { useNotifications } from '../../components/NotificationsContext'
 
 const StoryForm = () => {
+  const { addNotification } = useNotifications()
   const { user } = useAuth()
   const isAuthenticated = !!user
   const navigate = useNavigate()
@@ -60,6 +62,7 @@ const StoryForm = () => {
       }).then(response => {
         console.log(response.data)
         if (response.data.createStory.success) {
+          addNotification(`${response.data.createStory.story.title} created!`, 2000)
           console.log('Story created successfully with ID:', response.data.createStory.story.id)
           navigate(`/story/${response.data.createStory.story.id}`)
         } else {
