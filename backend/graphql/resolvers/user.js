@@ -1,219 +1,113 @@
 const bcrypt = require('bcrypt')
-const db = require('../../db/mysql')
-
+const queryDB = require('../../db/query')
 const Hashids = require('hashids/cjs')
 const hashids = new Hashids(process.env.IDSECRET, 20)
 
 const UserResolvers = {
+  // Queries
   Query: {
+    // Fetch a user
     getUser: async (_, { id }) => {
-      const selectQuery = 'SELECT * FROM users WHERE id = ?'
-      const user = await new Promise((resolve, reject) => {
-        db.query(selectQuery, [id], (error, results) => {
-          if (error) reject(error)
-          resolve(results[0])
-        })
-      })
-      console.log(user.email)
-      user.email = require('crypto').createHash('md5').update(user.email).digest('hex')
+      const user = await queryDB('SELECT * FROM users WHERE id = ?', [id], true)
+      // Hash the email for privacy
+      user.email = require('crypto').createHash('md5').update(user.email.toLowerCase()).digest('hex')
       return user
     },
+    // Fetch all users
     getAllUsers: async () => {
-      const selectQuery = 'SELECT * FROM users'
-      const users = await new Promise((resolve, reject) => {
-        db.query(selectQuery, (error, results) => {
-          if (error) reject(error)
-          resolve(results)
-        })
-      })
-      return users
+      return await queryDB('SELECT * FROM users')
     },
+    // Fetch the current logged-in user
     me: async (_, args, context) => {
       const original = hashids.decode(context.req.session.user)
       const userId = original[0]
-      if (!userId) {
-        throw new Error('You are not logged in.')
-      }
-      const selectQuery = 'SELECT * FROM users WHERE id = ?'
-
-      const user = await new Promise((resolve, reject) => {
-        db.query(selectQuery, [userId], (error, results) => {
-          if (error) reject(error)
-          resolve(results[0])
-        })
-      })
-
+      if (!userId) throw new Error('You are not logged in.')
+      const user = await queryDB('SELECT * FROM users WHERE id = ?', [userId], true)
+      user.email = require('crypto').createHash('md5').update(user.email.toLowerCase()).digest('hex')
       return user
-    }
-  },
-  Mutation: {
-    createUser: async (_, { username, password, email },context) => {
-      const salt = await bcrypt.genSalt(10)
-      const hashedPassword = await bcrypt.hash(password, salt)
-
-      const selectQuery = 'SELECT * FROM users WHERE email = ?'
-      const user = await new Promise((resolve, reject) => {
-        db.query(selectQuery, [email], (error, results) => {
-          if (error) reject(error)
-          resolve(results[0])
-        })
-      })
-
-      if(user){
-        return {
-          success: false,
-          message: 'email already in use'
-        }
-      }
-
-      const insertQuery = 'INSERT INTO users (username, password, email) VALUES (?, ?, ?)'
-
-      const result = await new Promise((resolve, reject) => {
-        db.query(insertQuery, [username, hashedPassword, email], (error, results) => {
-          if (error) reject(error)
-          const selectQuery = 'SELECT * FROM users WHERE id = ?'
-          db.query(selectQuery, [results.insertId], (error, userResults) => {
-            if (error) reject(error)
-            resolve(userResults[0])
-          })
-        })
-      })
-
-      context.req.session.user = hashids.encode(result.id)
-
-      return {
-        success: true,
-        message: 'sign up successful',
-        user: result
-      }
     },
+  },
 
-    login: async (_, { email, password }, context) => {
-      const selectQuery = 'SELECT * FROM users WHERE email = ?'
-      const user = await new Promise((resolve, reject) => {
-        db.query(selectQuery, [email], (error, results) => {
-          if (error) reject(error)
-          resolve(results[0])
-        })
-      })
-
-      if (!user) {
-        return {
-          success: false,
-          message: 'email doesn\'t exist.'
-        }
+  // Mutations
+  Mutation: {
+    // Create a new user
+    createUser: async (_, { username, password, email }, context) => {
+      // Check for existing users with the same email
+      const existingUser = await queryDB('SELECT * FROM users WHERE email = ?', [email], true)
+      if (existingUser) {
+        return { success: false, message: 'email already in use' }
       }
+      // Hash the user's password
+      const hashedPassword = await bcrypt.hash(password, 10)
 
+      // Insert the new user into the database
+      await queryDB('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', [username, hashedPassword, email])
+      const newUser = await queryDB('SELECT * FROM users WHERE email = ?', [email], true)
+
+      // Store user session
+      context.req.session.user = hashids.encode(newUser.id)
+      return { success: true, message: 'Sign up successful', user: newUser }
+    },
+    // Log in a user
+    login: async (_, { email, password }, context) => {
+      // Check if the email exists
+      const user = await queryDB('SELECT * FROM users WHERE email = ?', [email], true)
+      if (!user) {
+        return { success: false, message: 'Email doesn\'t exist' }
+      }
+      // Check if the password is correct
       const valid = await bcrypt.compare(password, user.password)
       if (!valid) {
-        return {
-          success: false,
-          message: 'Incorrect password.'
-        }
+        return { success: false, message: 'Incorrect password' }
       }
-
+      // Store user session
       context.req.session.user = hashids.encode(user.id)
-      console.log(context.req.session.user)
-      return {
-        success: true,
-        message: 'Logged in successfully',
-        user
-      }
+      return { success: true, message: 'Logged in successfully', user }
     },
-    changePassword: async (_,{ oldPassword, newPassword }, context) => {
+    // Change the user's password
+    changePassword: async (_, { oldPassword, newPassword }, context) => {
       const original = hashids.decode(context.req.session.user)
       const userId = original[0]
-      if (!userId) {
-        throw new Error('You are not logged in.')
-      }
-      const selectQuery = 'SELECT password FROM users WHERE id = ?'
-
-      const user = await new Promise((resolve, reject) => {
-        db.query(selectQuery, [userId], (error, results) => {
-          if (error) reject(error)
-          resolve(results[0])
-        })
-      })
-
-      const salt = await bcrypt.genSalt(10)
-      const hashedPassword = await bcrypt.hash(newPassword, salt)
-
+      if (!userId) throw new Error('You are not logged in.')
+      // Check if password is correct
+      const user = await queryDB('SELECT password FROM users WHERE id = ?', [userId], true)
       const valid = await bcrypt.compare(oldPassword, user.password)
-      if (!valid) {
-        return {
-          success: false,
-          message: 'Incorrect password.'
-        }
-      }
-
-      const updateQuery = 'UPDATE users SET password = ? WHERE id = ?'
-      await new Promise((resolve, reject) => {
-        db.query(updateQuery, [hashedPassword, userId], (error, results) => {
-          if (error) reject(error)
-          resolve(results)
-        })
-      })
-      return {
-        success: true,
-        message: 'Password changed.'
-      }
-
-    }
-    ,
-
+      if (!valid) return { success: false, message: 'Incorrect password' }
+      // Update password
+      const hashedPassword = await bcrypt.hash(newPassword, 10)
+      await queryDB('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, userId])
+      return { success: true, message: 'Password changed' }
+    },
+    // Logout user
     logout: (_, __, context) => {
       return new Promise((resolve) => {
+        // Destroy the session
         context.req.session.destroy((err) => {
           if (err) {
-            resolve({
-              success: false,
-              message: 'Failed to logout.'
-            })
+            resolve({ success: false, message: 'Failed to logout' })
             return
           }
-
+          // Clear cookies
           context.res.clearCookie('plotpot_sid')
-          resolve({
-            success: true,
-            message: 'Logged out successfully.'
-          })
+          resolve({ success: true, message: 'Logged out successfully' })
         })
       })
     },
-    editCoffee: async (_,{ link },context) => {
+    // Edit the user's Buy Me a Coffee link
+    editCoffee: async (_, { link }, context) => {
       const original = hashids.decode(context.req.session.user)
       const userId = original[0]
-      if (!userId) {
-        throw new Error('You are not logged in.')
-      }
-      const updateQuery = 'UPDATE users SET coffee = ? WHERE id = ?'
-
-      await new Promise((resolve, reject) => {
-        db.query(updateQuery, [link, userId], (error, results) => {
-          if (error) reject(error)
-          resolve(results)
-        })
-      })
-      return {
-        success: true,
-        message: 'Buy Me a Coffee link updated.'
-      }
-
+      if (!userId) throw new Error('You are not logged in.')
+      await queryDB('UPDATE users SET coffee = ? WHERE id = ?', [link, userId])
+      return { success: true, message: 'Buy Me a Coffee link updated' }
     }
   },
+
+  // Fetching stories where user is an author
   User: {
     stories: async (parent) => {
-
       const userId = parent.id
-      const selectQuery = 'SELECT * FROM stories WHERE authorId = ?'
-
-      const stories = await new Promise((resolve, reject) => {
-        db.query(selectQuery, [userId], (error, results) => {
-          if (error) reject(error)
-          resolve(results)
-        })
-      })
-      return stories
+      return await queryDB('SELECT * FROM stories WHERE authorId = ?', [userId])
     }
   }
 }

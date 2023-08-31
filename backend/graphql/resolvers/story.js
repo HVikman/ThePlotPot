@@ -1,144 +1,127 @@
 const db = require('../../db/mysql')
-
+const queryDB = require('../../db/query')
 const Hashids = require('hashids/cjs')
 const hashids = new Hashids(process.env.IDSECRET, 20)
-
 const sanitizeHtml = require('sanitize-html')
 
 const StoryResolvers = {
   Query: {
+    // Fetch a single story
     getStory: async (_, { id }) => {
-      const query = 'SELECT * FROM stories WHERE id = ? AND deleted_at IS NULL'
-      const result = await new Promise((resolve, reject) => {
-        db.query(query, [id], (error, results) => {
-          if (error) reject(error)
-          resolve(results[0])
-        })
-      })
-
-      return result
+      return await queryDB('SELECT * FROM stories WHERE id = ? AND deleted_at IS NULL', [id], true)
     },
-
+    // Fetch all stories
     getAllStories: async () => {
-      const query = 'SELECT * FROM stories WHERE deleted_at IS NULL'
-      const results = await new Promise((resolve, reject) => {
-        db.query(query, (error, results) => {
-          if (error) reject(error)
-          resolve(results)
-        })
-      })
-
-      return results
-    }
+      return await queryDB('SELECT * FROM stories WHERE deleted_at IS NULL')
+    },
   },
-
   Mutation: {
-    async createStory(_, { input }, context) {
-      const original = hashids.decode(context.req.session.user)
-      const userId = original[0]
-      if (!userId) {
-        throw new Error('You must be logged in to delete stories.')
-      }
-
-      const { title, description, genre, firstChapterContent } = input
-
-      const sanitizedContent = sanitizeHtml(firstChapterContent)
-
+    // Create a new story and its first chapter
+    createStory: (_, { input }, context) => {
       return new Promise((resolve, reject) => {
-        // Start a transaction
-        db.beginTransaction(async (error) => {
-          if (error) reject(error)
+        // Get user from session and decode id
+        const original = hashids.decode(context.req.session.user)
+        const userId = original[0]
 
-          try {
-            let insertStoryQuery = 'INSERT INTO stories (title, description, genre, authorId) VALUES (?, ?, ?, ?)'
-            const [storyResults] = await db.promise().query(insertStoryQuery, [title, description, genre, userId])
-            const storyId = storyResults.insertId
+        // Check if user is logged in
+        if (!userId) {
+          reject(new Error('You must be logged in to create stories.'))
+          return
+        }
 
-            let insertChapterQuery = 'INSERT INTO chapters (storyId, content, branch, authorId) VALUES (?, ?, ?, ?)'
-            await db.promise().query(insertChapterQuery, [storyId, sanitizedContent, 0, userId])
+        const { title, description, genre, firstChapterContent } = input
+        //Sanitize content
+        const sanitizedContent = sanitizeHtml(firstChapterContent)
 
-            db.commit((err) => {
-              if (err) {
-                db.rollback(() => {
-                  reject(err)
+        // Begin a transaction
+        db.beginTransaction((error) => {
+          if (error) {
+            reject(error)
+            return
+          }
+          let storyId
+
+          // Insert story
+          queryDB('INSERT INTO stories (title, description, genre, authorId) VALUES (?, ?, ?, ?)', [title, description, genre, userId])
+            .then((storyResults) => {
+              storyId = storyResults.insertId
+              // Insert first chapter for the story
+              return queryDB('INSERT INTO chapters (storyId, content, branch, authorId) VALUES (?, ?, ?, ?)', [storyId, sanitizedContent, 0, userId])
+            })
+            .then(() => {
+              // Commit the transaction
+              db.commit((err) => {
+                if (err) {
+                  db.rollback(() => {
+                    reject(err)
+                  })
+                  return
+                }
+                resolve({
+                  success: true,
+                  message: 'Story and first chapter created successfully',
+                  story: {
+                    id: storyId,
+                    title,
+                    description,
+                    genre,
+                    authorId: userId
+                  },
                 })
-              }
-              resolve({
-                success: true,
-                message: 'Story and first chapter created successfully',
-                story: {
-                  id: storyId,
-                  title,
-                  description,
-                  genre,
-                  authorId: userId
-                },
               })
             })
-          } catch (err) {
-            db.rollback(() => {
-              reject(err)
+            .catch((err) => {
+              // Rollback the transaction in case of errors
+              db.rollback(() => {
+                reject(err)
+              })
             })
-          }
         })
       })
     },
-
-    deleteStory: async (_, { id }, context) => {
+    // Softdelete a story and its chapters
+    deleteStory: async(_, { id }, context) => {
+      // Get user from session and decode id
       const original = hashids.decode(context.req.session.user)
       const userId = original[0]
+
+      // Check if user is logged in
       if (!userId) {
         throw new Error('You must be logged in to delete stories.')
       }
-      const chapterQuery = 'delete from chapters where storyId = ?'
-      await new Promise((resolve, reject) => {
-        db.query(chapterQuery, [id,userId], (error, results) => {
-          if (error) reject (error)
-          console.log(results)
-          resolve(results)
-        })
-      })
 
-      const query = 'delete FROM stories WHERE id = ? and authorId=?'
-      const result = await new Promise((resolve, reject) => {
-        db.query(query, [id,userId], (error, results) => {
-          if (error) reject (error)
-          console.log(results)
-          resolve(results)
-        })
-      })
+      // Count the number of chapters associated with the story
+      const chapterCountResult = await queryDB('SELECT COUNT(*) as count FROM chapters WHERE storyId = ? AND deleted_at IS NULL', [id], true)
+      const chapterCount = chapterCountResult.count
 
-      return (result.affectedRows ?
-        { 'success' : !!result.affectedRows,
-          'message' : 'story deleted successfully' }:
-        { 'success': false,
-          'message': 'You can only delete your own stories' })
+      // Don't delete the story if there are more than one chapters
+      if (chapterCount > 1) {
+        return { success: false, message: 'Cannot delete a story with more than one chapters' }
+      }
+
+      // Softdelete the initial chapter if exists
+      if (chapterCount === 1) {
+        await queryDB('UPDATE chapters SET deleted_at = NOW() WHERE storyId = ?', [id])
+      }
+
+      // Softdelete the story
+      const result = await queryDB('UPDATE stories SET deleted_at = NOW() WHERE id = ? AND authorId = ?', [id, userId], true)
+
+      if (result.affectedRows) {
+        return { success: true, message: 'Story and initial chapter soft-deleted successfully' }
+      } else {
+        return { success: false, message: 'You can only soft-delete your own stories' }
+      }
     }
   },
-
   Story: {
-
+    // Fetch the author of a story
     author: async (parent) => {
-      const selectQuery = 'SELECT * FROM users WHERE id= ?'
-
-      const author = await new Promise((resolve, reject) => {
-        db.query(selectQuery, [parent.authorId], (error, results) => {
-          if (error) reject(error)
-          resolve(results[0])
-        })
-      })
-      return author
+      return await queryDB('SELECT * FROM users WHERE id = ?', [parent.authorId], true)
     },
+    // Fetch first chapter of a story
     chapters: async (parent) => {
-      const storyId = parent.id
-      const selectQuery = 'SELECT * FROM chapters WHERE storyId = ? AND parentChapterId IS NULL AND deleted_at IS NULL'
-      const chapters = await new Promise((resolve, reject) => {
-        db.query(selectQuery, [storyId], (error, results) => {
-          if (error) reject(error)
-          resolve(results)
-        })
-      })
-      return chapters
+      return await queryDB('SELECT * FROM chapters WHERE storyId = ? AND parentChapterId IS NULL AND deleted_at IS NULL', [parent.id])
     }
   }
 }
