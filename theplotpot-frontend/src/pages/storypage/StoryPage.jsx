@@ -9,24 +9,30 @@ import LoadingComponent from './Loading'
 const StoryPage = () => {
   const navigate = useNavigate()
   const { storyId } = useParams()
+
+  //GraphQL queries
   const { data, loading, error } = useQuery(GET_STORY_BY_ID, {
     variables: { id: storyId },
   })
   const [getChildChapters, { data: childChaptersData, loading: childChaptersLoading }] = useLazyQuery(GET_CHAPTER_CHILDREN)
 
   const location = useLocation()
-  const { chapter } = location.state || {}
+  const { chapter, navigationStack: newNavigationStack } = location.state || {}
+
   const [currentChapter, setCurrentChapter] = useState(null)
   const [navigationStack, setNavigationStack] = useState([])
 
   useEffect(() => {
     if (chapter) {
       setCurrentChapter(chapter)
+      if (newNavigationStack) {
+        setNavigationStack(newNavigationStack)
+      }
     } else if (data && data.getStory && data.getStory.chapters) {
       const rootChapter = data.getStory.chapters.find(chapter => chapter.branch === 0)
       setCurrentChapter(rootChapter)
     }
-  }, [chapter, data])
+  }, [chapter, data, newNavigationStack])
   useEffect(() => {
     if (currentChapter) {
       getChildChapters({ variables: { id: currentChapter.id } })
@@ -44,6 +50,7 @@ const StoryPage = () => {
     } else if (data && data.getStory && Array.isArray(data.getStory.chapters)) {
       chaptersArray = data.getStory.chapters
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
     setNavigationStack([...navigationStack, currentChapter])
     const selectedChapter = chaptersArray.find(chapter => chapter.id === chapterId)
     if (!selectedChapter) {
@@ -56,6 +63,7 @@ const StoryPage = () => {
 
   const goBack = () => {
     const lastChapter = navigationStack.pop()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
     setNavigationStack([...navigationStack])
     if (lastChapter) {
       setCurrentChapter(lastChapter)
@@ -64,12 +72,12 @@ const StoryPage = () => {
     }
   }
 
-  const handleAddChapter = (parentChapterId, branch) => {
+  const handleAddChapter = ( ) => {
     navigate('/add-chapter', {
       state: {
         storyId: storyId,
-        parentChapterId: parentChapterId,
-        branch: branch
+        parentChapter: currentChapter,
+        navigationStack: navigationStack
       }
     })
   }
@@ -95,7 +103,7 @@ const StoryPage = () => {
               <Card.Body>
                 <Card.Title>{data.getStory.title}</Card.Title>
                 <Card.Subtitle className="mb-2 text-muted">{data.getStory.genre}</Card.Subtitle>
-                {currentChapter ? currentChapter.title?<Card.Text>Chapter {currentChapter.branch+1}:<br /> { currentChapter.title }</Card.Text> : <Card.Text>Current chapter: First chapter</Card.Text>:''}
+                {currentChapter.title && <Card.Text>Chapter {currentChapter.branch+1}:<br /> { currentChapter.title }</Card.Text> }
                 <Card.Text><small className="text-muted">Written by: {currentChapter ? currentChapter.author.username : data.getStory.author.username}</small></Card.Text>
                 {currentChapter.branch === 0 ?<Card.Text>{data.getStory.description}</Card.Text>:null}
                 {currentChapter.author.coffee && <Card.Text>Enjoying what {currentChapter.author.username} is writing? <a href={currentChapter.author.coffee} target="_blank" rel="noreferrer"> Buy them a coffee </a>  </Card.Text>}

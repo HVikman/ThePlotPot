@@ -1,8 +1,6 @@
-// WordCounter.js
-
 import Quill from 'quill'
 
-class WordCounter {
+class CharacterCounter {
   constructor(quill, options) {
     this.quill = quill
     this.options = options
@@ -14,20 +12,20 @@ class WordCounter {
 
   calculate() {
     let text = this.quill.getText()
-    return text.split(/\s+/).filter(Boolean).length
+    return text.length
   }
 
   update() {
-    let wordCount = this.calculate()
-    if (wordCount > this.options.maxWords) {
+    let charCount = this.calculate()
+    if (charCount > this.options.maxChars) {
       let currentText = this.quill.getText()
-      let newText = currentText.split(/\s+/).slice(0, this.options.maxWords).join(' ')
+      let newText = currentText.substring(0, this.options.maxChars)
       this.quill.setText(newText)
     }
-    this.container.innerText = wordCount + ' / ' + this.options.maxWords
+    this.container.innerText = charCount + ' / ' + this.options.maxChars
   }
 }
 
-Quill.register('modules/wordCounter', WordCounter)
+Quill.register('modules/characterCounter', CharacterCounter)
 
-export default WordCounter
+export default CharacterCounter

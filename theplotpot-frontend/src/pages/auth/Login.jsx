@@ -19,7 +19,21 @@ const Login = () => {
   const { user, setUser } = useAuth()
   const isAuthenticated = !!user
   const navigate = useNavigate()
-  const [login, { error }] = useMutation(LOGIN_MUTATION)
+  const [login] = useMutation(LOGIN_MUTATION, {
+    update: (cache, { data }) => {
+      if (data.login.success) {
+        setUser(data.login.user)
+        addNotification(`Welcome back ${data.login.user.username}`)
+        navigate('/')
+      } else {
+        setLoginError('Wrong username/password.')
+      }
+    },
+    onError: (error) => {
+      addNotification(`Something went wrong: ${error}`)
+    },
+  })
+
 
   const formik = useFormik({
     initialValues: {
@@ -28,14 +42,7 @@ const Login = () => {
     },
     validationSchema: LoginSchema,
     onSubmit: async (values) => {
-      const response = await login({ variables: values })
-      if (response.data.login.success) {
-        setUser(response.data.login.user)
-        addNotification(`Welcome back ${response.data.login.user.username}`)
-        navigate('/')
-      } else {
-        setLoginError('Wrong username/password.')
-      }
+      login({ variables: values })
     },
   })
   if(isAuthenticated){navigate('/'); return <p>You are already logged in.</p>}
@@ -78,8 +85,6 @@ const Login = () => {
           Login
         </Button>
       </Form>
-      {/* Handle any error messages here */}
-      {error && <Alert variant="danger" className="mt-3">{error.message}</Alert>}
       {loginError && <Alert variant="danger" className="mt-3">{loginError}</Alert>}
     </Container>
   )
