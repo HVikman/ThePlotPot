@@ -13,8 +13,7 @@ import StoryPage from './pages/storypage/StoryPage'
 import AddChapter from './pages/newstory/AddChapter'
 import UserSettings from './pages/users/UserSettings'
 import Notification from './components/Notification'
-import { AuthProvider } from './pages/auth/AuthContext'
-import { NotificationsProvider } from './components/NotificationsContext'
+
 import './App.css'
 import Cookies from 'js-cookie'
 import CookieConsentPopup from './components/CookieConsentPopup'
@@ -34,29 +33,27 @@ const App = () => {
 
 
   return (
-    <AuthProvider>
-      <NotificationsProvider>
-        <div id="app">
-          <Router>
-            <Navbar/>
-            <div className="main-content">
-              <Routes>
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/login" element={<Login />} />
-                <Route path='/story' element={<StoryForm />} />
-                <Route path="/" element={<Home />} />
-                <Route path="/story/:storyId" element={<StoryPage />} />
-                <Route path="/add-chapter" element={<AddChapter />} />
-                <Route path="/usersettings" element={<UserSettings />} />
-              </Routes>
-            </div>
-            <Notification />
-          </Router>
-          {showCookiePopup && <CookieConsentPopup onConsent={handleConsent} />}
-          <Footer></Footer>
+
+    <div id="app">
+      <Router>
+        <Navbar/>
+        <div className="main-content">
+          <Routes>
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path='/story' element={<StoryForm />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/story/:storyId" element={<StoryPage />} />
+            <Route path="/add-chapter" element={<AddChapter />} />
+            <Route path="/usersettings" element={<UserSettings />} />
+          </Routes>
         </div>
-      </NotificationsProvider>
-    </AuthProvider>
+        <Notification />
+      </Router>
+      {showCookiePopup && <CookieConsentPopup onConsent={handleConsent} />}
+      <Footer></Footer>
+    </div>
+
   )
 }
 

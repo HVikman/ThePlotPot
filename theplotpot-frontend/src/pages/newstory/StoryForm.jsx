@@ -1,56 +1,61 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { AutoComplete, Collapse, Button, Input, Form } from 'antd'
 import genres from './genres'
 import ReactQuill from 'react-quill'
 import 'quill/dist/quill.snow.css'
-import '../../utils/wordcounter'
-import { useMutation } from '@apollo/client'
-import { CREATE_STORY, GET_ALL_STORIES } from '../../api/queries'
+import '../../utils/charactercounter'
+import './quill.css'
+
 import { useAuth } from '../auth/AuthContext'
-import { useNavigate } from 'react-router-dom'
 import { useNotifications } from '../../components/NotificationsContext'
+import { useCreateStory } from '../../hooks/createStory'
+
+// Form validation schema
+const validationSchema = Yup.object({
+  title: Yup.string()
+    .required('Required')
+    .max(100, 'Must be 100 characters or less'),
+  description: Yup.string()
+    .required('Required')
+    .max(500, 'Must be 450 characters or less'),
+  content: Yup.string().required('Required'),
+  genre: Yup.string().required('Required')
+})
+
+const initialValues = {
+  title: '',
+  description: '',
+  content: '',
+  genre: ''
+}
+
+// Quill modules
+const quillModules = {
+  characterCounter: {
+    container: '#character-count',
+    maxChars: 12000
+  },
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'blockquote'],
+    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+  ]
+}
 
 const StoryForm = () => {
   const { addNotification } = useNotifications()
   const { user } = useAuth()
   const isAuthenticated = !!user
-  const navigate = useNavigate()
-  const [disabledPanels, setDisabledPanels] = useState('disabled')
-  const [createStory] = useMutation(CREATE_STORY, {
-    update: (cache, { data: { createStory } }) => {
-      if (createStory.success) {
-        console.log('New Story ID:', createStory.story.id)
-      } else {
-        console.log('Failed to create story:', createStory.message)
-      }
 
-      const { getAllStories } = cache.readQuery({ query: GET_ALL_STORIES })
-      const updatedStories = [...getAllStories, createStory.story]
-      cache.writeQuery({
-        query: GET_ALL_STORIES,
-        data: { getAllStories: updatedStories }
-      })
-    }
-  })
+  const [disabledPanels, setDisabledPanels] = useState('disabled')
+
+  const createStory = useCreateStory(addNotification)
+
   const formik = useFormik({
-    initialValues: {
-      title: '',
-      description: '',
-      content: '',
-      genre: ''
-    },
-    validationSchema: Yup.object({
-      title: Yup.string()
-        .required('Required')
-        .max(100, 'Must be 100 characters or less'),
-      description: Yup.string()
-        .required('Required')
-        .max(500, 'Must be 450 characters or less'),
-      content: Yup.string().required('Required'),
-      genre: Yup.string().required('Required')
-    }),
+    initialValues,
+    validationSchema,
     onSubmit: (values) => {
       createStory({
         variables: {
@@ -59,20 +64,13 @@ const StoryForm = () => {
           genre: values.genre,
           firstChapterContent: values.content
         }
-      }).then(response => {
-        console.log(response.data)
-        if (response.data.createStory.success) {
-          addNotification(`${response.data.createStory.story.title} created!`, 2000)
-          console.log('Story created successfully with ID:', response.data.createStory.story.id)
-          navigate(`/story/${response.data.createStory.story.id}`)
-        } else {
-          console.log('Error creating story:', response.data.createStory.message)
-        }
-      }).catch(err => {
-        console.error('There was an error creating the story:', err)
+      }).catch(error => {
+        console.error('There was an error creating the chapter:', error)
+        addNotification(`Something went wrong: ${error}`, 2000, 'error')
       })
     },
   })
+
   useEffect(() => {
     if (formik.values.title && formik.values.description && formik.values.genre) {
       setDisabledPanels('')
@@ -80,7 +78,11 @@ const StoryForm = () => {
       setDisabledPanels('disabled')
     }
   }, [formik.values.title, formik.values.description, formik.values.genre])
-  if(!isAuthenticated){return <p>You are not logged in.</p>}
+
+  if (!isAuthenticated) {
+    return <p>You are not logged in.</p>
+  }
+
   const items = [
     {
       key: '1',
@@ -130,23 +132,11 @@ const StoryForm = () => {
         <>
           <ReactQuill
             value={formik.values.content}
-            placeholder='Compose an epic start of a story...'
             onChange={value => formik.setFieldValue('content', value)}
             theme="snow"
-            style={{ marginBottom: '15px' }}
-            modules={{
-              wordCounter: {
-                container: '#word-count',
-                maxWords: 2000
-              },
-              toolbar: [
-                [{ 'header': [1, 2, 3, false] }],
-                ['bold', 'italic', 'underline', 'blockquote'],
-                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-              ]
-            }}
+            modules={quillModules}
           />
-          <div><div id='word-count'></div>words</div>
+          <div id="character-count"></div>
           <Button type="primary" onClick={() => formik.handleSubmit()}>Submit</Button>
         </>
       )

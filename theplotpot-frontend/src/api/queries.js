@@ -146,4 +146,20 @@ const GET_CHAPTER_CHILDREN = gql `
     }
   }
 `
-export { LOGIN_MUTATION, SIGNUP_MUTATION, LOGOUT_MUTATION,CREATE_STORY,GET_ALL_STORIES,GET_STORY_BY_ID, ME, CREATE_CHAPTER, GET_CHAPTER_CHILDREN }
+const EDIT_COFFEE= gql `
+mutation EditCoffee($link: String!) {
+  editCoffee(link: $link) {
+    message
+    success
+  }
+}
+`
+const CHANGE_PASSWORD = gql `
+mutation ChangePassword($oldPassword: String!, $newPassword: String!) {
+  changePassword(oldPassword: $oldPassword, newPassword: $newPassword) {
+    message
+    success
+  }
+}
+`
+export { LOGIN_MUTATION, SIGNUP_MUTATION, LOGOUT_MUTATION,CREATE_STORY,GET_ALL_STORIES,GET_STORY_BY_ID, ME, CREATE_CHAPTER, GET_CHAPTER_CHILDREN,EDIT_COFFEE,CHANGE_PASSWORD }

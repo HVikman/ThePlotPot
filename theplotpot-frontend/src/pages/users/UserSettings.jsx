@@ -1,18 +1,22 @@
-import React from 'react'
 import { Collapse } from 'antd'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import { Form, Button, Container, Alert, Row, Col, Card } from 'react-bootstrap'
+import { Form, Button, Container, Alert, Row, Col, Card, InputGroup } from 'react-bootstrap'
+import { useMutation } from '@apollo/client'
+import { EDIT_COFFEE, CHANGE_PASSWORD } from '../../api/queries'
 
 const { Panel } = Collapse
 
 const UserSettings = () => {
+  const [editCoffee] = useMutation(EDIT_COFFEE)
+  const [changePassword] = useMutation(CHANGE_PASSWORD)
+
   const formik = useFormik({
     initialValues: {
       currentPassword: '',
       newPassword: '',
       confirmPassword: '',
-      websiteLink: ''
+      coffeeName: '',
     },
     validationSchema: Yup.object({
       currentPassword: Yup.string().required('Current password is required'),
@@ -20,17 +24,27 @@ const UserSettings = () => {
       confirmPassword: Yup.string()
         .oneOf([Yup.ref('newPassword'), null], 'Passwords must match')
         .required('Confirm password is required'),
-      websiteLink: Yup.string()
-        .matches(
-          /^https:\/\/www\.buymeacoffee\.com\//,
-          'Must be a buymeacoffee link'
-        )
-        .required('Website link is required')
+      coffeeName: Yup.string().required('Coffee name is required'),
     }),
     onSubmit: (values) => {
-
-    }
+    },
   })
+
+  const handlePasswordChange = async () => {
+    const { currentPassword, newPassword } = formik.values
+    await changePassword({
+      variables: { oldPassword: currentPassword, newPassword: newPassword },
+    })
+    formik.setSubmitting(false)
+  }
+
+  const handleCoffeeLinkChange = async () => {
+    const fullLink = `https://www.buymeacoffee.com/${formik.values.coffeeName}`
+    console.log(fullLink)
+    await editCoffee({ variables: { link: fullLink } })
+    formik.setSubmitting(false)
+  }
+
 
   return (
     <Container>
@@ -40,7 +54,12 @@ const UserSettings = () => {
             <Panel header="Change Password" key="1">
               <Card>
                 <Card.Body>
-                  <Form onSubmit={formik.handleSubmit}>
+                  <Form
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      handlePasswordChange()
+                    }}
+                  >
                     <Form.Group className='mt-2'>
                       <Form.Label>Current Password</Form.Label>
                       <Form.Control
@@ -78,16 +97,28 @@ const UserSettings = () => {
             <Panel header="Edit your Buy Me a Coffee link" key="2">
               <Card>
                 <Card.Body>
-                  <Form>
+                  <Form
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      handleCoffeeLinkChange()
+                    }}
+                  >
                     <Form.Group>
-                      <Form.Label>Buy Me a Coffee link</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="websiteLink"
-                        onChange={formik.handleChange}
-                        value={formik.values.websiteLink}
-                      />
-                      {formik.errors.websiteLink && <Alert variant="danger" className="mt-3">{formik.errors.websiteLink}</Alert>}
+                      <Form.Label htmlFor="basic-url">Your Buy Me a Coffee URL</Form.Label>
+                      <InputGroup className="mb-3">
+                        <InputGroup.Text id="basic-addon3">
+                          https://www.buymeacoffee.com/
+                        </InputGroup.Text>
+                        <Form.Control
+                          id="basic-url"
+                          aria-describedby="basic-addon3"
+                          type="text"
+                          name="coffeeName"
+                          onChange={formik.handleChange}
+                          value={formik.values.coffeeName}
+                        />
+                      </InputGroup>
+                      {formik.errors.coffeeName && <Alert variant="danger" className="mt-3">{formik.errors.coffeeName}</Alert>}
                     </Form.Group>
                     <Button variant="secondary" className='mt-2' type="submit">
                       Update
