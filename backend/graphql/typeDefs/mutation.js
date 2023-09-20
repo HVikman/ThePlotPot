@@ -11,5 +11,7 @@ type Mutation {
     createChapter(content: String!, storyId: ID!, title: String!, branch: Int!, parentChapterId: ID!): Chapter!
     login(email: String!, password: String!): LoginResponse!
     logout: Response!
+    likeChapter(id: ID!): Response!
+    unlikeChapter(id: ID!): Response!
 }
 `

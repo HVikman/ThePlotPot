@@ -1,13 +1,22 @@
-const db = require('../../db/mysql')
+const db = require('../../db/mysql.js')
 const queryDB = require('../../db/query')
 const Hashids = require('hashids/cjs')
 const hashids = new Hashids(process.env.IDSECRET, 20)
 const sanitizeHtml = require('sanitize-html')
 
+
 const StoryResolvers = {
   Query: {
     // Fetch a single story
-    getStory: async (_, { id }) => {
+    getStory: async (_, { id }, context) => {
+      const original = hashids.decode(context.req.session.user)
+      const userId = original[0]
+      // Fetch chapter id and insert row to chapter_reads to add a read count
+      const chapter = await queryDB('SELECT id FROM chapters WHERE storyId= ? AND branch = 0', [id], true)
+      await queryDB(
+        'INSERT INTO chapter_reads (chapterId, userId, viewedAt) VALUES (?, ?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE viewedAt = CURRENT_TIMESTAMP',
+        [chapter.id, userId]
+      )
       return await queryDB('SELECT * FROM stories WHERE id = ? AND deleted_at IS NULL', [id], true)
     },
     // Fetch all stories
@@ -79,7 +88,7 @@ const StoryResolvers = {
         })
       })
     },
-    // Softdelete a story and its chapters
+    // Softdelete a story and its root chapter
     deleteStory: async(_, { id }, context) => {
       // Get user from session and decode id
       const original = hashids.decode(context.req.session.user)

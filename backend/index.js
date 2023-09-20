@@ -3,11 +3,13 @@ const { ApolloServer } = require('apollo-server-express')
 const session = require('express-session')
 const SQLiteStore = require('connect-sqlite3')(session)
 
-//const morgan = require('morgan')
+
 const app = express()
-//app.use(morgan('combined'))
 const dotenv = require('dotenv')
 dotenv.config()
+
+const scheduleChapterCountsUpdate = require('./db/batchJobs')
+scheduleChapterCountsUpdate()
 
 app.use(session({
   store: new SQLiteStore(),
@@ -36,6 +38,7 @@ const server = new ApolloServer({
       user: req.session ? req.session.user : null
     }}
 })
+
 
 ; (async () => {
   await server.start()
