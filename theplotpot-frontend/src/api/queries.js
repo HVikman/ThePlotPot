@@ -102,6 +102,8 @@ query GetStory($id: ID!) {
         username
         coffee
       }
+      reads_count
+      votes_count
     }
     author {
       username
@@ -143,6 +145,8 @@ const GET_CHAPTER_CHILDREN = gql `
         username
         coffee
       }
+      reads_count
+      votes_count
     }
   }
 `
@@ -162,4 +166,27 @@ mutation ChangePassword($oldPassword: String!, $newPassword: String!) {
   }
 }
 `
-export { LOGIN_MUTATION, SIGNUP_MUTATION, LOGOUT_MUTATION,CREATE_STORY,GET_ALL_STORIES,GET_STORY_BY_ID, ME, CREATE_CHAPTER, GET_CHAPTER_CHILDREN,EDIT_COFFEE,CHANGE_PASSWORD }
+const LIKE_CHAPTER = gql `
+mutation likeChapter($id: ID!) {
+  likeChapter(id: $id) {
+    message
+    success
+  }
+}
+`
+
+const UNLIKE_CHAPTER = gql `
+mutation unlikeChapter($id: ID!) {
+  unlikeChapter(id: $id) {
+    message
+    success
+  }
+}
+`
+
+const IS_CHAPTER_LIKED = gql`
+query IsChapterLiked($id: ID!) {
+  isChapterLiked(id: $id) 
+}
+`
+export { LOGIN_MUTATION, IS_CHAPTER_LIKED, SIGNUP_MUTATION, LOGOUT_MUTATION,CREATE_STORY,GET_ALL_STORIES,GET_STORY_BY_ID, ME, CREATE_CHAPTER, GET_CHAPTER_CHILDREN,EDIT_COFFEE,CHANGE_PASSWORD,LIKE_CHAPTER,UNLIKE_CHAPTER }

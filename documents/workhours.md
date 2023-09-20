@@ -9,5 +9,11 @@
 | 28.8 | 11  | apollo cache updating when adding stories/chapters, refactored chapter navigation and story display, few ui improvements, added some validations for graphql resolvers, loading component to display while loading longer stories
 | 29.8 | 11 | refactored story and chapterloading to lazyload next chapters instead of getting all at once, added notification component and context for noticications, started to work on user settings page|
 | 30.8 | 8 | Refactored backend to remove repetitive code, commented code for readability, fixed frontend bugs found while testing some edge cases
-| 31.8 | 7  | Refactored some frontend code, added usersettings functionality
-|      | 62     | 
+| 31.8 | 7  | Refactored some frontend code, added usersettings functionality|
+|   01.9 | 6     | Testing app, editing database for view and like counts
+|   19.9 | 6     | Backend functionality for likes and read count
+|   20.9 |  7     | Frontend functionality for liking chapters and displaying likes and read counts
+|    |     | 
+|    |      | 
+|    |      | 
+|    | 68     | 
