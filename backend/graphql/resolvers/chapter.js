@@ -12,10 +12,25 @@ const ChapterResolvers = {
       return await queryDB(query, [id], true)
     },
     // Fetch child chapters of a chapter by ID
-    getChapterChildren: async (_, { id }) => {
+    getChapterChildren: async (_, { id }, context) => {
+      const original = hashids.decode(context.req.session.user)
+      const userId = original[0]
+      // Insert row to chapter_reads to add a read count
+      await queryDB(
+        'INSERT INTO chapter_reads (chapterId, userId, viewedAt) VALUES (?, ?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE viewedAt = CURRENT_TIMESTAMP',
+        [id, userId]
+      )
       const query = 'SELECT * FROM chapters WHERE parentChapterId = ? AND deleted_at IS NULL'
       return await queryDB(query, [id])
     },
+    async isChapterLiked(_, { id }, context) {
+      // Get user from session and decode id
+      const original = hashids.decode(context.req.session.user)
+      const userId = original[0]
+      const result = await queryDB('SELECT COUNT(*) as count FROM votes WHERE chapterId = ? AND userId = ? ', [id, userId], true)
+      if (result.count === 1){return true} else {return false}
+
+    }
   },
   Mutation: {
     // Create a new chapter
@@ -77,6 +92,31 @@ const ChapterResolvers = {
       await queryDB(deleteQuery, [id], true)
 
       return { success: true, message: 'Deleted chapter' }
+    },
+    async likeChapter(_, { id }, context) {
+      // Get user from session and decode id
+      const original = hashids.decode(context.req.session.user)
+      const userId = original[0]
+      console.log(id)
+      try {
+        // Insert a new record into the votes table.
+        await queryDB('INSERT INTO votes (chapterId, userId) VALUES (?, ?)', [id, userId])
+        return { success: true, message: 'Like added' }
+      } catch (error) {
+        return { success: false, message: error.message }
+      }
+    },
+    async unlikeChapter(_, { id }, context) {
+      // Get user from session and decode id
+      const original = hashids.decode(context.req.session.user)
+      const userId = original[0]
+      try {
+        // Remove the record from the votes table.
+        await queryDB('DELETE FROM votes WHERE chapterId = ? AND userId = ?', [id, userId])
+        return { success: true, message: 'Like removed' }
+      } catch (error) {
+        return { success: false, message: 'Couldn\'t unlike chapter' }
+      }
     }
   },
   Chapter: {

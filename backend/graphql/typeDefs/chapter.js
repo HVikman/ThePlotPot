@@ -10,5 +10,7 @@ module.exports = gql`
     branch: Int!
     upvotes: Int
     author: User!
+    reads_count: Int
+    votes_count: Int
     }
 `

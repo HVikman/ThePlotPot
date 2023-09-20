@@ -10,5 +10,6 @@ type Query {
     getChapterChildren(id: ID!): [Chapter]
     getAllChapters: [Chapter]
     me: User
+    isChapterLiked(id: ID!): Boolean!
 }
 `
