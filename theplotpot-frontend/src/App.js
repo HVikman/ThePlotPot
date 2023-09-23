@@ -1,23 +1,23 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense, lazy } from 'react'
 import {
   BrowserRouter as Router,
   Routes, Route
 } from 'react-router-dom'
-import Home from './pages/home/Home'
-import Login from './pages/auth/Login'
-import Signup from './pages/auth/Signup'
+import { Spin } from 'antd'
+import Cookies from 'js-cookie'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import StoryForm from './pages/newstory/StoryForm'
-import StoryPage from './pages/storypage/StoryPage'
-import AddChapter from './pages/newstory/AddChapter'
-import UserSettings from './pages/users/UserSettings'
 import Notification from './components/Notification'
-
-import './App.css'
-import Cookies from 'js-cookie'
 import CookieConsentPopup from './components/CookieConsentPopup'
+import './App.css'
 
+const Home = lazy(() => import('./pages/home/Home'))
+const Login = lazy(() => import('./pages/auth/Login'))
+const Signup = lazy(() => import('./pages/auth/Signup'))
+const StoryForm = lazy(() => import('./pages/newstory/StoryForm'))
+const StoryPage = lazy(() => import('./pages/storypage/StoryPage'))
+const AddChapter = lazy(() => import('./pages/newstory/AddChapter'))
+const UserSettings = lazy(() => import('./pages/users/UserSettings'))
 
 const App = () => {
   const [showCookiePopup, setShowCookiePopup] = useState(false)
@@ -38,15 +38,18 @@ const App = () => {
       <Router>
         <Navbar/>
         <div className="main-content">
-          <Routes>
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<Login />} />
-            <Route path='/story' element={<StoryForm />} />
-            <Route path="/" element={<Home />} />
-            <Route path="/story/:storyId" element={<StoryPage />} />
-            <Route path="/add-chapter" element={<AddChapter />} />
-            <Route path="/usersettings" element={<UserSettings />} />
-          </Routes>
+          <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}><Spin size="large" /></div>}>
+            <Routes>
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={<Login />} />
+              <Route path='/story' element={<StoryForm />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/story/:storyId/chapter/:chapterId" element={<StoryPage />} />
+              <Route path="/story/:storyId" element={<StoryPage />} />
+              <Route path="/add-chapter" element={<AddChapter />} />
+              <Route path="/usersettings" element={<UserSettings />} />
+            </Routes>
+          </Suspense>
         </div>
         <Notification />
       </Router>

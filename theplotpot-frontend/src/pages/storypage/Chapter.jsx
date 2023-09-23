@@ -42,7 +42,7 @@ const Chapter = ({ chapter, childChapters, onNavigate, onAddChapter, onGoBack, i
       <div className='chapter-content' dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />
       <div className="chapter-stats">
         {
-          isLiked !== null ? (
+          isLiked !== null && isAuthenticated ? (
             <Button variant={isLiked ? 'success' : 'secondary'} className="m-2" onClick={() => handleButton()}>
               <HandThumbsUpFill />
             </Button>
