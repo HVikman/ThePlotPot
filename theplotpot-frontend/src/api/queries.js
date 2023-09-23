@@ -80,6 +80,7 @@ const GET_ALL_STORIES = gql`
       genre
       description
       id
+      genre
       author {
         username
         coffee

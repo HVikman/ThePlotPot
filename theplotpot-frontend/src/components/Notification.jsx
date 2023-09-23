@@ -21,7 +21,6 @@ const Notification = () => {
     }
 
     notification.open({
-      message: (<div style={{ color: 'white' }}>Notification</div>),
       description: (<div style={{ color: 'white' }}>{message}</div>),
       duration: duration,
       type: type,

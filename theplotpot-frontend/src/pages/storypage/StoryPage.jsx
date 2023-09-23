@@ -5,6 +5,7 @@ import Chapter from './Chapter'
 import { Container, Row, Col, Card } from 'react-bootstrap'
 import { GET_STORY_BY_ID, GET_CHAPTER_CHILDREN, GET_CHAPTER } from '../../api/queries'
 import LoadingComponent from './Loading'
+import ErrorComponent from '../../components/Error'
 
 const StoryPage = () => {
   const navigate = useNavigate()
@@ -47,7 +48,7 @@ const StoryPage = () => {
   }, [parentChapterData, storyId])
 
   if (loading) return <LoadingComponent />
-  if (error) return <p>Error: {error.message}</p>
+  if (error) return <ErrorComponent message={error.message} />
 
   const navigateToChapter = (chapterId) => {
     let chaptersArray
