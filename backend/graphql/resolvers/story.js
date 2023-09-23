@@ -8,17 +8,41 @@ const sanitizeHtml = require('sanitize-html')
 const StoryResolvers = {
   Query: {
     // Fetch a single story
-    getStory: async (_, { id }, context) => {
+    getStory: async (_, { id, chapterId }, context) => {
       const original = hashids.decode(context.req.session.user)
       const userId = original[0]
-      // Fetch chapter id and insert row to chapter_reads to add a read count
-      const chapter = await queryDB('SELECT id FROM chapters WHERE storyId= ? AND branch = 0', [id], true)
-      await queryDB(
-        'INSERT INTO chapter_reads (chapterId, userId, viewedAt) VALUES (?, ?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE viewedAt = CURRENT_TIMESTAMP',
-        [chapter.id, userId]
-      )
-      return await queryDB('SELECT * FROM stories WHERE id = ? AND deleted_at IS NULL', [id], true)
+
+      const story = await queryDB('SELECT * FROM stories WHERE id = ? AND deleted_at IS NULL', [id], true)
+
+      if (!story) {
+        // TODO: handle story not found
+      }
+
+      let chapter
+      if (chapterId) {
+        // Fetch chapter based on provided chapter id
+        chapter = await queryDB('SELECT * FROM chapters WHERE id=?', [chapterId], true)
+        if (!chapter){
+          // TODO: handle chapter not found
+        }
+      } else {
+        // Fetch first chapter (branch = 0)
+        chapter = await queryDB('SELECT * FROM chapters WHERE storyId= ? AND branch = 0', [id], true)
+      }
+
+      if (chapter) {
+        await queryDB(
+          'INSERT INTO chapter_reads (chapterId, userId, viewedAt) VALUES (?, ?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE viewedAt = CURRENT_TIMESTAMP',
+          [chapter.id, userId]
+        )
+      }
+
+      return {
+        ...story,
+        chapters: [chapter]
+      }
     },
+
     // Fetch all stories
     getAllStories: async () => {
       return await queryDB('SELECT * FROM stories WHERE deleted_at IS NULL')
@@ -128,10 +152,7 @@ const StoryResolvers = {
     author: async (parent) => {
       return await queryDB('SELECT * FROM users WHERE id = ?', [parent.authorId], true)
     },
-    // Fetch first chapter of a story
-    chapters: async (parent) => {
-      return await queryDB('SELECT * FROM chapters WHERE storyId = ? AND parentChapterId IS NULL AND deleted_at IS NULL', [parent.id])
-    }
+
   }
 }
 

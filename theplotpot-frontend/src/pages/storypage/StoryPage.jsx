@@ -3,18 +3,19 @@ import { useQuery, useLazyQuery } from '@apollo/client'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import Chapter from './Chapter'
 import { Container, Row, Col, Card } from 'react-bootstrap'
-import { GET_STORY_BY_ID, GET_CHAPTER_CHILDREN } from '../../api/queries'
+import { GET_STORY_BY_ID, GET_CHAPTER_CHILDREN, GET_CHAPTER } from '../../api/queries'
 import LoadingComponent from './Loading'
 
 const StoryPage = () => {
   const navigate = useNavigate()
-  const { storyId } = useParams()
+  const { storyId, chapterId } = useParams()
 
   //GraphQL queries
   const { data, loading, error } = useQuery(GET_STORY_BY_ID, {
-    variables: { id: storyId },
+    variables: { id: storyId, chapterId },
   })
   const [getChildChapters, { data: childChaptersData, loading: childChaptersLoading }] = useLazyQuery(GET_CHAPTER_CHILDREN)
+  const [getParentChapter, { data: parentChapterData }] = useLazyQuery(GET_CHAPTER)
 
   const location = useLocation()
   const { chapter, navigationStack: newNavigationStack } = location.state || {}
@@ -25,19 +26,25 @@ const StoryPage = () => {
   useEffect(() => {
     if (chapter) {
       setCurrentChapter(chapter)
+      window.history.replaceState(null, '', `/story/${storyId}/chapter/${chapter.id}`)
       if (newNavigationStack) {
         setNavigationStack(newNavigationStack)
       }
     } else if (data && data.getStory && data.getStory.chapters) {
-      const rootChapter = data.getStory.chapters.find(chapter => chapter.branch === 0)
-      setCurrentChapter(rootChapter)
+      setCurrentChapter(data.getStory.chapters[0])
     }
-  }, [chapter, data, newNavigationStack])
+  }, [chapter, data, newNavigationStack, storyId])
   useEffect(() => {
     if (currentChapter) {
       getChildChapters({ variables: { id: currentChapter.id } })
     }
   }, [currentChapter, getChildChapters])
+  useEffect(() => {
+    if (parentChapterData && parentChapterData.getChapter) {
+      setCurrentChapter(parentChapterData.getChapter)
+      window.history.replaceState(null, '', `/story/${storyId}/chapter/${parentChapterData.getChapter.id}`)
+    }
+  }, [parentChapterData, storyId])
 
   if (loading) return <LoadingComponent />
   if (error) return <p>Error: {error.message}</p>
@@ -58,15 +65,20 @@ const StoryPage = () => {
       return
     }
     setCurrentChapter(selectedChapter)
+    window.history.replaceState(null, '', `/story/${storyId}/chapter/${selectedChapter.id}`)
     getChildChapters({ variables: { id: selectedChapter.id } })
   }
 
   const goBack = () => {
     const lastChapter = navigationStack.pop()
     window.scrollTo({ top: 0, behavior: 'smooth' })
+    console.log(currentChapter)
     setNavigationStack([...navigationStack])
     if (lastChapter) {
       setCurrentChapter(lastChapter)
+      window.history.replaceState(null, '', `/story/${storyId}/chapter/${lastChapter.id}`)
+    } else if (currentChapter && currentChapter.parentChapterId) {
+      getParentChapter({ variables: { getChapterId: currentChapter.parentChapterId } })
     } else {
       navigate('/')
     }

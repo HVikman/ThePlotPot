@@ -88,8 +88,8 @@ const GET_ALL_STORIES = gql`
   }
 `
 const GET_STORY_BY_ID = gql`
-query GetStory($id: ID!) {
-  getStory(id: $id) {
+query GetStory($id: ID!, $chapterId: ID) {
+  getStory(id: $id, chapterId: $chapterId) {
     title
     chapters {
       content
@@ -150,6 +150,23 @@ const GET_CHAPTER_CHILDREN = gql `
     }
   }
 `
+const GET_CHAPTER = gql `
+query GetChapter($getChapterId: ID!) {
+  getChapter(id: $getChapterId) {
+    author {
+      coffee
+      username
+    }
+    content
+    branch
+    parentChapterId
+    reads_count
+    title
+    votes_count
+    id
+  }
+}
+`
 const EDIT_COFFEE= gql `
 mutation EditCoffee($link: String!) {
   editCoffee(link: $link) {
@@ -189,4 +206,4 @@ query IsChapterLiked($id: ID!) {
   isChapterLiked(id: $id) 
 }
 `
-export { LOGIN_MUTATION, IS_CHAPTER_LIKED, SIGNUP_MUTATION, LOGOUT_MUTATION,CREATE_STORY,GET_ALL_STORIES,GET_STORY_BY_ID, ME, CREATE_CHAPTER, GET_CHAPTER_CHILDREN,EDIT_COFFEE,CHANGE_PASSWORD,LIKE_CHAPTER,UNLIKE_CHAPTER }
+export { LOGIN_MUTATION, GET_CHAPTER, IS_CHAPTER_LIKED, SIGNUP_MUTATION, LOGOUT_MUTATION,CREATE_STORY,GET_ALL_STORIES,GET_STORY_BY_ID, ME, CREATE_CHAPTER, GET_CHAPTER_CHILDREN,EDIT_COFFEE,CHANGE_PASSWORD,LIKE_CHAPTER,UNLIKE_CHAPTER }

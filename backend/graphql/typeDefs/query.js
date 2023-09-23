@@ -4,7 +4,7 @@ module.exports = gql`
 type Query {
     getUser(id: ID!): User
     getAllUsers: [User]
-    getStory(id: ID!): Story
+    getStory(id: ID!, chapterId: ID): Story
     getAllStories: [Story]
     getChapter(id: ID!): Chapter
     getChapterChildren(id: ID!): [Chapter]
