@@ -17,6 +17,7 @@ const Signup = lazy(() => import('./pages/auth/Signup'))
 const StoryForm = lazy(() => import('./pages/newstory/StoryForm'))
 const StoryPage = lazy(() => import('./pages/storypage/StoryPage'))
 const AddChapter = lazy(() => import('./pages/newstory/AddChapter'))
+const StoriesPage = lazy(() => import('./pages/stories/StoriesPage'))
 const UserSettings = lazy(() => import('./pages/users/UserSettings'))
 
 const App = () => {
@@ -48,6 +49,7 @@ const App = () => {
               <Route path="/story/:storyId" element={<StoryPage />} />
               <Route path="/add-chapter" element={<AddChapter />} />
               <Route path="/usersettings" element={<UserSettings />} />
+              <Route path="/stories" element={<StoriesPage />} />
             </Routes>
           </Suspense>
         </div>

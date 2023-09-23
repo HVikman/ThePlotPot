@@ -29,7 +29,7 @@ const Signup = () => {
       }
     },
     onError: (error) => {
-      addNotification(`Something went wrong: ${error}`)
+      addNotification(`Something went wrong: ${error}`,2000,'error')
     }
   })
   const { user, setUser } = useAuth()

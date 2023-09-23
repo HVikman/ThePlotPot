@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { GET_ALL_STORIES } from '../../api/queries'
 import './home.css'
 import { Link } from 'react-router-dom'
+import ErrorComponent from '../../components/Error'
 
 
 
@@ -16,7 +17,7 @@ const LoadingPlaceholder = () => {
 const Home = () => {
   const { loading, error, data } = useQuery(GET_ALL_STORIES)
 
-  if (error) return <p>Error: {error.message}</p>
+  if (error) return <ErrorComponent message={error.message} />
 
   let latestStories = []
   if (data) {
