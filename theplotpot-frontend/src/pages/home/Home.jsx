@@ -43,7 +43,7 @@ const Home = () => {
                     <Card.Title>{story.title}</Card.Title>
                     <Card.Text>{story.description}</Card.Text>
                     <Card.Text>Genre: {story.genre}</Card.Text>
-                    <Card.Text><small className="text-muted">By: {story.author.username}</small></Card.Text>
+                    <Card.Text><small className="text-muted">By:<Link to={`/user/${story.author.id}`}>{story.author.username}</Link> </small></Card.Text>
                     <Link to={`/story/${story.id}`}>
                       <Button variant="secondary">Read Story</Button>
                     </Link>
@@ -69,7 +69,7 @@ const Home = () => {
                   <Card.Title>{story.title}</Card.Title>
                   <Card.Text>{story.description}</Card.Text>
                   <Card.Text>Genre: {story.genre}</Card.Text>
-                  <Card.Text><small className="text-muted">By: {story.author.username}</small></Card.Text>
+                  <Card.Text><small className="text-muted">By: <Link to={`/user/${story.author.id}`}>{story.author.username}</Link></small></Card.Text>
                   <Link to={`/story/${story.id}`}>
                     <Button variant="secondary">Read Story</Button>
                   </Link>

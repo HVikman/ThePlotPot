@@ -8,7 +8,7 @@ const Footer = () => {
 
         <Row>
           <Col className="text-center mt-4 text-light">
-            <p>The PlotPot ©{new Date().getFullYear()} Created by Henri Vikman</p>
+            <p>ThePlotPot ©{new Date().getFullYear()} Created by Henri Vikman</p>
           </Col>
         </Row>
       </Container>

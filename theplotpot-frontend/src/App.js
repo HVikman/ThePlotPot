@@ -9,6 +9,7 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Notification from './components/Notification'
 import CookieConsentPopup from './components/CookieConsentPopup'
+import UserPage from './pages/users/UserPage'
 import './App.css'
 
 const Home = lazy(() => import('./pages/home/Home'))
@@ -19,6 +20,7 @@ const StoryPage = lazy(() => import('./pages/storypage/StoryPage'))
 const AddChapter = lazy(() => import('./pages/newstory/AddChapter'))
 const StoriesPage = lazy(() => import('./pages/stories/StoriesPage'))
 const UserSettings = lazy(() => import('./pages/users/UserSettings'))
+
 
 const App = () => {
   const [showCookiePopup, setShowCookiePopup] = useState(false)
@@ -44,6 +46,7 @@ const App = () => {
               <Route path="/signup" element={<Signup />} />
               <Route path="/login" element={<Login />} />
               <Route path='/story' element={<StoryForm />} />
+              <Route path='/user/:id' element={<UserPage />} />
               <Route path="/" element={<Home />} />
               <Route path="/story/:storyId/chapter/:chapterId" element={<StoryPage />} />
               <Route path="/story/:storyId" element={<StoryPage />} />

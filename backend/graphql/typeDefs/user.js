@@ -18,4 +18,9 @@ module.exports = gql`
         message: String!
         user: User
     }
+    type UserProfile {
+        user: User
+        stories: [Story]
+        chapters: [Chapter]
+    }
 `

@@ -14,6 +14,6 @@
 |   19.9 | 6     | Backend functionality for likes and read count
 |   20.9 |  7     | Frontend functionality for liking chapters and displaying likes and read counts
 |   23.9 |  4  | Frontend chapter navigation fixes, added component lazy loading to reduce initial file size
+|   23.9 |  5    | All stories page, error handling and custom error component
 |    |      | 
-|    |      | 
-|    | 81     | 
+|    | 90     | 

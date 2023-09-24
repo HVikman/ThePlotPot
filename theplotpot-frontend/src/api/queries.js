@@ -66,6 +66,7 @@ const CREATE_STORY = gql`
         description
         id
         author {
+          id
           username
           coffee
         }
@@ -82,6 +83,7 @@ const GET_ALL_STORIES = gql`
       id
       genre
       author {
+        id
         username
         coffee
       }
@@ -100,6 +102,7 @@ query GetStory($id: ID!, $chapterId: ID) {
       parentChapterId
       upvotes
       author{
+        id
         username
         coffee
       }
@@ -107,6 +110,7 @@ query GetStory($id: ID!, $chapterId: ID) {
       votes_count
     }
     author {
+      id
       username
       coffee
     }
@@ -126,6 +130,7 @@ mutation CreateChapter($content: String!, $storyId: ID!, $title: String!, $branc
     title
     upvotes
     author {
+      id
       username
       coffee
     }
@@ -143,6 +148,7 @@ const GET_CHAPTER_CHILDREN = gql `
       branch
       upvotes
       author {
+        id
         username
         coffee
       }
@@ -155,6 +161,7 @@ const GET_CHAPTER = gql `
 query GetChapter($getChapterId: ID!) {
   getChapter(id: $getChapterId) {
     author {
+      id
       coffee
       username
     }
@@ -207,4 +214,34 @@ query IsChapterLiked($id: ID!) {
   isChapterLiked(id: $id) 
 }
 `
-export { LOGIN_MUTATION, GET_CHAPTER, IS_CHAPTER_LIKED, SIGNUP_MUTATION, LOGOUT_MUTATION,CREATE_STORY,GET_ALL_STORIES,GET_STORY_BY_ID, ME, CREATE_CHAPTER, GET_CHAPTER_CHILDREN,EDIT_COFFEE,CHANGE_PASSWORD,LIKE_CHAPTER,UNLIKE_CHAPTER }
+const GET_USER_PROFILE = gql `
+query GetUserProfile($getUserProfileId: ID!) {
+  getUserProfile(id: $getUserProfileId) {
+    chapters {
+      title
+      id
+      story {
+        title
+        id
+      }
+      branch
+      parentChapterId
+      votes_count
+      reads_count
+    }
+    stories {
+      title
+      id
+      genre
+    }
+    user {
+      coffee
+      email
+      id
+      username
+    }
+  }
+}
+`
+
+export { GET_USER_PROFILE, LOGIN_MUTATION, GET_CHAPTER, IS_CHAPTER_LIKED, SIGNUP_MUTATION, LOGOUT_MUTATION,CREATE_STORY,GET_ALL_STORIES,GET_STORY_BY_ID, ME, CREATE_CHAPTER, GET_CHAPTER_CHILDREN,EDIT_COFFEE,CHANGE_PASSWORD,LIKE_CHAPTER,UNLIKE_CHAPTER }

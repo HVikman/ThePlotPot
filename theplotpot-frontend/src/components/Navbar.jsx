@@ -48,7 +48,7 @@ const Navigation = () => {
             <>
               <NavDropdown  title={<Gravatar style={{ borderRadius: 25, width: '70%',height: '70%' }} md5={user.email}/>} align='end'>
                 <NavDropdown.Item className="no-hover-effect">Hi, {user.username}</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/dashboard">Dashboard</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to={`/user/${user.id}`}>Dashboard</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/usersettings">Edit profile</NavDropdown.Item>
                 <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
               </NavDropdown>
