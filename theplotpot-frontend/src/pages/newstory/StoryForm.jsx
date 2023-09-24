@@ -66,7 +66,7 @@ const StoryForm = () => {
         }
       }).catch(error => {
         console.error('There was an error creating the chapter:', error)
-        addNotification(`Something went wrong: ${error}`, 2000, 'error')
+        addNotification(`Something went wrong: ${error}`, 3000, 'error')
       })
     },
   })

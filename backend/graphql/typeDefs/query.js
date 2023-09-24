@@ -11,5 +11,6 @@ type Query {
     getAllChapters: [Chapter]
     me: User
     isChapterLiked(id: ID!): Boolean!
+    getUserProfile(id: ID!): UserProfile!
 }
 `

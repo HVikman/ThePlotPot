@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useLazyQuery } from '@apollo/client'
-import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useNavigate, useParams, useLocation, Link } from 'react-router-dom'
 import Chapter from './Chapter'
 import { Container, Row, Col, Card } from 'react-bootstrap'
 import { GET_STORY_BY_ID, GET_CHAPTER_CHILDREN, GET_CHAPTER } from '../../api/queries'
@@ -118,7 +118,11 @@ const StoryPage = () => {
                 <Card.Subtitle className="mb-2 text-muted">{data.getStory.genre}</Card.Subtitle>
                 {currentChapter.title && <Card.Text>Chapter {currentChapter.branch+1}:<br /> { currentChapter.title }</Card.Text> }
                 <Card.Text><span>Reads: {currentChapter && currentChapter.reads_count}</span></Card.Text>
-                <Card.Text><small className="text-muted">Written by: {currentChapter ? currentChapter.author.username : data.getStory.author.username}</small></Card.Text>
+                <Card.Text><small className="text-muted">Written by: {currentChapter ?
+                  <Link to={`/user/${currentChapter.author.id}`}>{currentChapter.author.username}</Link> :
+                  <Link to={`/user/${data.getStory.author.id}`}>{data.getStory.author.username}</Link> }
+                </small>
+                </Card.Text>
                 {currentChapter.branch === 0 ?<Card.Text>{data.getStory.description}</Card.Text>:null}
                 {currentChapter.author.coffee && <Card.Text>Enjoying what {currentChapter.author.username} is writing? <a href={currentChapter.author.coffee} target="_blank" rel="noreferrer"> Buy them a coffee </a>  </Card.Text>}
 

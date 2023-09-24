@@ -24,8 +24,28 @@ const UserResolvers = {
       if (!userId) throw new Error('You are not logged in.')
       const user = await queryDB('SELECT * FROM users WHERE id = ?', [userId], true)
       user.email = require('crypto').createHash('md5').update(user.email.toLowerCase()).digest('hex')
+      user.id = hashids.encode(user.id)
       return user
     },
+    getUserProfile: async (_, { id }) => {
+      const original = hashids.decode(id)
+      const userId = original[0]
+      const user = await queryDB('SELECT * FROM users WHERE id = ?', [userId], true)
+      console.log(id)
+      if (!user) {
+        //TODO: Handle user not found
+      }
+      user.email = require('crypto').createHash('md5').update(user.email.toLowerCase()).digest('hex')
+      user.id = hashids.encode(user.id)
+      const chapters = await queryDB('SELECT * FROM chapters WHERE authorId = ? AND NOT branch=0', [userId])
+      const stories = await queryDB('SELECT * FROM stories WHERE authorId = ?', [userId])
+
+      return {
+        user,
+        stories,
+        chapters
+      }
+    }
   },
 
   // Mutations

@@ -123,7 +123,13 @@ const ChapterResolvers = {
     // Fetch author details
     author: async (parent) => {
       const selectQuery = 'SELECT * FROM users WHERE id = ?'
-      return await queryDB(selectQuery, [parent.authorId], true)
+      const author = await queryDB(selectQuery, [parent.authorId], true)
+      author.id = hashids.encode(author.id)
+      return author
+    },
+    story: async (parent) => {
+      const storyId = parent.storyId
+      return await queryDB('SELECT * FROM stories WHERE id = ?', [storyId], true)
     },
   }
 }

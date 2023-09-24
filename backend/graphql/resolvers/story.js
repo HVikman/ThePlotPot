@@ -37,6 +37,7 @@ const StoryResolvers = {
         )
       }
 
+
       return {
         ...story,
         chapters: [chapter]
@@ -150,7 +151,9 @@ const StoryResolvers = {
   Story: {
     // Fetch the author of a story
     author: async (parent) => {
-      return await queryDB('SELECT * FROM users WHERE id = ?', [parent.authorId], true)
+      const author = await queryDB('SELECT * FROM users WHERE id = ?', [parent.authorId], true)
+      author.id = hashids.encode(author.id)
+      return author
     },
 
   }
