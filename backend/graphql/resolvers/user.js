@@ -2,6 +2,8 @@ const bcrypt = require('bcrypt')
 const queryDB = require('../../db/query')
 const Hashids = require('hashids/cjs')
 const hashids = new Hashids(process.env.IDSECRET, 20)
+const crypto = require('crypto')
+
 
 const UserResolvers = {
   // Queries
@@ -11,6 +13,7 @@ const UserResolvers = {
       const user = await queryDB('SELECT * FROM users WHERE id = ?', [id], true)
       // Hash the email for privacy
       user.email = require('crypto').createHash('md5').update(user.email.toLowerCase()).digest('hex')
+      if (!user) throw new Error ('User not found')
       return user
     },
     // Fetch all users
@@ -23,27 +26,28 @@ const UserResolvers = {
       const userId = original[0]
       if (!userId) throw new Error('You are not logged in.')
       const user = await queryDB('SELECT * FROM users WHERE id = ?', [userId], true)
-      user.email = require('crypto').createHash('md5').update(user.email.toLowerCase()).digest('hex')
+      if (!user) throw new Error ('User not found')
+      user.email = crypto.createHash('sha256').update(user.email.trim().toLowerCase()).digest('hex')
       user.id = hashids.encode(user.id)
       return user
     },
+    // Fetch specified user profile data
     getUserProfile: async (_, { id }) => {
       const original = hashids.decode(id)
       const userId = original[0]
       const user = await queryDB('SELECT * FROM users WHERE id = ?', [userId], true)
-      console.log(id)
-      if (!user) {
-        //TODO: Handle user not found
-      }
-      user.email = require('crypto').createHash('md5').update(user.email.toLowerCase()).digest('hex')
+      if (!user) throw new Error ('User not found')
+      user.email = crypto.createHash('sha256').update(user.email.trim().toLowerCase()).digest('hex')
       user.id = hashids.encode(user.id)
-      const chapters = await queryDB('SELECT * FROM chapters WHERE authorId = ? AND NOT branch=0', [userId])
-      const stories = await queryDB('SELECT * FROM stories WHERE authorId = ?', [userId])
+      const chapters = await queryDB('SELECT * FROM chapters WHERE authorId = ? AND NOT branch=0 AND deleted_at IS NULL', [userId])
+      const stories = await queryDB('SELECT * FROM stories WHERE authorId = ? AND deleted_at IS NULL', [userId])
+      const comments = await queryDB('SELECT * FROM comments WHERE userId = ? AND deletedAt IS NULL', [userId])
 
       return {
         user,
         stories,
-        chapters
+        chapters,
+        comments
       }
     }
   },
@@ -82,6 +86,8 @@ const UserResolvers = {
       }
       // Store user session
       context.req.session.user = hashids.encode(user.id)
+      user.id = hashids.encode(user.id)
+      user.email = crypto.createHash('sha256').update(user.email.trim().toLowerCase()).digest('hex')
       return { success: true, message: 'Logged in successfully', user }
     },
     // Change the user's password
@@ -113,10 +119,12 @@ const UserResolvers = {
         })
       })
     },
+
     // Edit the user's Buy Me a Coffee link
     editCoffee: async (_, { link }, context) => {
       const original = hashids.decode(context.req.session.user)
       const userId = original[0]
+      if (!link) throw new Error ('Link is required')
       if (!userId) throw new Error('You are not logged in.')
       await queryDB('UPDATE users SET coffee = ? WHERE id = ?', [link, userId])
       return { success: true, message: 'Buy Me a Coffee link updated' }

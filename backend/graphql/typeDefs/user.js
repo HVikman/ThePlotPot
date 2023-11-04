@@ -22,5 +22,6 @@ module.exports = gql`
         user: User
         stories: [Story]
         chapters: [Chapter]
+        comments: [Comment]
     }
 `

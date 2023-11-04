@@ -2,26 +2,46 @@ const Hashids = require('hashids/cjs')
 const hashids = new Hashids(process.env.IDSECRET, 20)
 const sanitizeHtml = require('sanitize-html')
 const queryDB = require('../../db/query')
-
+const { detectSpam } = require('../../utils/detectspam')
 
 const ChapterResolvers = {
   Query: {
     // Fetch a single chapter by ID
     getChapter: async (_, { id }) => {
-      const query = 'SELECT * FROM chapters WHERE id = ? AND deleted_at IS NULL'
-      return await queryDB(query, [id], true)
+      // Fetch chapter
+      const chapterQuery = 'SELECT * FROM chapters WHERE id = ? AND deleted_at IS NULL'
+      const chapter = await queryDB(chapterQuery, [id], true)
+
+      // Fetch comments for the chapter
+      const commentQuery = 'SELECT * FROM comments WHERE chapterId = ? AND deletedAt IS NULL'
+      const comments = await queryDB(commentQuery, [id])
+
+      // Append comments to the chapter
+      chapter.comments = comments
+      return chapter
     },
-    // Fetch child chapters of a chapter by ID
     getChapterChildren: async (_, { id }, context) => {
       const original = hashids.decode(context.req.session.user)
       const userId = original[0]
+
       // Insert row to chapter_reads to add a read count
       await queryDB(
         'INSERT INTO chapter_reads (chapterId, userId, viewedAt) VALUES (?, ?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE viewedAt = CURRENT_TIMESTAMP',
         [id, userId]
       )
-      const query = 'SELECT * FROM chapters WHERE parentChapterId = ? AND deleted_at IS NULL'
-      return await queryDB(query, [id])
+
+      // Fetch child chapters
+      const childChaptersQuery = 'SELECT * FROM chapters WHERE parentChapterId = ? AND deleted_at IS NULL'
+      const childChapters = await queryDB(childChaptersQuery, [id])
+
+      // Fetch comments for each child chapter and append to them
+      for (let childChapter of childChapters) {
+        const commentQuery = 'SELECT * FROM comments WHERE chapterId = ? AND deletedAt IS NULL'
+        const comments = await queryDB(commentQuery, [childChapter.id])
+        childChapter.comments = comments
+      }
+
+      return childChapters
     },
     async isChapterLiked(_, { id }, context) {
       // Get user from session and decode id
@@ -56,13 +76,29 @@ const ChapterResolvers = {
       // Sanitize content before insertion
       const sanitizedContent = sanitizeHtml(content)
 
+      if (detectSpam(title)) {
+        throw new Error('Spam detected in title')
+      }
+
+      if (detectSpam(sanitizedContent, true)) {
+        throw new Error('Spam detected in content')
+      }
+
+
       // Insert the new chapter into the database
       const insertQuery = 'INSERT INTO chapters (title, content, storyId, branch, parentChapterId, authorId) VALUES (?, ?, ?, ?, ?, ?)'
       const results = await queryDB(insertQuery, [title, sanitizedContent, storyId, branch, parentChapterId, userId])
 
       // Fetch the newly created chapter
       const selectQuery = 'SELECT * FROM chapters WHERE id = ?'
-      return await queryDB(selectQuery, [results.insertId], true)
+      const chapter = await queryDB(selectQuery, [results.insertId], true)
+
+      const commentQuery = 'SELECT * FROM comments WHERE chapterId = ? AND deletedAt IS NULL'
+      const comments = await queryDB(commentQuery, [results.insertId])
+
+      // Append comments to the chapter
+      chapter.comments = comments
+      return chapter
     },
     // Soft-delete a chapter
     deleteChapter: async (_, { id }, context) => {
@@ -90,6 +126,11 @@ const ChapterResolvers = {
       // Mark as deleted
       const deleteQuery = 'UPDATE chapters SET deleted_at = NOW() WHERE id = ?'
       await queryDB(deleteQuery, [id], true)
+
+      //Mark comments as deleted
+      const commentQuery = 'Call DeleteComments(?)'
+      await queryDB(commentQuery, [id], true)
+
 
       return { success: true, message: 'Deleted chapter' }
     },

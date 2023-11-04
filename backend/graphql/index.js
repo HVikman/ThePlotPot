@@ -1,6 +1,7 @@
 const UserResolvers = require('./resolvers/user')
 const StoryResolvers = require('./resolvers/story')
 const ChapterResolvers = require('./resolvers/chapter')
+const CommentResolvers = require('./resolvers/comment')
 
 
 const UserType = require('./typeDefs/user')
@@ -9,21 +10,25 @@ const ChapterType = require('./typeDefs/chapter')
 const MutationType = require('./typeDefs/mutation')
 const QueryType = require('./typeDefs/query')
 const BasicType = require('./typeDefs/basic')
+const CommentType = require('./typeDefs/comment')
 
 const resolvers = {
   Query: {
     ...UserResolvers.Query,
     ...StoryResolvers.Query,
-    ...ChapterResolvers.Query
+    ...ChapterResolvers.Query,
+    ...CommentResolvers.Query
   },
   Mutation: {
     ...UserResolvers.Mutation,
     ...StoryResolvers.Mutation,
-    ...ChapterResolvers.Mutation
+    ...ChapterResolvers.Mutation,
+    ...CommentResolvers.Mutation
   },
   User: UserResolvers.User,
   Story: StoryResolvers.Story,
-  Chapter: ChapterResolvers.Chapter
+  Chapter: ChapterResolvers.Chapter,
+  Comment: CommentResolvers.Comment
 }
 
 const typeDefs = [
@@ -32,7 +37,8 @@ const typeDefs = [
   ChapterType,
   MutationType,
   QueryType,
-  BasicType
+  BasicType,
+  CommentType
 ]
 
 module.exports = {

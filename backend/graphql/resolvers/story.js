@@ -3,6 +3,7 @@ const queryDB = require('../../db/query')
 const Hashids = require('hashids/cjs')
 const hashids = new Hashids(process.env.IDSECRET, 20)
 const sanitizeHtml = require('sanitize-html')
+const { detectSpam } = require('../../utils/detectspam')
 
 
 const StoryResolvers = {
@@ -21,8 +22,8 @@ const StoryResolvers = {
       let chapter
       if (chapterId) {
         // Fetch chapter based on provided chapter id
-        chapter = await queryDB('SELECT * FROM chapters WHERE id=?', [chapterId], true)
-        if (!chapter){
+        chapter = await queryDB('SELECT * FROM chapters WHERE id=? AND deleted_at IS NULL', [chapterId], true)
+        if (!chapter) {
           // TODO: handle chapter not found
         }
       } else {
@@ -31,12 +32,15 @@ const StoryResolvers = {
       }
 
       if (chapter) {
+        // Fetch comments for the chapter
+        const comments = await queryDB('SELECT * FROM comments WHERE chapterId = ? AND deletedAt IS NULL', [chapter.id])
+        chapter.comments = comments
+
         await queryDB(
           'INSERT INTO chapter_reads (chapterId, userId, viewedAt) VALUES (?, ?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE viewedAt = CURRENT_TIMESTAMP',
           [chapter.id, userId]
         )
       }
-
 
       return {
         ...story,
@@ -59,57 +63,83 @@ const StoryResolvers = {
 
         // Check if user is logged in
         if (!userId) {
-          reject(new Error('You must be logged in to create stories.'))
-          return
+          throw new Error('You must be logged in to create stories.')
         }
 
         const { title, description, genre, firstChapterContent } = input
         //Sanitize content
         const sanitizedContent = sanitizeHtml(firstChapterContent)
 
-        // Begin a transaction
-        db.beginTransaction((error) => {
-          if (error) {
-            reject(error)
+        if (detectSpam(sanitizedContent, true)) {
+          throw new Error('Spam detected in content')
+        }
+        if (detectSpam(title)) {
+          throw new Error('Spam detected in title')
+        }
+        if (detectSpam(description)) {
+          throw new Error('Spam detected in description')
+        }
+        if (detectSpam(genre)) {
+          throw new Error('Spam detected in genre')
+        }
+
+
+
+        // Obtain a connection from the pool
+        db.getConnection((connError, connection) => {
+          if (connError) {
+            reject(connError)
             return
           }
-          let storyId
 
-          // Insert story
-          queryDB('INSERT INTO stories (title, description, genre, authorId) VALUES (?, ?, ?, ?)', [title, description, genre, userId])
-            .then((storyResults) => {
-              storyId = storyResults.insertId
-              // Insert first chapter for the story
-              return queryDB('INSERT INTO chapters (storyId, content, branch, authorId) VALUES (?, ?, ?, ?)', [storyId, sanitizedContent, 0, userId])
-            })
-            .then(() => {
-              // Commit the transaction
-              db.commit((err) => {
-                if (err) {
-                  db.rollback(() => {
-                    reject(err)
+          // Begin a transaction on the connection
+          connection.beginTransaction((error) => {
+            if (error) {
+              connection.release()
+              reject(error)
+              return
+            }
+            let storyId
+
+            // Insert story
+            queryDB('INSERT INTO stories (title, description, genre, authorId) VALUES (?, ?, ?, ?)', [title, description, genre, userId])
+              .then((storyResults) => {
+                storyId = storyResults.insertId
+                // Insert first chapter for the story
+                return queryDB('INSERT INTO chapters (storyId, content, branch, authorId) VALUES (?, ?, ?, ?)', [storyId, sanitizedContent, 0, userId])
+              })
+              .then(() => {
+                // Commit the transaction
+                connection.commit((commitError) => {
+                  if (commitError) {
+                    connection.rollback(() => {
+                      connection.release()
+                      reject(commitError)
+                    })
+                    return
+                  }
+                  connection.release()
+                  resolve({
+                    success: true,
+                    message: 'Story and first chapter created successfully',
+                    story: {
+                      id: storyId,
+                      title,
+                      description,
+                      genre,
+                      authorId: userId
+                    },
                   })
-                  return
-                }
-                resolve({
-                  success: true,
-                  message: 'Story and first chapter created successfully',
-                  story: {
-                    id: storyId,
-                    title,
-                    description,
-                    genre,
-                    authorId: userId
-                  },
                 })
               })
-            })
-            .catch((err) => {
-              // Rollback the transaction in case of errors
-              db.rollback(() => {
-                reject(err)
+              .catch((transactionError) => {
+                // Rollback the transaction in case of errors
+                connection.rollback(() => {
+                  connection.release()
+                  reject(transactionError)
+                })
               })
-            })
+          })
         })
       })
     },
@@ -133,15 +163,24 @@ const StoryResolvers = {
         return { success: false, message: 'Cannot delete a story with more than one chapters' }
       }
 
+      //find chapter id
+
+      const chapter = await queryDB('SELECT * FROM chapters WHERE storyId = ?', [id],true)
+      console.log(chapter.id)
+      //Mark comments as deleted
+      const res = await queryDB('Call DeleteComments(?)', [chapter.id])
+      console.log(res)
+
       // Softdelete the initial chapter if exists
       if (chapterCount === 1) {
         await queryDB('UPDATE chapters SET deleted_at = NOW() WHERE storyId = ?', [id])
       }
 
       // Softdelete the story
-      const result = await queryDB('UPDATE stories SET deleted_at = NOW() WHERE id = ? AND authorId = ?', [id, userId], true)
-
-      if (result.affectedRows) {
+      await queryDB('UPDATE stories SET deleted_at = NOW() WHERE id = ? AND authorId = ?', [id, userId], true)
+      const result = await queryDB('SELECT COUNT(*) as count FROM stories WHERE id = ? AND deleted_at IS NOT NULL ', [id],true)
+      console.log(result)
+      if (result.count === 1) {
         return { success: true, message: 'Story and initial chapter soft-deleted successfully' }
       } else {
         return { success: false, message: 'You can only soft-delete your own stories' }

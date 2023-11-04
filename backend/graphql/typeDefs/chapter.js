@@ -12,5 +12,6 @@ module.exports = gql`
     author: User!
     reads_count: Int
     votes_count: Int
+    comments:[Comment]
     }
 `

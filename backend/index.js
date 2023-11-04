@@ -18,13 +18,12 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    domain:'localhost',
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     maxAge: 7 * 24 * 60 * 60 * 1000
   }
 }))
-
+app.use(express.static('dist'))
 
 const { resolvers, typeDefs } = require('./graphql')
 const server = new ApolloServer({
