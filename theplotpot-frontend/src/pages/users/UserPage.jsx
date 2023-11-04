@@ -38,7 +38,7 @@ const UserPage = () => {
         <Col md={4}>
           <Card style={{ width: '18rem' }}>
             <Card.Body>
-              <Card.Img variant="top" src={`http://www.gravatar.com/avatar/${user.email}?d=retro&r=g&s=100`} />
+              <Card.Img variant="top" src={`https://www.gravatar.com/avatar/${user.email}?d=robohash&r=g&s=100`} />
               <Card.Title className="mt-2">{user.username}</Card.Title>
               {user.coffee && <Card.Text><Link to={user.coffee}>Buy Me a Coffee</Link> <CupHot /> </Card.Text>}
               <Card.Text>{user.email}</Card.Text>
@@ -46,16 +46,13 @@ const UserPage = () => {
           </Card>
         </Col>
         <Col md={8}>
-          {/* TODO:
-          FIX BUG WHERE ACCORDION SOMETIMES TURNS TO UGLY BUTTONS
-          */}
           <Accordion defaultActiveKey="0">
             <Accordion.Item eventKey="1">
               <Accordion.Header>Stories</Accordion.Header>
               <Accordion.Body>
                 <ListGroup>
                   {stories.map((story) => (
-                    <ListGroup.Item key={story.id}>{story.title} - {story.genre}</ListGroup.Item>
+                    <ListGroup.Item key={story.id}><Link style={{ color: 'inherit', textDecoration: 'inherit' }} to={`/story/${story.id}`}>{story.title} - {story.genre}</Link></ListGroup.Item>
                   ))}
                 </ListGroup>
               </Accordion.Body>
@@ -72,7 +69,7 @@ const UserPage = () => {
                         <ListGroup>
                           {groupedChapters[storyId].branches[branch].map(chapter => (
                             <ListGroup.Item key={chapter.id}>
-                              {chapter.title} - Likes: {chapter.votes_count} - Reads: {chapter.reads_count}
+                              <Link style={{ color: 'inherit', textDecoration: 'inherit' }} to={`/story/${storyId}/chapter/${chapter.id}`}>{chapter.title} - Likes: {chapter.votes_count} - Reads: {chapter.reads_count}</Link>
                             </ListGroup.Item>
                           ))}
                         </ListGroup>

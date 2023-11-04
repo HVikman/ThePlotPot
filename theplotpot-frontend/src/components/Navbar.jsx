@@ -1,6 +1,5 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import Gravatar from 'react-gravatar'
 import { Navbar, Nav, NavDropdown, Button } from 'react-bootstrap'
 import { useMutation } from '@apollo/client'
 import { LOGOUT_MUTATION } from '../api/queries'
@@ -34,25 +33,28 @@ const Navigation = () => {
   }
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg" style={{ height:'80px' }}>
+    <Navbar bg="dark" variant="dark" expand="lg">
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="mr-auto">
           <Nav.Link as={Link} to="/">Home</Nav.Link>
           <Nav.Link as={Link} to="/stories">All Stories</Nav.Link>
-          {isAuthenticated ? <Nav.Link as={Link} to="/story">Create a new story</Nav.Link> : <></>}
+          {isAuthenticated && <Nav.Link as={Link} to="/story">Create a new story</Nav.Link>}
         </Nav>
 
-        <Nav >
+        <Nav className="d-none d-lg-flex">  {/* Hide on small, show on large screens */}
           {isAuthenticated ? (
-            <>
-              <NavDropdown  title={<Gravatar style={{ borderRadius: 25, width: '70%',height: '70%' }} md5={user.email}/>} align='end'>
-                <NavDropdown.Item className="no-hover-effect">Hi, {user.username}</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to={`/user/${user.id}`}>Dashboard</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/usersettings">Edit profile</NavDropdown.Item>
-                <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
-              </NavDropdown>
-            </>
+            <NavDropdown title={
+              <img
+                src={`https://www.gravatar.com/avatar/${user.email}?s=80&d=robohash`}
+                className="img-fluid rounded-circle"
+                alt="User Gravatar"
+              />} align='end'>
+              <NavDropdown.Item className="no-hover-effect">Hi, {user.username}</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to={`/user/${user.id}`}>Dashboard</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/usersettings">Edit profile</NavDropdown.Item>
+              <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
+            </NavDropdown>
           ) : (
             <>
               <Button variant="outline-light" as={Link} to="/login">Login</Button>
@@ -60,6 +62,23 @@ const Navigation = () => {
             </>
           )}
         </Nav>
+
+        {/* Mobile-specific menu */}
+        {isAuthenticated ?
+          <Nav className="d-lg-none">
+            <NavDropdown title={`Hi, ${user.username}`} align='end'>
+              <NavDropdown.Item as={Link} to={`/user/${user.id}`}>Dashboard</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/usersettings">Edit profile</NavDropdown.Item>
+              <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
+            </NavDropdown>
+          </Nav>
+          :
+          <Nav className="d-lg-none">
+            <NavDropdown title={'Login/Signup'} align='end'>
+              <NavDropdown.Item as={Link} to='/login'>Login</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to='/signup'>Signup</NavDropdown.Item>
+            </NavDropdown>
+          </Nav>}
       </Navbar.Collapse>
     </Navbar>
   )

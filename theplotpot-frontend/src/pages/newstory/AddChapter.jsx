@@ -1,7 +1,8 @@
 import { useLocation } from 'react-router-dom'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import { Input, Form, Button, Alert } from 'antd'
+import { Input, Form, Alert } from 'antd'
+import { Button } from 'react-bootstrap'
 import ReactQuill from 'react-quill'
 import 'quill/dist/quill.snow.css'
 import '../../utils/charactercounter'
@@ -19,7 +20,8 @@ const validationSchema = Yup.object({
 
 const initialValues = {
   title: '',
-  content: ''
+  content: '',
+  honeypot: ''
 }
 
 const AddChapter = () => {
@@ -33,6 +35,10 @@ const AddChapter = () => {
     initialValues,
     validationSchema,
     onSubmit: (values) => {
+      if (values.honeypot) {
+        console.log('Bot detected')
+        return
+      }
       createChapter({
         variables: {
           storyId: storyId,
@@ -43,13 +49,13 @@ const AddChapter = () => {
         }
       }).catch(error => {
         console.error('There was an error creating the chapter:', error)
-        addNotification(`Something went wrong: ${error}`, 3000, 'error')
+        addNotification(error.message, 3000, 'error')
       })
     },
   })
 
   return (
-    <div className="add-chapter-container">
+    <div className="add-chapter-container mx-4">
       <h2>Add a New Chapter</h2>
       <Form layout="vertical" onSubmit={formik.handleSubmit}>
         <Form.Item label="Title" help={formik.touched.title && formik.errors.title}>
@@ -82,7 +88,7 @@ const AddChapter = () => {
           />
           <div id='char-count'></div>
         </Form.Item>
-        <Button type="primary" onClick={() => formik.handleSubmit()}>Submit</Button>
+        <Button variant='secondary' onClick={() => formik.handleSubmit()}>Submit</Button>
       </Form>
       {error && <Alert type="error" message={error.message} className="mt-3" />}
     </div>

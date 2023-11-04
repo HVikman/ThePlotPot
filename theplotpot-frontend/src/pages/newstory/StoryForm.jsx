@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import { AutoComplete, Collapse, Button, Input, Form } from 'antd'
+import { AutoComplete, Collapse, Input, Form } from 'antd'
+import { Button } from 'react-bootstrap'
 import genres from './genres'
 import ReactQuill from 'react-quill'
 import 'quill/dist/quill.snow.css'
@@ -28,7 +29,8 @@ const initialValues = {
   title: '',
   description: '',
   content: '',
-  genre: ''
+  genre: '',
+  honeypot: '',
 }
 
 // Quill modules
@@ -57,6 +59,10 @@ const StoryForm = () => {
     initialValues,
     validationSchema,
     onSubmit: (values) => {
+      if (values.honeypot) {
+        console.log('Bot detected')
+        return
+      }
       createStory({
         variables: {
           title: values.title,
@@ -66,7 +72,7 @@ const StoryForm = () => {
         }
       }).catch(error => {
         console.error('There was an error creating the chapter:', error)
-        addNotification(`Something went wrong: ${error}`, 3000, 'error')
+        addNotification(error.message, 3000, 'error')
       })
     },
   })
@@ -88,7 +94,7 @@ const StoryForm = () => {
       key: '1',
       label: 'Step 1: Basic Details',
       children: (
-        <Form layout="vertical" onSubmit={formik.handleSubmit}>
+        <Form layout="vertical" onSubmit={formik.handleSubmit} className='mx-2'>
           <Form.Item label="Title" help={formik.touched.title && formik.errors.title}>
             <Input
               type="text"
@@ -129,7 +135,7 @@ const StoryForm = () => {
       collapsible: disabledPanels,
       label: 'Step 2: Story Content',
       children: (
-        <>
+        <div className='mx-2'>
           <ReactQuill
             value={formik.values.content}
             onChange={value => formik.setFieldValue('content', value)}
@@ -137,8 +143,8 @@ const StoryForm = () => {
             modules={quillModules}
           />
           <div id="character-count"></div>
-          <Button type="primary" onClick={() => formik.handleSubmit()}>Submit</Button>
-        </>
+          <Button variant='secondary' onClick={() => formik.handleSubmit()}>Submit</Button>
+        </div>
       )
     }
   ]

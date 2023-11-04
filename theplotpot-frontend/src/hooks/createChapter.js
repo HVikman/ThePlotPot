@@ -50,7 +50,7 @@ export const useCreateChapter = (storyId, parentChapter, navigationStack, addNot
         })
       } catch (error) {
         console.error('Error updating cache after adding chapter:', error)
-        addNotification(`Something went wrong: ${error}`, 2000, 'error')
+        addNotification(error.message, 2000, 'error')
       }
     }
   })
