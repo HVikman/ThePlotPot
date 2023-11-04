@@ -13,5 +13,8 @@ type Mutation {
     logout: Response!
     likeChapter(id: ID!): Response!
     unlikeChapter(id: ID!): Response!
+    addComment(input: CommentInput!): Comment!
+    editComment(commentId: ID!, content: String!): Response!
+    deleteComment(commentId: ID!): Response!
 }
 `

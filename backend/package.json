@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js",
-    "lint:fix": "eslint --fix ."
+    "lint:fix": "eslint --fix .",
+    "start": "node index.js"
   },
   "author": "Henri Vikman",
   "license": "ISC",
@@ -24,6 +25,7 @@
     "mysql2": "^3.6.0",
     "node-cron": "^3.0.2",
     "sanitize-html": "^2.11.0",
-    "sqlite3": "^5.1.6"
+    "sqlite3": "^5.1.6",
+    "striptags": "^3.2.0"
   }
 }
