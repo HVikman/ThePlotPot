@@ -95,6 +95,9 @@ query GetStory($id: ID!, $chapterId: ID) {
   getStory(id: $id, chapterId: $chapterId) {
     title
     chapters {
+      story{
+        id
+      }
       content
       title
       branch
@@ -105,6 +108,15 @@ query GetStory($id: ID!, $chapterId: ID) {
         id
         username
         coffee
+      }
+      comments {
+        user {
+          username
+          id
+          email
+        }
+        content
+        id
       }
       reads_count
       votes_count
@@ -134,6 +146,15 @@ mutation CreateChapter($content: String!, $storyId: ID!, $title: String!, $branc
       username
       coffee
     }
+    comments {
+      user {
+        username
+        id
+        email
+      }
+      content
+      id
+    }
   }
 }
 `
@@ -144,6 +165,9 @@ const GET_CHAPTER_CHILDREN = gql `
       id
       content
       title
+      story{
+        id
+      }
       parentChapterId
       branch
       upvotes
@@ -154,6 +178,15 @@ const GET_CHAPTER_CHILDREN = gql `
       }
       reads_count
       votes_count
+      comments {
+        user {
+          username
+          id
+          email
+        }
+        content
+        id
+      }
     }
   }
 `
@@ -166,12 +199,24 @@ query GetChapter($getChapterId: ID!) {
       username
     }
     content
+    story{
+      id
+    }
     branch
     parentChapterId
     reads_count
     title
     votes_count
     id
+    comments {
+      user {
+        username
+        id
+        email
+      }
+      content
+      id
+    }
   }
 }
 `
@@ -214,6 +259,32 @@ query IsChapterLiked($id: ID!) {
   isChapterLiked(id: $id) 
 }
 `
+const DELETE_CHAPTER = gql`
+mutation DeleteChapter($id: ID!) {
+  deleteChapter(id: $id) {
+      success
+      message
+  }
+}
+`
+const DELETE_STORY = gql`
+mutation DeleteStory($id: ID!) {
+  deleteStory(id: $id) {
+      success
+      message
+  }
+}
+`
+const DELETE_COMMENT = gql`
+mutation DeleteComment($commentId: ID!) {
+  deleteComment(commentId: $commentId) {
+      success
+      message
+  }
+}
+
+`
+
 const GET_USER_PROFILE = gql `
 query GetUserProfile($getUserProfileId: ID!) {
   getUserProfile(id: $getUserProfileId) {
@@ -243,5 +314,18 @@ query GetUserProfile($getUserProfileId: ID!) {
   }
 }
 `
+const ADD_COMMENT_MUTATION = gql`
+  mutation AddComment($Input: CommentInput!) {
+    addComment(input: $Input) {
+      content
+      id
+      user {
+        email
+        id
+        username
+      }
+    }
+  }
+`
 
-export { GET_USER_PROFILE, LOGIN_MUTATION, GET_CHAPTER, IS_CHAPTER_LIKED, SIGNUP_MUTATION, LOGOUT_MUTATION,CREATE_STORY,GET_ALL_STORIES,GET_STORY_BY_ID, ME, CREATE_CHAPTER, GET_CHAPTER_CHILDREN,EDIT_COFFEE,CHANGE_PASSWORD,LIKE_CHAPTER,UNLIKE_CHAPTER }
+export { DELETE_COMMENT,DELETE_CHAPTER, DELETE_STORY, ADD_COMMENT_MUTATION, GET_USER_PROFILE, LOGIN_MUTATION, GET_CHAPTER, IS_CHAPTER_LIKED, SIGNUP_MUTATION, LOGOUT_MUTATION,CREATE_STORY,GET_ALL_STORIES,GET_STORY_BY_ID, ME, CREATE_CHAPTER, GET_CHAPTER_CHILDREN,EDIT_COFFEE,CHANGE_PASSWORD,LIKE_CHAPTER,UNLIKE_CHAPTER }

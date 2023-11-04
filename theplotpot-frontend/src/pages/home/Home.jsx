@@ -43,7 +43,7 @@ const Home = () => {
                     <Card.Title>{story.title}</Card.Title>
                     <Card.Text>{story.description}</Card.Text>
                     <Card.Text>Genre: {story.genre}</Card.Text>
-                    <Card.Text><small className="text-muted">By:<Link to={`/user/${story.author.id}`}>{story.author.username}</Link> </small></Card.Text>
+                    <Card.Text><small className="text-muted">By:<Link style={{ color: 'inherit', textDecoration: 'inherit' }} to={`/user/${story.author.id}`}>{story.author.username}</Link> </small></Card.Text>
                     <Link to={`/story/${story.id}`}>
                       <Button variant="secondary">Read Story</Button>
                     </Link>
@@ -64,12 +64,12 @@ const Home = () => {
                 <LoadingPlaceholder />
               </Card>
             )) : latestStories.map(story => (
-              <Card className="shadow" key={story.id} style={{ margin: '15px' }}>
+              <Card className="shadow" key={story.id} style={{ margin: '15px', maxWidth:'600px' }}>
                 <Card.Body>
                   <Card.Title>{story.title}</Card.Title>
                   <Card.Text>{story.description}</Card.Text>
                   <Card.Text>Genre: {story.genre}</Card.Text>
-                  <Card.Text><small className="text-muted">By: <Link to={`/user/${story.author.id}`}>{story.author.username}</Link></small></Card.Text>
+                  <Card.Text><small className="text-muted">By: <Link style={{ color: 'inherit', textDecoration: 'inherit' }} to={`/user/${story.author.id}`}>{story.author.username}</Link></small></Card.Text>
                   <Link to={`/story/${story.id}`}>
                     <Button variant="secondary">Read Story</Button>
                   </Link>

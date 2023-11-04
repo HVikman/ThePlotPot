@@ -8,7 +8,6 @@ import Cookies from 'js-cookie'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Notification from './components/Notification'
-import CookieConsentPopup from './components/CookieConsentPopup'
 import UserPage from './pages/users/UserPage'
 import './App.css'
 
@@ -20,6 +19,7 @@ const StoryPage = lazy(() => import('./pages/storypage/StoryPage'))
 const AddChapter = lazy(() => import('./pages/newstory/AddChapter'))
 const StoriesPage = lazy(() => import('./pages/stories/StoriesPage'))
 const UserSettings = lazy(() => import('./pages/users/UserSettings'))
+const CookieConsentPopup = lazy(() => import('./components/CookieConsentPopup'))
 
 
 const App = () => {
@@ -58,7 +58,11 @@ const App = () => {
         </div>
         <Notification />
       </Router>
-      {showCookiePopup && <CookieConsentPopup onConsent={handleConsent} />}
+      {showCookiePopup && (
+        <Suspense fallback={<div>Loading...</div>}>
+          <CookieConsentPopup onConsent={handleConsent} />
+        </Suspense>
+      )}
       <Footer></Footer>
     </div>
 

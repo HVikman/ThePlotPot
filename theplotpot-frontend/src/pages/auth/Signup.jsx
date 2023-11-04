@@ -50,7 +50,7 @@ const Signup = () => {
   return (
     <Container style={{ maxWidth: '400px', marginTop: '50px' }}>
       <Form onSubmit={formik.handleSubmit}>
-        <Form.Group controlId="formBasicUsername">
+        <Form.Group controlId="formBasicUsername" className='mt-4 custom-form'>
           <Form.Label>Username</Form.Label>
           <InputGroup className="mb-3">
             <InputGroup.Text ><PersonFill /></InputGroup.Text>
@@ -71,7 +71,7 @@ const Signup = () => {
         </Form.Group>
 
 
-        <Form.Group controlId="formBasicEmail" className='mt-4'>
+        <Form.Group controlId="formBasicEmail" className='mt-4 custom-form'>
           <Form.Label>Email address</Form.Label>
           <InputGroup className="mb-3">
             <InputGroup.Text >@</InputGroup.Text>
@@ -90,7 +90,7 @@ const Signup = () => {
           </InputGroup>
         </Form.Group>
 
-        <Form.Group controlId="formBasicPassword" className='mt-4'>
+        <Form.Group controlId="formBasicPassword" className='mt-4 custom-form'>
           <Form.Label>Password</Form.Label>
           <InputGroup className="mb-3">
             <InputGroup.Text ><KeyFill /></InputGroup.Text>

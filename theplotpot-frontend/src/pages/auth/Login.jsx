@@ -49,7 +49,7 @@ const Login = () => {
   return (
     <Container style={{ maxWidth: '400px', marginTop: '50px' }}>
       <Form onSubmit={formik.handleSubmit}>
-        <Form.Group controlId="formBasicEmail" className='mt-2'>
+        <Form.Group controlId="formBasicEmail" className='mt-2 custom-form'>
           <Form.Label>Email address</Form.Label>
           <Form.Control
             type="email"
@@ -65,7 +65,7 @@ const Login = () => {
           </Form.Control.Feedback>
         </Form.Group>
 
-        <Form.Group controlId="formBasicPassword" className='mt-4'>
+        <Form.Group controlId="formBasicPassword" className='mt-4 custom-form'>
           <Form.Label>Password</Form.Label>
           <Form.Control
             type="password"
