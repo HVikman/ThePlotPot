@@ -15,5 +15,8 @@
 |   20.9 |  7     | Frontend functionality for liking chapters and displaying likes and read counts
 |   23.9 |  4  | Frontend chapter navigation fixes, added component lazy loading to reduce initial file size
 |   23.9 |  5    | All stories page, error handling and custom error component
-|    |      | 
-|    | 90     | 
+|  24.9  |   11   | User profile page, backend functionality to retrieve user information, bug fixes and small improvements
+| 29.10 | 8 | backend functionality for comments
+| 31.10 | 10 | Comments, adding and deleting comments added to frontend, small improvements and bug fixes 
+| 04.11 | 7 | More comment functionality, more validation for graphql resolvers and some simple spam detection/prevention
+|    | 126     | 
