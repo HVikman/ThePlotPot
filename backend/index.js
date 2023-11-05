@@ -2,6 +2,8 @@ const express = require('express')
 const { ApolloServer } = require('apollo-server-express')
 const session = require('express-session')
 const SQLiteStore = require('connect-sqlite3')(session)
+const path = require('path')
+const cors = require('cors')
 
 
 const app = express()
@@ -25,6 +27,17 @@ app.use(session({
   }
 }))
 app.use(express.static('dist'))
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'))
+})
+
+if(process.env.NODE_ENV === 'production'){
+  const corsOptions = {
+    origin: 'https://theplotpot.onrender.com/',
+    methods: 'POST',
+  }
+  app.use('/graphql', cors(corsOptions))
+}
 
 const { resolvers, typeDefs } = require('./graphql')
 const server = new ApolloServer({
