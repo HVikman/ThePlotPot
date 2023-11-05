@@ -23,7 +23,7 @@ const Comments = ({ comments: initialComments, chapterId }) => {
       {}
       {comments && comments.length > 0 ? comments.map(comment => (
         <CommentCard key={comment.id} comment={comment} user={user} deleteComment={deleteComment} />
-      )): <p>No comments yet, be first to comment!</p>}{isAuthenticated && <AddCommentForm chapterId={chapterId} addNewComment={addNewComment} />}
+      )): isAuthenticated ? <p>No comments yet, be first to comment!</p> : <p>No comments yet, <a href="/login">login</a> or <a href="/signup">signup</a> to comment!</p>}{isAuthenticated && <AddCommentForm chapterId={chapterId} addNewComment={addNewComment} />}
     </Container>
   )
 }
