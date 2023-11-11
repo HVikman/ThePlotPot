@@ -3,7 +3,7 @@ const queryDB = require('../../db/query')
 const Hashids = require('hashids/cjs')
 const hashids = new Hashids(process.env.IDSECRET, 20)
 const crypto = require('crypto')
-
+const checkCaptcha = require('../../utils/captcha')
 
 const UserResolvers = {
   // Queries
@@ -55,7 +55,12 @@ const UserResolvers = {
   // Mutations
   Mutation: {
     // Create a new user
-    createUser: async (_, { username, password, email }, context) => {
+    createUser: async (_, { username, password, email, token }, context) => {
+      const bot = await checkCaptcha(token)
+      if (bot) {
+        throw new Error('Captcha failed')
+      }
+
       // Check for existing users with the same email
       const existingUser = await queryDB('SELECT * FROM users WHERE email = ?', [email], true)
       if (existingUser) {
@@ -70,6 +75,9 @@ const UserResolvers = {
 
       // Store user session
       context.req.session.user = hashids.encode(newUser.id)
+      context.req.session.username = username
+      context.req.session.email = email
+      context.req.session.admin = false
       return { success: true, message: 'Sign up successful', user: newUser }
     },
     // Log in a user
@@ -86,6 +94,10 @@ const UserResolvers = {
       }
       // Store user session
       context.req.session.user = hashids.encode(user.id)
+      context.req.session.username = user.username
+      context.req.session.email = user.email
+      context.req.session.admin = user.has_superpowers ? true : false
+      console.log(context.req.session)
       user.id = hashids.encode(user.id)
       user.email = crypto.createHash('sha256').update(user.email.trim().toLowerCase()).digest('hex')
       return { success: true, message: 'Logged in successfully', user }

@@ -4,17 +4,25 @@ const hashids = new Hashids(process.env.IDSECRET, 20)
 const queryDB = require('../../db/query')
 const { detectSpam } = require('../../utils/detectspam')
 const crypto = require('crypto')
+const checkCaptcha = require('../../utils/captcha')
 
 const CommentResolvers = {
   Mutation: {
-    async addComment(_, { input }, context) {
+    async addComment(_, { input, token }, context) {
       const original = hashids.decode(context.req.session.user)
       const userId = original[0]
-
       if (!userId) throw new Error('You must be logged in to create comments.')
-      if (detectSpam(input.content)) {
+
+      const bot = await checkCaptcha(token)
+      if (bot) {
+        throw new Error('Captcha failed')
+      }
+
+      const isSpam = await detectSpam(context, input.content, 'comment')
+      if(isSpam){
         throw new Error('Spam detected')
       }
+
 
       try {
         const { chapterId, content } = input
@@ -71,7 +79,7 @@ const CommentResolvers = {
       // Validation: User must be logged in
       if (!userId) throw new Error('You must be logged in to delete.')
 
-      // Fetch chapter details
+      // Fetch comment details
       const query = 'SELECT * FROM comments WHERE id = ? AND deletedAt IS NULL'
       const comment = await queryDB(query, [commentId], true)
       if (userId !== comment.userId) throw new Error('This is someone else\'s comment')

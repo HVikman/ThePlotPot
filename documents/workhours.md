@@ -19,4 +19,7 @@
 | 29.10 | 8 | backend functionality for comments
 | 31.10 | 10 | Comments, adding and deleting comments added to frontend, small improvements and bug fixes 
 | 04.11 | 7 | More comment functionality, more validation for graphql resolvers and some simple spam detection/prevention
-|    | 126     | 
+| 08.11 | 5 | Learning about spam prevention, edited spam detection to use Akismet for detecting spam
+| 09.11 | 6 | Added google recaptcha v3 to detect bots, edited privacy policy and cookie consents to match added features
+| 10.11 | 1 | Improved chapter reads tracking and edited privacy policy
+|    | 138     | 

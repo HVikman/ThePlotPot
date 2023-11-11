@@ -39,18 +39,24 @@ const AddChapter = () => {
         console.log('Bot detected')
         return
       }
-      createChapter({
-        variables: {
-          storyId: storyId,
-          parentChapterId: parentChapter.id,
-          branch: parentChapter.branch + 1,
-          title: values.title,
-          content: values.content
-        }
-      }).catch(error => {
-        console.error('There was an error creating the chapter:', error)
-        addNotification(error.message, 3000, 'error')
-      })
+      // eslint-disable-next-line no-undef
+      grecaptcha.ready(async () => {
+        // eslint-disable-next-line no-undef
+        const token = await grecaptcha.execute('6LfY0fooAAAAAKaljIbo723ZiMGApMCVg6ZU805o', { action: 'submit' })
+
+        createChapter({
+          variables: {
+            storyId: storyId,
+            parentChapterId: parentChapter.id,
+            branch: parentChapter.branch + 1,
+            title: values.title,
+            content: values.content,
+            token
+          }
+        }).catch(error => {
+          console.error('There was an error creating the chapter:', error)
+          addNotification(error.message, 3000, 'error')
+        })})
     },
   })
 
@@ -66,6 +72,15 @@ const AddChapter = () => {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.title}
+          />
+        </Form.Item>
+        <Form.Item style={{ display: 'none' }}>
+          <Input
+            type="text"
+            name="honeypot"
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.honeypot}
           />
         </Form.Item>
         <Form.Item label="Content" help={formik.touched.content && formik.errors.content}>

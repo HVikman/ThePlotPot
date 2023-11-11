@@ -3,6 +3,7 @@ const hashids = new Hashids(process.env.IDSECRET, 20)
 const sanitizeHtml = require('sanitize-html')
 const queryDB = require('../../db/query')
 const { detectSpam } = require('../../utils/detectspam')
+const checkCaptcha = require('../../utils/captcha')
 
 const ChapterResolvers = {
   Query: {
@@ -21,14 +22,22 @@ const ChapterResolvers = {
       return chapter
     },
     getChapterChildren: async (_, { id }, context) => {
-      const original = hashids.decode(context.req.session.user)
-      const userId = original[0]
+      let IDorIP
 
+      if (context.req.session && context.req.session.user) {
+        // Decode the user ID from the session
+        const original = hashids.decode(context.req.session.user)
+        IDorIP = original[0].toString() // Convert User ID to a string
+        console.log('Logged in user ID:', IDorIP)
+      } else {
+        // User is not logged in, use their IP address
+        IDorIP = context.req.ip
+        console.log('Unauthenticated user IP:', IDorIP)
+      }
       // Insert row to chapter_reads to add a read count
-      await queryDB(
-        'INSERT INTO chapter_reads (chapterId, userId, viewedAt) VALUES (?, ?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE viewedAt = CURRENT_TIMESTAMP',
-        [id, userId]
-      )
+      if(IDorIP){
+        const query = 'INSERT INTO chapter_reads (chapterId, IDorIP, viewedAt)VALUES (?, ?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE viewedAt = CURRENT_TIMESTAMP'
+        await queryDB(query, [id, IDorIP])}
 
       // Fetch child chapters
       const childChaptersQuery = 'SELECT * FROM chapters WHERE parentChapterId = ? AND deleted_at IS NULL'
@@ -54,13 +63,19 @@ const ChapterResolvers = {
   },
   Mutation: {
     // Create a new chapter
-    createChapter: async (_, { title, content, storyId, branch, parentChapterId }, context) => {
+    createChapter: async (_, { title, content, storyId, branch, parentChapterId, token }, context) => {
       // Get user from session and decode id
       const original = hashids.decode(context.req.session.user)
       const userId = original[0]
 
       // Validation: User must be logged in
       if (!userId) throw new Error('You must be logged in to create chapters.')
+
+      // Check captcha
+      const bot = await checkCaptcha(token)
+      if (bot) {
+        throw new Error('Captcha failed')
+      }
 
       // Validation: Only 10 branches allowed(counting from 0)
       // This limits story length, at 10 branches story max size is around 29600 chapters
@@ -76,14 +91,12 @@ const ChapterResolvers = {
       // Sanitize content before insertion
       const sanitizedContent = sanitizeHtml(content)
 
-      if (detectSpam(title)) {
-        throw new Error('Spam detected in title')
-      }
+      const isTitleSpam = await detectSpam(context, content, 'forum-post')
+      const isContentSpam = await detectSpam(context, title, 'forum-post', true)
 
-      if (detectSpam(sanitizedContent, true)) {
-        throw new Error('Spam detected in content')
+      if(isTitleSpam || isContentSpam){
+        throw new Error('Spam detected')
       }
-
 
       // Insert the new chapter into the database
       const insertQuery = 'INSERT INTO chapters (title, content, storyId, branch, parentChapterId, authorId) VALUES (?, ?, ?, ?, ?, ?)'
@@ -107,14 +120,14 @@ const ChapterResolvers = {
       const userId = original[0]
 
       // Validation: User must be logged in
-      if (!userId) throw new Error('You must be logged in to create chapters.')
+      if (!userId) throw new Error('You must be logged in to delete chapters.')
 
       // Fetch chapter details
       const query = 'SELECT * FROM chapters WHERE id = ? AND deleted_at IS NULL'
       const chapter = await queryDB(query, [id], true)
 
       // Validation: User must be the chapter's author
-      if (userId !== chapter.authorId) throw new Error('This is someone else\'s chapter')
+      if (userId !== chapter.authorId && !context.req.session.admin ) throw new Error('This is someone else\'s chapter')
 
       // Check if chapter has any children
       const countQuery = 'SELECT COUNT(*) as count FROM chapters WHERE parentChapterId = ?'

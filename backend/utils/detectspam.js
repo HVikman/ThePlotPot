@@ -1,55 +1,35 @@
 const striptags = require('striptags')
 
-function detectSpam(content, isHTML = false) {
-  if (isHTML) {
-    // Strip HTML tags for chapters or any HTML content
+const Akismet = require('akismet-api')
+
+const client = new Akismet.Client({
+  key: process.env.AKISMET_KEY,
+  blog: process.env.URL
+})
+
+const detectSpam = async (context, content, type, isHtml=false) => {
+  const { ip, userAgent, referrer } = context
+
+  if (isHtml){
     content = striptags(content)
   }
 
-  if ( isHTML && content.length > 12000 || !isHTML && content.length > 1000){
-    return true // The content appears to be spam.
+  const comment = {
+    ip: ip || context.req.ip,
+    useragent: userAgent || context.req.headers['user-agent'],
+    content: content,
+    referrer: referrer || context.req.get('referrer'),
+    type: type,
+    name: context.req.session.username,
+    email: context.req.session.email
   }
-
-  // This regex will match most common URL formats
-  const urlPattern = /https?:\/\/[^\s]+|www\.[^\s]+/
-
-  if (urlPattern.test(content)) {
-    return true // The content appears to be spam.
+  try {
+    const isSpam = await client.checkSpam(comment)
+    return isSpam
+  } catch (err) {
+    console.error('Error:', err.message)
+    throw new Error('Unable to check for spam at this time.')
   }
-
-  const spamPatterns = [
-    // Multiple consecutive special characters
-    /[!@#$%^&*()_+{}[\]:;<>,.?~\\/-]{3,}/,
-
-    // Repeated words or phrases
-    /\b(\w+)\b.*\b\1\b/,
-
-    // Excessive use of capital letters (more than 70% of the message)
-    /^[^a-z]*$/,
-
-    // Suspicious phrases
-    /\b(win money|you'?ve won|free gift|click below|special promotion|urgent matter)\b/i,
-
-    // Email patterns
-    /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/,
-
-    // Numbers that look like credit card formats
-    /(?:\d{4}-?){3}\d{4}/,
-
-    // Phrases commonly associated with prescription drugs
-    /\b(viagra|cialis|phentermine|xanax)\b/i,
-
-    // URL shorteners
-    /https?:\/\/(bit\.ly|goo\.gl|t\.co|tinyurl\.com|ow\.ly)/i
-  ]
-
-  for (let pattern of spamPatterns) {
-    if (pattern.test(content)) {
-      return true  // The content appears to be spam.
-    }
-  }
-
-  return false  // The content does not appear to be spam.
 }
 
 module.exports = {

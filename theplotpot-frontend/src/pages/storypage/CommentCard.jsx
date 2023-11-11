@@ -17,17 +17,13 @@ const CommentCard = ({ comment, user, deleteComment }) => {
           commentId: comment.id
         }
       })
-
       console.log(data)
       deleteComment(comment.id)
       addNotification('Comment deleted successfully!', 3000, 'success')
-
     } catch (error) {
       console.error('There was an error deleting the comment:', error)
       addNotification(error.message, 3000, 'error')
     }
-
-
   }
 
 
@@ -47,17 +43,32 @@ const CommentCard = ({ comment, user, deleteComment }) => {
             <Card.Text>{comment.content}</Card.Text>
           </Col>
           <Col xs={1} md={1} className="d-flex align-items-start justify-content-end">
-            {user && user.id === comment.user.id && (
-              <Popconfirm
-                title='Delete comment'
-                description='Are you sure you want to delete this comment'
-                onConfirm={confirm}
-                okText='Yes'
-                cancelText='No'
-              >
-                <Button variant='danger'>Delete</Button>
-              </Popconfirm>
+            {user && (
+              <>
+                {user.id === comment.user.id && (
+                  <Popconfirm
+                    title="Delete your comment?"
+                    description="Are you sure you want to delete your comment?"
+                    onConfirm={confirm}
+                    okText="Yes"
+                    cancelText="No"
+                  >
+                    <Button variant="danger">Delete</Button>
+                  </Popconfirm>
+                )}
 
+                {user.has_superpowers && (
+                  <Popconfirm
+                    title="Admin Delete"
+                    description="Are you sure you want to delete this user's comment as an admin?"
+                    onConfirm={confirm}
+                    okText="Yes"
+                    cancelText="No"
+                  >
+                    <Button variant="warning">Admin Delete</Button>
+                  </Popconfirm>
+                )}
+              </>
             )}
           </Col>
         </Row>

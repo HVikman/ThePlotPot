@@ -13,9 +13,6 @@
 #### Collaborative Writing:
 * After an initial chapter is posted, users can suggest continuations for a set number of branches by writing a next chapter (e.g., two or three).
 * For each chapter, the system should show a branching option, allowing users to either continue Branch 1 or Branch 2.
-#### Voting and Selection:
-* Users can upvote their preferred continuation for each branch.
-* After a certain time period (e.g., 48 hours), the continuation with the most votes for each branch becomes official. Other contributions are archived as alternative paths.
 #### Story Viewing:
 * Stories can be read linearly.
 * At the end of each chapter, readers are presented with options to explore each branch.
