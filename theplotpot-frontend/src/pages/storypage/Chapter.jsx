@@ -122,20 +122,29 @@ const Chapter = ({ chapter, childChapters, onNavigate, onAddChapter, onGoBack, i
             <span>Likes:</span>
           )
         }
+        {user ? user.has_superpowers && <Popconfirm
+          title={chapter.branch === 0 ?'Delete story' : 'Delete chapter'}
+          description={chapter.branch === 0 ? 'Are you sure you want to delete this story': 'Are you sure you want to delete this chapter'}
+          onConfirm={handleDelete}
+          okText='Yes'
+          cancelText='No'
+        >
+          <Button variant='danger'>Admin delete</Button>
+        </Popconfirm> : <></>}
         <span>{chapter.votes_count}</span>
       </div>
       <div className="next-chapters m-2">
         {!isLoading && isAuthenticated && childChapters.length < 3 && chapter.branch < 9 && (
-          <Button variant='secondary' className="mr-3" onClick={() => onAddChapter()}>Add Chapter</Button>
+          <Button variant='secondary' className="mr-3 mt-2" onClick={() => onAddChapter()}>Add Chapter</Button>
         )}
         {childChapters.map(child => (
-          <Button variant='secondary' className="mr-3" key={child.id} onClick={() => onNavigate(child.id)}>
+          <Button variant='secondary' className="mr-3 mt-2" key={child.id} onClick={() => onNavigate(child.id)}>
             Continue to: {child.title}
           </Button>
         ))}
 
       </div>
-      <Comments comments={chapter.comments} chapterId={chapter.id}/>
+      <Comments key={chapter.id} comments={chapter.comments} chapterId={chapter.id}/>
 
 
     </div>

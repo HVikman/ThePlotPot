@@ -31,24 +31,31 @@ const AddCommentForm = ({ chapterId, addNewComment }) => {
         console.log('Bot detected')
         return
       }
+      // eslint-disable-next-line no-undef
+      grecaptcha.ready(async () => {
+        // eslint-disable-next-line no-undef
+        const token = await grecaptcha.execute('6LfY0fooAAAAAKaljIbo723ZiMGApMCVg6ZU805o', { action: 'submit' })
 
-      try {
-        const { data } = await addComment({
-          variables: {
-            Input: {
-              content: values.content,
-              chapterId,
+
+        try {
+
+          const { data } = await addComment({
+            variables: {
+              Input: {
+                content: values.content,
+                chapterId
+              },
+              token: token
             }
-          }
-        })
+          })
 
-        addNewComment(data.addComment)
-        addNotification('Comment added successfully!', 3000, 'success')
-        formik.resetForm()
-      } catch (error) {
-        console.error('There was an error adding the comment:', error)
-        addNotification(error.message, 3000, 'error')
-      }
+          addNewComment(data.addComment)
+          addNotification('Comment added successfully!', 3000, 'success')
+          formik.resetForm()
+        } catch (error) {
+          console.error('There was an error adding the comment:', error)
+          addNotification(error.message, 3000, 'error')
+        }})
     },
   })
 
@@ -72,9 +79,7 @@ const AddCommentForm = ({ chapterId, addNewComment }) => {
           </Form.Control.Feedback>
         </Form.Group>
 
-        <div style={{ display: 'none' }}>
-          <Form.Control name="honeypot" onChange={formik.handleChange} value={formik.values.honeypot} />
-        </div>
+        <Form.Control style={{ display: 'none' }} name="honeypot" onChange={formik.handleChange} value={formik.values.honeypot} />
 
         <Button variant="secondary" type="submit">Submit</Button>
       </Form>

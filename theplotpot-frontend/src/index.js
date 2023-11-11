@@ -4,7 +4,6 @@ import App from './App'
 import { ApolloProvider, ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { AuthProvider } from './pages/auth/AuthContext'
 import { NotificationsProvider } from './components/NotificationsContext'
-import 'bootstrap/dist/css/bootstrap.min.css'
 
 
 const httpLink = new HttpLink({

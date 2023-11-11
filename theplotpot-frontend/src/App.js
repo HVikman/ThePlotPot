@@ -20,6 +20,7 @@ const AddChapter = lazy(() => import('./pages/newstory/AddChapter'))
 const StoriesPage = lazy(() => import('./pages/stories/StoriesPage'))
 const UserSettings = lazy(() => import('./pages/users/UserSettings'))
 const CookieConsentPopup = lazy(() => import('./components/CookieConsentPopup'))
+const ActivateAccount = lazy(() => import('./pages/auth/ActivateAccount'))
 
 
 const App = () => {
@@ -53,6 +54,7 @@ const App = () => {
               <Route path="/add-chapter" element={<AddChapter />} />
               <Route path="/usersettings" element={<UserSettings />} />
               <Route path="/stories" element={<StoriesPage />} />
+              <Route path="/activate" element={<ActivateAccount />} />
             </Routes>
           </Suspense>
         </div>

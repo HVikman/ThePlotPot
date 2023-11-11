@@ -39,9 +39,14 @@ const Login = () => {
     initialValues: {
       email: '',
       password: '',
+      honeypot: ''
     },
     validationSchema: LoginSchema,
     onSubmit: async (values) => {
+      if (values.honeypot) {
+        console.log('Bot detected')
+        return
+      }
       login({ variables: values })
     },
   })
@@ -80,7 +85,7 @@ const Login = () => {
             {formik.errors.password}
           </Form.Control.Feedback>
         </Form.Group>
-
+        <Form.Control style={{ display: 'none' }} name="honeypot" onChange={formik.handleChange} value={formik.values.honeypot} />
         <Button variant="secondary" className='mt-2' type="submit">
           Login
         </Button>

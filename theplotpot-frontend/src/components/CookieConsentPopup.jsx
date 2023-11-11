@@ -6,9 +6,11 @@ const PrivacyPolicyModal = lazy(() => import('./PrivacyPolicy'))
 const CookieConsentPopup = ({ onConsent }) => {
   return (
     <div className="popup">
-      <p>We use cookies to ensure the functionality of our website and to maintain your session. <Suspense fallback={<div>Loading...</div>}>
-  Learn more in our <PrivacyPolicyModal />.
-      </Suspense>.</p>
+      <div>
+        <span>We use cookies to ensure the functionality of our website, to maintain your session and to enhance website security. This includes the use of Google reCAPTCHA for spam prevention, which may use cookies and other data for its operation.
+  Learn more in our </span> <Suspense fallback={<div>Loading...</div>}> <PrivacyPolicyModal />
+        </Suspense>
+      </div>
       <Button variant='secondary' onClick={onConsent}>Okay</Button>
     </div>
   )

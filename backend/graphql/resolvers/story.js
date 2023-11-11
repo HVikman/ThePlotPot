@@ -4,19 +4,16 @@ const Hashids = require('hashids/cjs')
 const hashids = new Hashids(process.env.IDSECRET, 20)
 const sanitizeHtml = require('sanitize-html')
 const { detectSpam } = require('../../utils/detectspam')
-
+const checkCaptcha  = require('../../utils/captcha')
 
 const StoryResolvers = {
   Query: {
     // Fetch a single story
     getStory: async (_, { id, chapterId }, context) => {
-      const original = hashids.decode(context.req.session.user)
-      const userId = original[0]
-
       const story = await queryDB('SELECT * FROM stories WHERE id = ? AND deleted_at IS NULL', [id], true)
 
       if (!story) {
-        // TODO: handle story not found
+        throw new Error('Story not found')
       }
 
       let chapter
@@ -36,10 +33,22 @@ const StoryResolvers = {
         const comments = await queryDB('SELECT * FROM comments WHERE chapterId = ? AND deletedAt IS NULL', [chapter.id])
         chapter.comments = comments
 
-        await queryDB(
-          'INSERT INTO chapter_reads (chapterId, userId, viewedAt) VALUES (?, ?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE viewedAt = CURRENT_TIMESTAMP',
-          [chapter.id, userId]
-        )
+        let IDorIP
+
+        if (context.req.session && context.req.session.user) {
+          // Decode the user ID from the session
+          const original = hashids.decode(context.req.session.user)
+          IDorIP = original[0].toString() // Convert User ID to a string
+          console.log('Logged in user ID:', IDorIP)
+        } else {
+          // User is not logged in, use their IP address
+          IDorIP = context.req.ip
+          console.log('Unauthenticated user IP:', IDorIP)
+        }
+        // Insert row to chapter_reads to add a read count
+        if(IDorIP){
+          const query = 'INSERT INTO chapter_reads (chapterId, IDorIP, viewedAt)VALUES (?, ?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE viewedAt = CURRENT_TIMESTAMP'
+          await queryDB(query, [chapter.id, IDorIP])}
       }
 
       return {
@@ -55,36 +64,34 @@ const StoryResolvers = {
   },
   Mutation: {
     // Create a new story and its first chapter
-    createStory: (_, { input }, context) => {
+    createStory: async (_, { input, token }, context) => {
+      const original = hashids.decode(context.req.session.user)
+      const userId = original[0]
+      if (!userId) {
+        throw new Error('You must be logged in to create stories.')
+      }
+
+      //Check captcha
+      const bot = await checkCaptcha(token)
+      if (bot) {
+        throw new Error('Captcha failed')
+      }
+      console.log(token)
+      const { title, description, genre, firstChapterContent } = input
+
+      //Sanitize content
+      const sanitizedContent = sanitizeHtml(firstChapterContent)
+
+      //Check for spam and throw error if spam
+      const isTitleSpam = await detectSpam(context, firstChapterContent, 'forum-post')
+      const isContentSpam = await detectSpam(context, title, 'forum-post', true)
+      const isDescriptionSpam = await detectSpam(context, description, 'forum-post')
+
+      if(isTitleSpam || isContentSpam || isDescriptionSpam) {
+        throw new Error('Spam detected')
+      }
+
       return new Promise((resolve, reject) => {
-        // Get user from session and decode id
-        const original = hashids.decode(context.req.session.user)
-        const userId = original[0]
-
-        // Check if user is logged in
-        if (!userId) {
-          throw new Error('You must be logged in to create stories.')
-        }
-
-        const { title, description, genre, firstChapterContent } = input
-        //Sanitize content
-        const sanitizedContent = sanitizeHtml(firstChapterContent)
-
-        if (detectSpam(sanitizedContent, true)) {
-          throw new Error('Spam detected in content')
-        }
-        if (detectSpam(title)) {
-          throw new Error('Spam detected in title')
-        }
-        if (detectSpam(description)) {
-          throw new Error('Spam detected in description')
-        }
-        if (detectSpam(genre)) {
-          throw new Error('Spam detected in genre')
-        }
-
-
-
         // Obtain a connection from the pool
         db.getConnection((connError, connection) => {
           if (connError) {

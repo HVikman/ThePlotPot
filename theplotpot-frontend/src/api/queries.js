@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client'
 
 const SIGNUP_MUTATION = gql`
-mutation Mutation($username: String!, $email: String!, $password: String!) {
-    createUser(username: $username, email: $email, password: $password) {
+mutation Mutation($username: String!, $email: String!, $password: String! $token: String!) {
+    createUser(username: $username, email: $email, password: $password, token: $token) {
       message
       success
       user {
@@ -24,6 +24,7 @@ const LOGIN_MUTATION = gql`
           username
           email
           coffee
+          has_superpowers
         }
       }
   }
@@ -44,19 +45,20 @@ query Me {
       username
       email
       coffee
+      has_superpowers
   }
 }
 
 `
 const CREATE_STORY = gql`
-  mutation CreateStory($title: String!, $description: String!, $genre: String!, $firstChapterContent: String!) {
+  mutation CreateStory($title: String!, $description: String!, $genre: String!, $firstChapterContent: String!, $token: String!) {
     createStory(
       input: {
         title: $title, 
         description: $description, 
         genre: $genre, 
         firstChapterContent: $firstChapterContent
-      }
+      }, token: $token
     ) {
       success
       message
@@ -133,8 +135,8 @@ query GetStory($id: ID!, $chapterId: ID) {
 }
 `
 const CREATE_CHAPTER = gql`
-mutation CreateChapter($content: String!, $storyId: ID!, $title: String!, $branch: Int!, $parentChapterId: ID!) {
-  createChapter(content: $content, storyId: $storyId, title: $title, branch: $branch, parentChapterId: $parentChapterId) {
+mutation CreateChapter($content: String!, $storyId: ID!, $title: String!, $branch: Int!, $parentChapterId: ID!, $token: String!) {
+  createChapter(content: $content, storyId: $storyId, title: $title, branch: $branch, parentChapterId: $parentChapterId, token: $token) {
     branch
     content
     id
@@ -315,8 +317,8 @@ query GetUserProfile($getUserProfileId: ID!) {
 }
 `
 const ADD_COMMENT_MUTATION = gql`
-  mutation AddComment($Input: CommentInput!) {
-    addComment(input: $Input) {
+  mutation AddComment($Input: CommentInput!, $token: String!) {
+    addComment(input: $Input, token: $token) {
       content
       id
       user {

@@ -21,7 +21,7 @@ const Signup = () => {
   const [signup] = useMutation(SIGNUP_MUTATION, {
     update: (cache, { data }) => {
       if (data.createUser.success) {
-        addNotification(`Signup successful: ${data.login.user.username}`)
+        addNotification(`Signup successful: ${data.createUser.user.username}`)
         setUser(data.createUser.user)
         navigate('/')
       } else {
@@ -40,10 +40,20 @@ const Signup = () => {
       username: '',
       email: '',
       password: '',
+      honeypot: ''
     },
     validationSchema: SignupSchema,
     onSubmit: async (values) => {
-      signup({ variables: values })
+      if (values.honeypot) {
+        console.log('Bot detected')
+        return
+      }
+      // eslint-disable-next-line no-undef
+      grecaptcha.ready(async () => {
+        // eslint-disable-next-line no-undef
+        const token = await grecaptcha.execute('6LfY0fooAAAAAKaljIbo723ZiMGApMCVg6ZU805o', { action: 'submit' })
+        signup({ variables: { ...values, token } })
+      })
     },
   })
   if(isAuthenticated){navigate('/'); return <p>You are already logged in.</p>}
@@ -108,7 +118,7 @@ const Signup = () => {
             </Form.Control.Feedback>
           </InputGroup>
         </Form.Group>
-
+        <Form.Control style={{ display: 'none' }} name="honeypot" onChange={formik.handleChange} value={formik.values.honeypot} />
         <Button variant="secondary" className='mt-2' type="submit">
         Signup
         </Button>

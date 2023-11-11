@@ -4,11 +4,19 @@ const session = require('express-session')
 const SQLiteStore = require('connect-sqlite3')(session)
 const path = require('path')
 const cors = require('cors')
+const rateLimit = require('express-rate-limit')
 
 
 const app = express()
 const dotenv = require('dotenv')
 dotenv.config()
+
+const limiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 200, // limit each IP to 200 requests per windowMs
+})
+
+app.use(limiter)
 
 const scheduleChapterCountsUpdate = require('./db/batchJobs')
 scheduleChapterCountsUpdate()
@@ -21,7 +29,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     domain: process.env.DOMAIN,
-    sameSite: 'lax',
+    sameSite: 'strict',
     secure: process.env.NODE_ENV === 'production',
     maxAge: 7 * 24 * 60 * 60 * 1000
   }

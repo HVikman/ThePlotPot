@@ -63,17 +63,23 @@ const StoryForm = () => {
         console.log('Bot detected')
         return
       }
-      createStory({
-        variables: {
-          title: values.title,
-          description: values.description,
-          genre: values.genre,
-          firstChapterContent: values.content
-        }
-      }).catch(error => {
-        console.error('There was an error creating the chapter:', error)
-        addNotification(error.message, 3000, 'error')
-      })
+      // eslint-disable-next-line no-undef
+      grecaptcha.ready(async () => {
+        // eslint-disable-next-line no-undef
+        const token = await grecaptcha.execute('6LfY0fooAAAAAKaljIbo723ZiMGApMCVg6ZU805o', { action: 'submit' })
+
+        createStory({
+          variables: {
+            title: values.title,
+            description: values.description,
+            genre: values.genre,
+            firstChapterContent: values.content,
+            token
+          }
+        }).catch(error => {
+          console.error('There was an error creating the chapter:', error)
+          addNotification(error.message, 3000, 'error')
+        })})
     },
   })
 
@@ -113,6 +119,15 @@ const StoryForm = () => {
               onBlur={formik.handleBlur}
               value={formik.values.description}
               rows={4}
+            />
+          </Form.Item>
+          <Form.Item style={{ display: 'none' }}>
+            <Input
+              type="text"
+              name="honeypot"
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              value={formik.values.honeypot}
             />
           </Form.Item>
           <Form.Item label="Genre" help={formik.touched.genre && formik.errors.genre}>
