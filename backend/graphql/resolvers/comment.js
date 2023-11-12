@@ -4,7 +4,7 @@ const hashids = new Hashids(process.env.IDSECRET, 20)
 const queryDB = require('../../db/query')
 const { detectSpam } = require('../../utils/detectspam')
 const crypto = require('crypto')
-const checkCaptcha = require('../../utils/captcha')
+const checkCaptcha = require('../../utils/captcha.js')
 
 const CommentResolvers = {
   Mutation: {

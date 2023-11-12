@@ -3,7 +3,7 @@ const queryDB = require('../../db/query')
 const Hashids = require('hashids/cjs')
 const hashids = new Hashids(process.env.IDSECRET, 20)
 const crypto = require('crypto')
-const checkCaptcha = require('../../utils/captcha')
+const checkCaptcha = require('../../utils/captcha.js')
 
 const UserResolvers = {
   // Queries

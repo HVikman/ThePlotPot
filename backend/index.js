@@ -34,6 +34,9 @@ app.use(session({
     maxAge: 7 * 24 * 60 * 60 * 1000
   }
 }))
+app.get('/health', (req, res) => {
+  res.status(200).send('OK')
+})
 app.use(express.static('dist'))
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'))
