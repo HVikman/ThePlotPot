@@ -4,7 +4,7 @@ const Hashids = require('hashids/cjs')
 const hashids = new Hashids(process.env.IDSECRET, 20)
 const sanitizeHtml = require('sanitize-html')
 const { detectSpam } = require('../../utils/detectspam')
-const checkCaptcha  = require('../../utils/captcha')
+const checkCaptcha  = require('../../utils/captcha.js')
 
 const StoryResolvers = {
   Query: {

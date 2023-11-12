@@ -3,7 +3,7 @@ const hashids = new Hashids(process.env.IDSECRET, 20)
 const sanitizeHtml = require('sanitize-html')
 const queryDB = require('../../db/query')
 const { detectSpam } = require('../../utils/detectspam')
-const checkCaptcha = require('../../utils/captcha')
+const checkCaptcha = require('../../utils/captcha.js')
 
 const ChapterResolvers = {
   Query: {
