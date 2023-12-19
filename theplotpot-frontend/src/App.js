@@ -10,6 +10,7 @@ import Footer from './components/Footer'
 import Notification from './components/Notification'
 import UserPage from './pages/users/UserPage'
 import './App.css'
+import InfoModal from './components/InfoModal'
 
 const Home = lazy(() => import('./pages/home/Home'))
 const Login = lazy(() => import('./pages/auth/Login'))
@@ -21,10 +22,13 @@ const StoriesPage = lazy(() => import('./pages/stories/StoriesPage'))
 const UserSettings = lazy(() => import('./pages/users/UserSettings'))
 const CookieConsentPopup = lazy(() => import('./components/CookieConsentPopup'))
 const ActivateAccount = lazy(() => import('./pages/auth/ActivateAccount'))
+const ProtectedRoute = lazy(() => import('./pages/admin/ProtectedRoute'))
+const UserList = lazy(() => import('./pages/admin/UserList'))
 
 
 const App = () => {
   const [showCookiePopup, setShowCookiePopup] = useState(false)
+  const [showInfo, setShowInfo] = useState(false)
   useEffect(() => {
     if (!Cookies.get('cookieConsent')) {
       setShowCookiePopup(true)
@@ -33,6 +37,9 @@ const App = () => {
   const handleConsent = () => {
     Cookies.set('cookieConsent', 'true', { expires: 365 })
     setShowCookiePopup(false)
+    setTimeout(() => {
+      setShowInfo(true)
+    }, 5000)
   }
 
 
@@ -55,6 +62,14 @@ const App = () => {
               <Route path="/usersettings" element={<UserSettings />} />
               <Route path="/stories" element={<StoriesPage />} />
               <Route path="/activate" element={<ActivateAccount />} />
+              <Route
+                path="/admin/users"
+                element={
+                  <ProtectedRoute>
+                    <UserList />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </Suspense>
         </div>
@@ -65,6 +80,7 @@ const App = () => {
           <CookieConsentPopup onConsent={handleConsent} />
         </Suspense>
       )}
+      {showInfo && <InfoModal />}
       <Footer></Footer>
     </div>
 

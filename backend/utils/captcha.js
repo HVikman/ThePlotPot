@@ -13,7 +13,9 @@ const checkCaptcha = async (token) => {
   console.log(data)
 
   if (!data.success || data.score < 0.5) {
-    return true
+    const error = new Error('Captcha verification failed')
+    error.isUserError = true
+    throw error
   }
 
   return false

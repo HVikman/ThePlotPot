@@ -5,6 +5,7 @@ const hashids = new Hashids(process.env.IDSECRET, 20)
 const sanitizeHtml = require('sanitize-html')
 const { detectSpam } = require('../../utils/detectspam')
 const checkCaptcha  = require('../../utils/captcha.js')
+const { checkLoggedIn, createUserError } = require('../../utils/tools.js')
 
 const StoryResolvers = {
   Query: {
@@ -13,7 +14,7 @@ const StoryResolvers = {
       const story = await queryDB('SELECT * FROM stories WHERE id = ? AND deleted_at IS NULL', [id], true)
 
       if (!story) {
-        throw new Error('Story not found')
+        createUserError('Story not found')
       }
 
       let chapter
@@ -21,7 +22,7 @@ const StoryResolvers = {
         // Fetch chapter based on provided chapter id
         chapter = await queryDB('SELECT * FROM chapters WHERE id=? AND deleted_at IS NULL', [chapterId], true)
         if (!chapter) {
-          // TODO: handle chapter not found
+          createUserError('Chapter not found')
         }
       } else {
         // Fetch first chapter (branch = 0)
@@ -37,8 +38,8 @@ const StoryResolvers = {
 
         if (context.req.session && context.req.session.user) {
           // Decode the user ID from the session
-          const original = hashids.decode(context.req.session.user)
-          IDorIP = original[0].toString() // Convert User ID to a string
+          const userId = await checkLoggedIn(context)
+          IDorIP = userId.toString() // Convert User ID to a string
           console.log('Logged in user ID:', IDorIP)
         } else {
           // User is not logged in, use their IP address
@@ -65,31 +66,21 @@ const StoryResolvers = {
   Mutation: {
     // Create a new story and its first chapter
     createStory: async (_, { input, token }, context) => {
-      const original = hashids.decode(context.req.session.user)
-      const userId = original[0]
-      if (!userId) {
-        throw new Error('You must be logged in to create stories.')
-      }
+      const userId = await checkLoggedIn(context)
 
       //Check captcha
-      const bot = await checkCaptcha(token)
-      if (bot) {
-        throw new Error('Captcha failed')
-      }
-      console.log(token)
+      await checkCaptcha(token)
+
+
       const { title, description, genre, firstChapterContent } = input
 
       //Sanitize content
       const sanitizedContent = sanitizeHtml(firstChapterContent)
 
       //Check for spam and throw error if spam
-      const isTitleSpam = await detectSpam(context, firstChapterContent, 'forum-post')
-      const isContentSpam = await detectSpam(context, title, 'forum-post', true)
-      const isDescriptionSpam = await detectSpam(context, description, 'forum-post')
-
-      if(isTitleSpam || isContentSpam || isDescriptionSpam) {
-        throw new Error('Spam detected')
-      }
+      await detectSpam(context, firstChapterContent, 'forum-post')
+      await detectSpam(context, title, 'forum-post', true)
+      await detectSpam(context, description, 'forum-post')
 
       return new Promise((resolve, reject) => {
         // Obtain a connection from the pool
@@ -152,18 +143,14 @@ const StoryResolvers = {
     },
     // Softdelete a story and its root chapter
     deleteStory: async(_, { id }, context) => {
-      // Get user from session and decode id
-      const original = hashids.decode(context.req.session.user)
-      const userId = original[0]
-
-      // Check if user is logged in
-      if (!userId) {
-        throw new Error('You must be logged in to delete stories.')
-      }
+      const userId = await checkLoggedIn(context)
 
       // Count the number of chapters associated with the story
       const chapterCountResult = await queryDB('SELECT COUNT(*) as count FROM chapters WHERE storyId = ? AND deleted_at IS NULL', [id], true)
       const chapterCount = chapterCountResult.count
+
+      const story = await queryDB('SELECT * FROM stories WHERE storyId = ?', [id], true)
+      if (userId !== story.authorId && !context.req.session.admin) createUserError('This is someone else\'s story')
 
       // Don't delete the story if there are more than one chapters
       if (chapterCount > 1) {
