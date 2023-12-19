@@ -25,7 +25,11 @@ const detectSpam = async (context, content, type, isHtml=false) => {
   }
   try {
     const isSpam = await client.checkSpam(comment)
-    return isSpam
+    if(isSpam){
+      const error = new Error('Spam detected')
+      error.isUserError = true
+      throw error
+    }
   } catch (err) {
     console.error('Error:', err.message)
     throw new Error('Unable to check for spam at this time.')

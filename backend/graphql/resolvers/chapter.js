@@ -1,9 +1,11 @@
-const Hashids = require('hashids/cjs')
-const hashids = new Hashids(process.env.IDSECRET, 20)
 const sanitizeHtml = require('sanitize-html')
 const queryDB = require('../../db/query')
 const { detectSpam } = require('../../utils/detectspam')
 const checkCaptcha = require('../../utils/captcha.js')
+const { checkLoggedIn, createUserError } = require('../../utils/tools.js')
+
+const Hashids = require('hashids/cjs')
+const hashids = new Hashids(process.env.IDSECRET, 20)
 
 const ChapterResolvers = {
   Query: {
@@ -12,7 +14,7 @@ const ChapterResolvers = {
       // Fetch chapter
       const chapterQuery = 'SELECT * FROM chapters WHERE id = ? AND deleted_at IS NULL'
       const chapter = await queryDB(chapterQuery, [id], true)
-
+      if(!chapter) createUserError('Chapter not found')
       // Fetch comments for the chapter
       const commentQuery = 'SELECT * FROM comments WHERE chapterId = ? AND deletedAt IS NULL'
       const comments = await queryDB(commentQuery, [id])
@@ -25,9 +27,8 @@ const ChapterResolvers = {
       let IDorIP
 
       if (context.req.session && context.req.session.user) {
-        // Decode the user ID from the session
-        const original = hashids.decode(context.req.session.user)
-        IDorIP = original[0].toString() // Convert User ID to a string
+        const userId = await checkLoggedIn(context)
+        IDorIP = userId.toString() // Convert User ID to a string
         console.log('Logged in user ID:', IDorIP)
       } else {
         // User is not logged in, use their IP address
@@ -54,8 +55,7 @@ const ChapterResolvers = {
     },
     async isChapterLiked(_, { id }, context) {
       // Get user from session and decode id
-      const original = hashids.decode(context.req.session.user)
-      const userId = original[0]
+      const userId = await checkLoggedIn(context)
       const result = await queryDB('SELECT COUNT(*) as count FROM votes WHERE chapterId = ? AND userId = ? ', [id, userId], true)
       if (result.count === 1){return true} else {return false}
 
@@ -65,38 +65,27 @@ const ChapterResolvers = {
     // Create a new chapter
     createChapter: async (_, { title, content, storyId, branch, parentChapterId, token }, context) => {
       // Get user from session and decode id
-      const original = hashids.decode(context.req.session.user)
-      const userId = original[0]
-
-      // Validation: User must be logged in
-      if (!userId) throw new Error('You must be logged in to create chapters.')
+      const userId = await checkLoggedIn(context)
 
       // Check captcha
-      const bot = await checkCaptcha(token)
-      if (bot) {
-        throw new Error('Captcha failed')
-      }
+      await checkCaptcha(token)
 
       // Validation: Only 10 branches allowed(counting from 0)
       // This limits story length, at 10 branches story max size is around 29600 chapters
-      if (branch >= 9) throw new Error('Stories can only go 10 branches deep for now')
+      if (branch >= 9) createUserError('Stories can only go 10 branches deep for now')
 
       // Check parent's child count
       // Only 3 chapters per parent allowed
       const countQuery = 'SELECT COUNT(*) as count FROM chapters WHERE storyId = ? AND parentChapterId = ? AND deleted_at IS NULL'
       const countResult = await queryDB(countQuery, [storyId, parentChapterId], true)
 
-      if (countResult.count >= 3) throw new Error('You can only have a maximum of 3 next chapters for chapter.')
+      if (countResult.count >= 3) createUserError('You can only have a maximum of 3 next chapters for chapter.')
 
       // Sanitize content before insertion
       const sanitizedContent = sanitizeHtml(content)
 
-      const isTitleSpam = await detectSpam(context, content, 'forum-post')
-      const isContentSpam = await detectSpam(context, title, 'forum-post', true)
-
-      if(isTitleSpam || isContentSpam){
-        throw new Error('Spam detected')
-      }
+      await detectSpam(context, content, 'forum-post')
+      await detectSpam(context, title, 'forum-post', true)
 
       // Insert the new chapter into the database
       const insertQuery = 'INSERT INTO chapters (title, content, storyId, branch, parentChapterId, authorId) VALUES (?, ?, ?, ?, ?, ?)'
@@ -116,11 +105,7 @@ const ChapterResolvers = {
     // Soft-delete a chapter
     deleteChapter: async (_, { id }, context) => {
       // Get user from session and decode id
-      const original = hashids.decode(context.req.session.user)
-      const userId = original[0]
-
-      // Validation: User must be logged in
-      if (!userId) throw new Error('You must be logged in to delete chapters.')
+      const userId = await checkLoggedIn(context)
 
       // Fetch chapter details
       const query = 'SELECT * FROM chapters WHERE id = ? AND deleted_at IS NULL'
@@ -134,7 +119,7 @@ const ChapterResolvers = {
       const countResult = await queryDB(countQuery, [id], true)
 
       // Validation: Chapter should not have children
-      if (countResult.count > 0) throw new Error('You can\'t delete a chapter that has children')
+      if (countResult.count > 0) createUserError('You can\'t delete a chapter that has children')
 
       // Mark as deleted
       const deleteQuery = 'UPDATE chapters SET deleted_at = NOW() WHERE id = ?'
@@ -149,8 +134,7 @@ const ChapterResolvers = {
     },
     async likeChapter(_, { id }, context) {
       // Get user from session and decode id
-      const original = hashids.decode(context.req.session.user)
-      const userId = original[0]
+      const userId = await checkLoggedIn(context)
       console.log(id)
       try {
         // Insert a new record into the votes table.
@@ -162,8 +146,7 @@ const ChapterResolvers = {
     },
     async unlikeChapter(_, { id }, context) {
       // Get user from session and decode id
-      const original = hashids.decode(context.req.session.user)
-      const userId = original[0]
+      const userId = await checkLoggedIn(context)
       try {
         // Remove the record from the votes table.
         await queryDB('DELETE FROM votes WHERE chapterId = ? AND userId = ?', [id, userId])

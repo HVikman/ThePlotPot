@@ -6,7 +6,6 @@ const path = require('path')
 const cors = require('cors')
 const rateLimit = require('express-rate-limit')
 
-
 const app = express()
 const dotenv = require('dotenv')
 dotenv.config()
@@ -20,6 +19,7 @@ app.use(limiter)
 
 const scheduleChapterCountsUpdate = require('./db/batchJobs')
 scheduleChapterCountsUpdate()
+
 app.set('trust proxy', 1)
 app.use(session({
   store: new SQLiteStore(),
@@ -55,7 +55,17 @@ const server = new ApolloServer({
   persistedQueries: false,
   typeDefs,
   resolvers,
-  context: ({ req, res }) => {
+  formatError: (error) => {
+    console.error(error)
+    const isUserError = error.originalError && error.originalError.isUserError
+    if (process.env.NODE_ENV !== 'development' && !isUserError) {
+      //Hide the message for internal errors
+      return new Error('Internal server error')
+    }
+    return error
+  }
+  ,
+  context: async ({ req, res }) => {
     return {
       req,
       res,

@@ -8,6 +8,7 @@ import { useAuth } from './AuthContext'
 import { Form, Button, Container, Alert, InputGroup } from 'react-bootstrap'
 import { useNotifications } from '../../components/NotificationsContext'
 import { PersonFill, KeyFill } from 'react-bootstrap-icons'
+import { Link } from 'react-router-dom'
 
 const SignupSchema = Yup.object().shape({
   username: Yup.string().min(3, 'Username must be at least 3 characters').required('Username is required'),
@@ -124,6 +125,9 @@ const Signup = () => {
         </Button>
       </Form>
       {signupError && <Alert variant="danger" className="mt-3">{signupError}</Alert>}
+      <div className="mt-3">
+        Already registered? <Link to="/login">Log in here</Link>
+      </div>
     </Container>
   )
 }

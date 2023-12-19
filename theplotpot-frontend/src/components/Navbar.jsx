@@ -40,6 +40,9 @@ const Navigation = () => {
           <Nav.Link as={Link} to="/">Home</Nav.Link>
           <Nav.Link as={Link} to="/stories">All Stories</Nav.Link>
           {isAuthenticated && <Nav.Link as={Link} to="/story">Create a new story</Nav.Link>}
+          {user && user.has_superpowers && (
+            <Nav.Link as={Link} to="/admin/users">Manage Users</Nav.Link>
+          )}
         </Nav>
 
         <Nav className="d-none d-lg-flex">  {/* Hide on small, show on large screens */}

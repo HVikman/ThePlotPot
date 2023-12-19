@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from './AuthContext'
 import { Form, Button, Container, Alert } from 'react-bootstrap'
 import { useNotifications } from '../../components/NotificationsContext'
+import { Link } from 'react-router-dom'
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email('Invalid email').required('Email is required'),
@@ -26,11 +27,12 @@ const Login = () => {
         addNotification(`Welcome back ${data.login.user.username}`)
         navigate('/')
       } else {
-        setLoginError('Wrong username/password.')
+        console.log(data.login)
+        setLoginError(data.login.message)
       }
     },
     onError: (error) => {
-      addNotification(`Something went wrong: ${error}`,2000,'error')
+      addNotification(`Something went wrong: ${error.message}`,2000,'error')
     },
   })
 
@@ -91,6 +93,9 @@ const Login = () => {
         </Button>
       </Form>
       {loginError && <Alert variant="danger" className="mt-3">{loginError}</Alert>}
+      <div className="mt-3">
+        No account yet? <Link to="/signup">Sign up here</Link>
+      </div>
     </Container>
   )
 }
