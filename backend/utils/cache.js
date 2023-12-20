@@ -2,33 +2,41 @@ const queryDB = require('../db/query')
 const Hashids = require('hashids/cjs')
 const hashids = new Hashids(process.env.IDSECRET, 20)
 
-let userBannedStatusCache = {}
+const { createClient } = require('redis')
+const redisClient = createClient({
+  socket: {
+    host: process.env.REDIS_HOST,
+    port: 6379
+  },
+  password: process.env.REDIS_PASS
+})
+redisClient.connect()
 
-const getCachedBannedStatus = (userId) => userBannedStatusCache[userId]
-
-const setCachedBannedStatus = (userId, isBanned) => {
-  userBannedStatusCache[userId] = {
-    isBanned,
-    lastChecked: Date.now(),
-  }
+const getCachedBannedStatus = async (userId) => {
+  const data = await redisClient.get(`bannedStatus:${userId}`)
+  return data ? JSON.parse(data) : null
 }
 
+const setCachedBannedStatus = (userId, isBanned) => {
+  const data = JSON.stringify({
+    isBanned,
+    lastChecked: Date.now(),
+  })
+  redisClient.set(`bannedStatus:${userId}`, data, 'PX', 5 * 60 * 1000) // Expires in 5 minutes
+}
 const isCacheStale = (lastChecked) => {
   const staleTime = 5 * 60 * 1000
   return (Date.now() - lastChecked) > staleTime
 }
 
-const clearUserFromCache = (userId) => {
-  delete userBannedStatusCache[userId]
+const clearUserFromCache = async (userId) => {
+  await redisClient.del(`bannedStatus:${userId}`)
 }
 
 const checkBanned = async (userId) => {
   const original = hashids.decode(userId)
   userId = original[0]
-  console.log(original)
-  console.log(userId)
-  console.log(userBannedStatusCache)
-  const cachedStatus = getCachedBannedStatus(userId)
+  const cachedStatus = await getCachedBannedStatus(userId)
 
   if (cachedStatus && !isCacheStale(cachedStatus.lastChecked)) {
     if (cachedStatus.isBanned) {
