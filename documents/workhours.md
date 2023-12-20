@@ -22,5 +22,6 @@
 | 08.11 | 5 | Learning about spam prevention, edited spam detection to use Akismet for detecting spam
 | 09.11 | 6 | Added google recaptcha v3 to detect bots, edited privacy policy and cookie consents to match added features
 | 10.11 | 1 | Improved chapter reads tracking and edited privacy policy
-|18.12| 12 | Added admin funcitonalities, removed some repetitive code, fixed some bugs
-|    | 150     | 
+|18.12| 12 | Added admin funcitonalities, added in memory cache for banned status, removed some repetitive code, fixed some bugs, edited database for some additional features
+|20.12| 6 | Learning about redis, converted banned status cache and session storage to use redis
+|    | 156     | 

@@ -1,7 +1,9 @@
 const express = require('express')
 const { ApolloServer } = require('apollo-server-express')
 const session = require('express-session')
-const SQLiteStore = require('connect-sqlite3')(session)
+const RedisStore = require('connect-redis').default
+const { createClient } = require('redis')
+
 const path = require('path')
 const cors = require('cors')
 const rateLimit = require('express-rate-limit')
@@ -15,6 +17,19 @@ const limiter = rateLimit({
   max: 200, // limit each IP to 200 requests per windowMs
 })
 
+let redisClient = createClient({
+  socket: {
+    host: process.env.REDIS_HOST,
+    port: 6379
+  },
+  password: process.env.REDIS_PASS
+})
+redisClient.connect().catch(console.error)
+
+let redisStore = new RedisStore({
+  client: redisClient
+})
+
 app.use(limiter)
 
 const scheduleChapterCountsUpdate = require('./db/batchJobs')
@@ -22,7 +37,7 @@ scheduleChapterCountsUpdate()
 
 app.set('trust proxy', 1)
 app.use(session({
-  store: new SQLiteStore(),
+  store: redisStore,
   name: 'plotpot_sid',
   secret: process.env.SECRET,
   resave: false,

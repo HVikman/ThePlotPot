@@ -4,10 +4,12 @@ import * as Yup from 'yup'
 import { Form, Button, Container, Alert, Row, Col, Card, InputGroup } from 'react-bootstrap'
 import { useMutation } from '@apollo/client'
 import { EDIT_COFFEE, CHANGE_PASSWORD } from '../../api/queries'
+import { useNotifications } from '../../components/NotificationsContext'
 
 const { Panel } = Collapse
 
 const UserSettings = () => {
+  const { addNotification } = useNotifications()
   const [editCoffee] = useMutation(EDIT_COFFEE)
   const [changePassword] = useMutation(CHANGE_PASSWORD)
 
@@ -32,17 +34,30 @@ const UserSettings = () => {
 
   const handlePasswordChange = async () => {
     const { currentPassword, newPassword } = formik.values
-    await changePassword({
+    try{    await changePassword({
       variables: { oldPassword: currentPassword, newPassword: newPassword },
     })
     formik.setSubmitting(false)
+    addNotification('Password changed.', 3000, 'success')
+    }
+    catch(error) {
+      addNotification(error.message, 3000, 'error')
+      console.error(error)
+    }
+
   }
 
   const handleCoffeeLinkChange = async () => {
-    const fullLink = `https://www.buymeacoffee.com/${formik.values.coffeeName}`
-    console.log(fullLink)
-    await editCoffee({ variables: { link: fullLink } })
-    formik.setSubmitting(false)
+    try {
+      const fullLink = `https://www.buymeacoffee.com/${formik.values.coffeeName}`
+      console.log(fullLink)
+      await editCoffee({ variables: { link: fullLink } })
+      formik.setSubmitting(false)
+      addNotification('Coffee link changed.', 3000, 'success')
+    } catch (error) {
+      addNotification(error.message, 3000, 'error')
+      console.error(error)
+    }
   }
 
 
