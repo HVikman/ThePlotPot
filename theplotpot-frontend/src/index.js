@@ -4,6 +4,7 @@ import App from './App'
 import { ApolloProvider, ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { AuthProvider } from './pages/auth/AuthContext'
 import { NotificationsProvider } from './components/NotificationsContext'
+import { DarkModeProvider } from './components/DarkModeContext'
 import 'bootstrap/dist/css/bootstrap.css'
 
 
@@ -23,7 +24,9 @@ root.render(
     <ApolloProvider client={client}>
       <AuthProvider>
         <NotificationsProvider>
-          <App />
+          <DarkModeProvider>
+            <App />
+          </DarkModeProvider>
         </NotificationsProvider>
       </AuthProvider>
     </ApolloProvider>

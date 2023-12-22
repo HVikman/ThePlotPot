@@ -4,9 +4,11 @@ import { useQuery } from '@apollo/client'
 import { Modal, Button, Container, Row, Col, Card, ListGroup } from 'react-bootstrap'
 import { GET_ALL_STORIES } from '../../api/queries'
 import ErrorComponent from '../../components/Error'
+import { useDarkMode } from '../../components/DarkModeContext'
 
 const StoriesPage = () => {
   const { loading, error, data } = useQuery(GET_ALL_STORIES)
+  const { isDarkMode } = useDarkMode()
   const [filteredStories, setFilteredStories] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [modalData, setModalData] = useState(null)
@@ -54,7 +56,7 @@ const StoriesPage = () => {
               <Button
                 key={index}
                 onClick={() => filterByGenre(genre)}
-                variant={selectedGenre === genre ? 'dark' : 'outline-dark'}
+                variant={isDarkMode ? (selectedGenre === genre ? 'dark' : 'outline-light') : (selectedGenre === genre ? 'dark' : 'outline-dark')}
                 className="m-2">
                 {genre}
               </Button>

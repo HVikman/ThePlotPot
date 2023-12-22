@@ -1,9 +1,9 @@
-import React from 'react'
-import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../pages/auth/AuthContext'
+import NotFoundPage from '../../pages/notfound/NotFoundPage'
 
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth()
-  return user && user.has_superpowers? children : <Navigate to="/" />
+  console.log(children)
+  return user && user.has_superpowers? children : <NotFoundPage />
 }
 export default ProtectedRoute
