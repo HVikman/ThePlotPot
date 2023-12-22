@@ -13,7 +13,8 @@
     text-align: center;
   }
   .carousel-section{
-    width:100%
+    width:100%;
+    overflow: hidden;
   }
   .card-grid-container {
     display: flex;
@@ -24,6 +25,8 @@
   .card-grid-container .card {
     flex: 0 0 calc(33.3333% - 30px); 
     margin: 15px;
+    border-radius: 10px;
+    overflow: hidden;
   }
   
   /* Responsive breakpoint for smaller screens */
@@ -31,5 +34,6 @@
     .card-grid-container .card {
       flex: 0 0 100%;
       margin: 10px 0;
+      overflow: hidden;
     }
   }

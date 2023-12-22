@@ -24,4 +24,5 @@
 | 10.11 | 1 | Improved chapter reads tracking and edited privacy policy
 |18.12| 12 | Added admin funcitonalities, added in memory cache for banned status, removed some repetitive code, fixed some bugs, edited database for some additional features
 |20.12| 6 | Learning about redis, converted banned status cache and session storage to use redis
-|    | 156     | 
+|21.12| 8 | Added seo friendly 404 page, added dark mode, deployed app to render for testing 
+|    | 164     | 

@@ -1,0 +1,9 @@
+.textcontainer{
+    max-width: 600px;
+    margin-top: 50px;
+    padding: 20px;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+  }

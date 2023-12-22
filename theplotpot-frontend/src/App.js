@@ -11,6 +11,7 @@ import Notification from './components/Notification'
 import UserPage from './pages/users/UserPage'
 import './App.css'
 import InfoModal from './components/InfoModal'
+import DarkModeToggle from './components/DarkModeToggle'
 
 const Home = lazy(() => import('./pages/home/Home'))
 const Login = lazy(() => import('./pages/auth/Login'))
@@ -24,6 +25,7 @@ const CookieConsentPopup = lazy(() => import('./components/CookieConsentPopup'))
 const ActivateAccount = lazy(() => import('./pages/auth/ActivateAccount'))
 const ProtectedRoute = lazy(() => import('./pages/admin/ProtectedRoute'))
 const UserList = lazy(() => import('./pages/admin/UserList'))
+const NotFoundPage = lazy(() => import('./pages/notfound/NotFoundPage'))
 
 
 const App = () => {
@@ -70,6 +72,7 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Suspense>
         </div>
@@ -82,6 +85,7 @@ const App = () => {
       )}
       {showInfo && <InfoModal />}
       <Footer></Footer>
+      <DarkModeToggle />
     </div>
 
   )

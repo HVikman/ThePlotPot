@@ -1,2 +1,0 @@
-.home-container{align-items:center;display:flex;flex-direction:column;padding:20px 0}.home-header{margin-bottom:20px}.carousel-heading,.home-header{text-align:center}.carousel-section{width:100%}.card-grid-container{display:flex;flex-wrap:wrap;justify-content:space-around}.card-grid-container .card{flex-basis:calc(33.3333% - 30px);flex-grow:0;flex-shrink:0;margin:15px}@media (max-width:767px){.card-grid-container .card{flex:0 0 100%;margin:10px 0}}
-/*# sourceMappingURL=764.ecb2b0bf.chunk.css.map*/
