@@ -1,0 +1,140 @@
+# ThePlotPot
+
+## Table of Contents
+- [Introduction](#introduction)
+- [Installation](#installation)
+  - [Node.js and npm](#nodejs-and-npm)
+  - [Redis](#redis)
+  - [MySQL](#mysql)
+  - [Setting up MySQL Database](#setting-up-mysql-database)
+  - [Configuring Environtment variables](#configuring-environment-variables)
+  - [Installing Dependencies](#installing-dependencies)
+  - [Running the Application](#running-the-application)
+  - [Integrating Frontend with Backend](#integrating-frontend-with-backend)
+
+## Introduction
+This is the backend for the ThePlotPot project. It is responsible for handling hosting the frontend and commnunication between frontend and database.
+
+## Installation
+
+### Node.js and npm
+Ensure you have Node.js and npm installed on your machine. You can download them from [Node.js official website](https://nodejs.org/).
+
+### Redis
+Install Redis. Follow the instructions on the [official Redis website](https://redis.io/download) for your operating system.
+
+### MySQL
+Install MySQL. You can download MySQL Community Server from [MySQL Downloads](https://dev.mysql.com/downloads/mysql/).
+
+### Setting up MySQL Database
+1. Create a new MySQL user and database for the project:
+
+    ```sql
+    CREATE DATABASE your_database_name;
+    CREATE USER 'your_username'@'localhost' IDENTIFIED BY 'your_password';
+    GRANT ALL PRIVILEGES ON your_database_name.* TO 'your_username'@'localhost';
+    FLUSH PRIVILEGES;
+    ```
+
+   Replace `your_database_name`, `your_username`, and `your_password` with appropriate values.
+
+2. Create necessary tables by running the SQL script provided:
+
+    ```bash
+    mysql -u your_username -p your_database_name < path/to/your/database.sql
+    ```
+
+   Replace `your_username`, `your_database_name`, and `path/to/your/database.sql` with your MySQL credentials and the path to the SQL script.
+
+
+### Configuring Environment Variables
+1. Copy the `.env.example` file:
+    ```bash
+    cp .env.example .env
+    ```
+
+2. Open the `.env` file in a text editor:
+    ```bash
+    code .env
+    ```
+
+3. Replace the placeholder values with your actual configuration details. Edit the following variables:
+   - `DB_HOST`
+   - `DB_PORT`
+   - `DB_USER`
+   - `DB_PASSWORD`
+   - `DB_NAME`
+   - `REDIS_HOST`
+   - `REDIS_PASS`
+   - `REDIS_PORT`
+   - `PORT`
+   - `URL`
+   - `Domain`
+   - `AKISMET_KEY` (replace with your Akismet API key)
+   - `RECAPTCHA_SECRET_KEY` (replace with your Google reCAPTCHA secret key)
+   - `IDSECRET` (generate a strong and unique secret)
+   - `SECRET` (generate a strong and unique secret)
+
+   You can use tools like [RandomKeygen](https://randomkeygen.com/) or your preferred method to generate secure random strings for `IDSECRET` and `SECRET`. Do not use same string for both.
+
+4. Save the `.env` file.
+
+
+### Installing Dependencies
+Run the following command in the project directory to install dependencies:
+
+```bash
+npm install
+```
+
+## Integrating Frontend with Backend
+
+### Configure Google reCAPTCHA
+Replace the google reCaptcha site key with your key in theplotpot-frontend/public/index.html
+
+### Building Frontend
+
+1. Navigate to the frontend directory:
+
+    ```bash
+    cd theplotpot/theplotpot-frontend/
+    ```
+
+
+2. Install frontend dependencies:
+
+    ```bash
+    npm install
+    ```
+
+3. Build the frontend:
+
+    ```bash
+    npm run build
+    ```
+
+   This will generate the necessary build files in the `theplotpot/theplotpot-frontend/build/` directory.
+
+### Integrating with Backend
+
+1. Copy the built frontend files to the backend's `dist` directory:
+
+    ```bash
+    cp -r theplotpot/theplotpot-frontend/build/* theplotpot/backend/dist/
+    ```
+
+   Ensure that the `theplotpot/backend/dist/` directory now contains the built frontend files.
+
+2. Start the backend server:
+
+    ```bash
+    cd theplotpot/backend/
+    npm start
+    ```
+
+   The server will now serve both the backend and the integrated frontend.
+
+Visit url:your_port to access the application, replacing `url` `your_port` with the specified url and port for the backend.
+
+Now, your application should be up and running with the integrated frontend and backend.
+

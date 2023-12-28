@@ -23,10 +23,14 @@
 
 #### Backend
 
-##### Database
+##### Database MySQL
 * users table: Store user data, including login details and profile information.
 * stories table: Store individual stories with reference to its author.
 * chapters table: Storing individual chapters, with references to parent chapters and their respective branches.
+
+##### Cache Database REDIS
+* Sessions: stores user session data
+* Bannedusers cache: To limit queries to main database backend queries cache for every user action requiring authentication to check if user is banned or not.
 
 ##### GraphQL Schema
 * Queries: Fetch user details, stories, chapters, and comments.
@@ -43,9 +47,8 @@
 * Secure sign-up, login, and session management.
 
 ## Challenges and Constraints
-* Maintaining content quality.
-* Managing spam contributions and ensuring platform integrity.
-
+* Maintaining content quality. -> Bot detection with Google Recaptcha v3 and spam detection with Akismet.
+* Managing spam contributions and ensuring platform integrity. -> Admins are able to delete stories, chapters and comments, ban, unban and delete users.
 ## Future Scope 
 * Implementation of user profiles with more details and achievements.
 * Introduction of a tree view to visualize story progression.

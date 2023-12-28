@@ -25,4 +25,5 @@
 |18.12| 12 | Added admin funcitonalities, added in memory cache for banned status, removed some repetitive code, fixed some bugs, edited database for some additional features
 |20.12| 6 | Learning about redis, converted banned status cache and session storage to use redis
 |21.12| 8 | Added seo friendly 404 page, added dark mode, deployed app to render for testing 
-|    | 164     | 
+|28.12| 6 | Extensive testing of application on production environment. Writing documentation and updating old documentation.
+|    | 170     | 
