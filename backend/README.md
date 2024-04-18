@@ -41,10 +41,10 @@ Install MySQL. You can download MySQL Community Server from [MySQL Downloads](ht
 2. Create necessary tables by running the SQL script provided:
 
     ```bash
-    mysql -u your_username -p your_database_name < path/to/your/database.sql
+    mysql -u your_username -p your_database_name < path/to/your/create_db.sql
     ```
 
-   Replace `your_username`, `your_database_name`, and `path/to/your/database.sql` with your MySQL credentials and the path to the SQL script.
+   Replace `your_username`, `your_database_name`, and `path/to/your/create_db.sql` with your MySQL credentials and the path to the SQL script. Script is located in backend folder.
 
 
 ### Configuring Environment Variables
@@ -60,13 +60,13 @@ Install MySQL. You can download MySQL Community Server from [MySQL Downloads](ht
 
 3. Replace the placeholder values with your actual configuration details. Edit the following variables:
    - `DB_HOST`
-   - `DB_PORT`
+   - `DB_PORT` (If not default 3306)
    - `DB_USER`
    - `DB_PASSWORD`
    - `DB_NAME`
    - `REDIS_HOST`
    - `REDIS_PASS`
-   - `REDIS_PORT`
+   - `REDIS_PORT` (If not default 6379)
    - `PORT`
    - `URL`
    - `Domain`

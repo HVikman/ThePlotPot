@@ -1,5 +1,7 @@
 import { Spin } from 'antd'
 import { Card } from 'react-bootstrap'
+import { useDarkMode } from '../../components/DarkModeContext'
+import '../../utils/theme.css'
 
 const loadingTexts = [
   'Your epic saga is so vast, even our scrolls are taking a while. Hang tight!',
@@ -19,11 +21,12 @@ const getRandomLoadingText = () => {
 }
 
 const LoadingComponent = () => {
+  const { isDarkMode } = useDarkMode()
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-      <Card style={{ width: '300px', textAlign: 'center' }}>
-        <Card.Body>
-          <Spin size="large" />
+      <Card style={{ width: '300px', textAlign: 'center' }} className={`shadow ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+        <Card.Body >
+          <Spin size="large" className='my-3' />
           <Card.Title>Fetching the Story...</Card.Title>
           <Card.Text>
             {getRandomLoadingText()}

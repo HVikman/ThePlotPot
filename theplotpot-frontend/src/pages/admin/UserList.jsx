@@ -4,9 +4,10 @@ import { Table, Button } from 'react-bootstrap'
 import { Popconfirm } from 'antd'
 import { GET_ALL_USERS, BAN_USER, UNBAN_USER, DELETE_USER } from '../../api/queries'
 import { Link } from 'react-router-dom'
-
+import { useDarkMode } from '../../components/DarkModeContext'
 
 const UserList = () => {
+  const { isDarkMode } = useDarkMode()
   const { loading, error, data } = useQuery(GET_ALL_USERS)
   const [banUser] = useMutation(BAN_USER, {
     refetchQueries: [
@@ -74,7 +75,7 @@ const UserList = () => {
   }
 
   return (
-    <Table striped bordered hover>
+    <Table striped bordered hover {...(isDarkMode ? { variant: 'dark' } : {})}>
       <thead>
         <tr>
           <th>User id</th>

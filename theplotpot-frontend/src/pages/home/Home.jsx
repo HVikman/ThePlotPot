@@ -1,11 +1,11 @@
 import { useQuery } from '@apollo/client'
 import { Carousel, Card, Button, CardGroup } from 'react-bootstrap'
-import 'bootstrap/dist/css/bootstrap.min.css'
 import { GET_ALL_STORIES } from '../../api/queries'
 import './home.css'
 import { Link } from 'react-router-dom'
 import ErrorComponent from '../../components/Error'
-
+import '../../utils/theme.css'
+import { useDarkMode } from '../../components/DarkModeContext'
 
 
 const LoadingPlaceholder = () => {
@@ -15,6 +15,7 @@ const LoadingPlaceholder = () => {
 }
 
 const Home = () => {
+  const { isDarkMode } = useDarkMode()
   const { loading, error, data } = useQuery(GET_ALL_STORIES)
 
   if (error) return <ErrorComponent message={error.message} />
@@ -64,7 +65,7 @@ const Home = () => {
                 <LoadingPlaceholder />
               </Card>
             )) : latestStories.map(story => (
-              <Card className="shadow" key={story.id} style={{ margin: '15px', maxWidth:'600px' }}>
+              <Card className={`shadow ${isDarkMode ? 'dark-mode' : 'light-mode'}`} key={story.id} style={{ margin: '15px', maxWidth:'600px' }}>
                 <Card.Body>
                   <Card.Title>{story.title}</Card.Title>
                   <Card.Text>{story.description}</Card.Text>

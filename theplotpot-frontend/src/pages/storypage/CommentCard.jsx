@@ -5,11 +5,12 @@ import { Link } from 'react-router-dom'
 import { useMutation } from '@apollo/client'
 import { DELETE_COMMENT } from '../../api/queries'
 import { useNotifications } from '../../components/NotificationsContext'
+import { useDarkMode } from '../../components/DarkModeContext'
 
 const CommentCard = ({ comment, user, deleteComment }) => {
   const { addNotification } = useNotifications()
   const [delComment] = useMutation(DELETE_COMMENT)
-
+  const { isDarkMode } = useDarkMode()
   const confirm = async () => {
     try {
       const { data } = await delComment({
@@ -28,8 +29,8 @@ const CommentCard = ({ comment, user, deleteComment }) => {
 
 
   return (
-    <Card className="mt-3">
-      <Card.Body>
+    <Card className={`shadow mt-3 ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+      <Card.Body >
         <Row>
           <Col xs={3} md={1}>
             <img

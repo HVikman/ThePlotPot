@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { Modal, Button } from 'react-bootstrap'
 import './privacypolicy.css'
+import '../utils/theme.css'
+import { useDarkMode } from './DarkModeContext'
 
 const PrivacyPolicyModal = () => {
+  const { isDarkMode } = useDarkMode()
   const [show, setShow] = useState(false)
 
   const handleClose = () => setShow(false)
@@ -18,14 +21,14 @@ const PrivacyPolicyModal = () => {
   Privacy Policy
       </Button>
 
-      <Modal show={show} onHide={handleClose} centered size="lg" >
+      <Modal show={show} onHide={handleClose} centered size="lg">
         <Button variant="secondary" onClick={handleClose}>
             Close
         </Button>
-        <Modal.Header closeButton className='content'>
+        <Modal.Header closeButton className={`content ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
           <Modal.Title>Privacy Policy</Modal.Title>
         </Modal.Header>
-        <Modal.Body className='content'>
+        <Modal.Body className={`content ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
           <div >
             <h4>Last Updated: 06.11.2023</h4>
             <h3>Welcome to ThePlotPot</h3>
@@ -80,7 +83,7 @@ const PrivacyPolicyModal = () => {
           </div>
 
         </Modal.Body>
-        <Modal.Footer className='content'>
+        <Modal.Footer className={`content ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
           <Button variant="secondary" onClick={handleClose}>
             Close
           </Button>

@@ -26,4 +26,5 @@
 |20.12| 6 | Learning about redis, converted banned status cache and session storage to use redis
 |21.12| 8 | Added seo friendly 404 page, added dark mode, deployed app to render for testing 
 |28.12| 6 | Extensive testing of application on production environment. Writing documentation and updating old documentation.
-|    | 170     | 
+|18.4 | 4 | Refactored and improved darkmode functionality, small fixes
+|    | 174     | 

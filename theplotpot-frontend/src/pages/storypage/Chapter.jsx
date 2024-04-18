@@ -11,7 +11,8 @@ import { useMutation } from '@apollo/client'
 import { DELETE_CHAPTER, DELETE_STORY } from '../../api/queries'
 import { useNavigate } from 'react-router-dom'
 import { useNotifications } from '../../components/NotificationsContext'
-
+import { useDarkMode } from '../../components/DarkModeContext'
+import '../../utils/theme.css'
 
 const Chapter = ({ chapter, childChapters, onNavigate, onAddChapter, onGoBack, isLoading }) => {
   const { addNotification } = useNotifications()
@@ -20,6 +21,7 @@ const Chapter = ({ chapter, childChapters, onNavigate, onAddChapter, onGoBack, i
   const [deleteStory] = useMutation(DELETE_STORY)
   const [isLiked, setIsLiked] = useState(null)
   const [isDisabled, setIsDisabled] = useState(false)
+  const { isDarkMode } = useDarkMode()
 
   const initialIsLiked = useIsChapterLiked(chapter.id)
   useEffect(() => {
@@ -93,7 +95,7 @@ const Chapter = ({ chapter, childChapters, onNavigate, onAddChapter, onGoBack, i
       <Button variant='secondary' className="mb-3" onClick={() => onGoBack()}>
         < ArrowLeft />
       </Button>
-      <div className='chapter-content shadow my-2' dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />
+      <div className={`chapter-content shadow my-2 ${isDarkMode ? 'dark-mode' : 'light-mode'}`} dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />
       <div className="chapter-stats m-2">
         {
           isAuthenticated ? (

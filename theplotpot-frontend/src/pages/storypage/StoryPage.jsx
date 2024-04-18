@@ -6,8 +6,10 @@ import { Container, Row, Col, Card } from 'react-bootstrap'
 import { GET_STORY_BY_ID, GET_CHAPTER_CHILDREN, GET_CHAPTER } from '../../api/queries'
 import LoadingComponent from './Loading'
 import ErrorComponent from '../../components/Error'
+import { useDarkMode } from '../../components/DarkModeContext'
 
 const StoryPage = () => {
+  const { isDarkMode } = useDarkMode()
   const navigate = useNavigate()
   const { storyId, chapterId } = useParams()
 
@@ -112,7 +114,7 @@ const StoryPage = () => {
         </Col>
         <Col md={3}>
           {currentChapter &&
-            <Card>
+            <Card className={`shadow mt-3 ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
               <Card.Body>
                 <Card.Title>{data.getStory.title}</Card.Title>
                 <Card.Subtitle className="mb-2 text-muted">{data.getStory.genre}</Card.Subtitle>

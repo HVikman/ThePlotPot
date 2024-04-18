@@ -5,6 +5,7 @@ import { Modal, Button, Container, Row, Col, Card, ListGroup } from 'react-boots
 import { GET_ALL_STORIES } from '../../api/queries'
 import ErrorComponent from '../../components/Error'
 import { useDarkMode } from '../../components/DarkModeContext'
+import '../../utils/theme.css'
 
 const StoriesPage = () => {
   const { loading, error, data } = useQuery(GET_ALL_STORIES)
@@ -68,9 +69,9 @@ const StoriesPage = () => {
               <ListGroup.Item
                 key={story.id}
                 onClick={() => handleClick(story)}
-              >
+                className={`${isDarkMode ? 'dark-mode' : 'light-mde'}`}>
                 <Card>
-                  <Card.Body>
+                  <Card.Body className={`${isDarkMode ? 'dark-mode' : 'light-mde'}`}>
                     <Row>
                       <Col xs={8}>
                         <Card.Title>
@@ -79,7 +80,7 @@ const StoriesPage = () => {
                   (Click for details)
                           </small>
                         </Card.Title>
-                        <Card.Subtitle className="mb-2 text-muted">{story.genre}</Card.Subtitle>
+                        <Card.Subtitle className="mb-2 text-muted" >{story.genre}</Card.Subtitle>
                       </Col>
                       <Col xs={4} className="text-right">
                         <Link to={`/story/${story.id}`}>
@@ -94,11 +95,11 @@ const StoriesPage = () => {
           </ListGroup>
 
           {modalData && (
-            <Modal show={showModal} onHide={handleClose}>
-              <Modal.Header closeButton>
+            <Modal show={showModal} onHide={handleClose} >
+              <Modal.Header closeButton className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
                 <Modal.Title>{modalData.title}</Modal.Title>
               </Modal.Header>
-              <Modal.Body>
+              <Modal.Body className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
                 <p>{modalData.description}</p>
                 <Link to={`/story/${modalData.id}`}>
                   <Button variant="secondary">Read Story</Button>
