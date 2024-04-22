@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
-import { Switch } from 'antd'
-import { Sun, Moon } from 'react-bootstrap-icons'
+import React, { useEffect, useState } from 'react'
+import './DarkModeToggle.css'
 import { useDarkMode } from './DarkModeContext'
+import { LightbulbFill } from 'react-bootstrap-icons'
 
 const DarkModeToggle = () => {
   const { isDarkMode, setIsDarkMode } = useDarkMode()
+  const [rotation, setRotation] = useState(0)
 
   useEffect(() => {
     if (isDarkMode) {
@@ -16,26 +17,22 @@ const DarkModeToggle = () => {
     }
   }, [isDarkMode])
 
-  const toggleDarkMode = (checked) => {
-    setIsDarkMode(checked)
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode)
+    setRotation(prev => prev + 360)
   }
 
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed',
-      bottom: '20px',
-      left: '20px', backgroundColor: '#343a40',
-      borderRadius: '10px',
-      padding: '10px',
-      zIndex: 1000 }}>
-      <Sun color={isDarkMode ? 'grey' : 'yellow'} />
-      <Switch
-        checkedChildren={<Moon />}
-        unCheckedChildren={<Sun />}
-        checked={isDarkMode}
-        onChange={toggleDarkMode}
-        style={{ margin: '0 10px' }}
-      />
-      <Moon color={isDarkMode ? 'white' : 'grey'} />
+    <div
+      className={`mode-toggle ${isDarkMode ? 'bulb-off' : 'bulb-on'}`}
+      onClick={toggleDarkMode}
+      style={{ transform: `rotate(${rotation}deg)` }}
+      aria-checked={isDarkMode}
+      role="switch"
+      aria-label="Toggle Dark Mode"
+    >
+      <LightbulbFill size={50} className="bulb-icon" />
     </div>
   )
 }
