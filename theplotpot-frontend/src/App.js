@@ -13,6 +13,7 @@ import './App.css'
 import InfoModal from './components/InfoModal'
 import DarkModeToggle from './components/DarkModeToggle'
 
+//Lazy loaded components
 const Home = lazy(() => import('./pages/home/Home'))
 const Login = lazy(() => import('./pages/auth/Login'))
 const Signup = lazy(() => import('./pages/auth/Signup'))

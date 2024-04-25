@@ -5,9 +5,11 @@ import { useMutation } from '@apollo/client'
 import { LOGIN_MUTATION } from '../../api/queries'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from './AuthContext'
-import { Form, Button, Container, Alert } from 'react-bootstrap'
+import { Form, Button, Container, Alert, InputGroup } from 'react-bootstrap'
 import { useNotifications } from '../../components/NotificationsContext'
 import { Link } from 'react-router-dom'
+import { KeyFill } from 'react-bootstrap-icons'
+import { useDarkMode } from '../../components/DarkModeContext'
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email('Invalid email').required('Email is required'),
@@ -15,6 +17,7 @@ const LoginSchema = Yup.object().shape({
 })
 
 const Login = () => {
+  const { isDarkMode } = useDarkMode()
   const { addNotification } = useNotifications()
   const [loginError, setLoginError] = useState(null)
   const { user, setUser } = useAuth()
@@ -55,39 +58,50 @@ const Login = () => {
   if(isAuthenticated){navigate('/'); return <p>You are already logged in.</p>}
   return (
     <Container style={{ maxWidth: '400px', marginTop: '50px' }}>
-      <Form onSubmit={formik.handleSubmit}>
+      <Form onSubmit={formik.handleSubmit} className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
         <Form.Group controlId="formBasicEmail" className='mt-2 custom-form'>
           <Form.Label>Email address</Form.Label>
-          <Form.Control
-            type="email"
-            name="email"
-            value={formik.values.email}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            isInvalid={formik.touched.email && formik.errors.email}
-            placeholder="Enter email"
-          />
-          <Form.Control.Feedback type="invalid">
-            {formik.errors.email}
-          </Form.Control.Feedback>
+          <InputGroup className="mb-3">
+            <InputGroup.Text>
+              @
+            </InputGroup.Text>
+            <Form.Control
+              type="email"
+              name="email"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              isInvalid={formik.touched.email && formik.errors.email}
+              placeholder="Enter email"
+            />
+            <Form.Control.Feedback type="invalid">
+              {formik.errors.email}
+            </Form.Control.Feedback>
+          </InputGroup>
         </Form.Group>
 
         <Form.Group controlId="formBasicPassword" className='mt-4 custom-form'>
           <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            name="password"
-            value={formik.values.password}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            isInvalid={formik.touched.password && formik.errors.password}
-            placeholder="Password"
-          />
-          <Form.Control.Feedback type="invalid">
-            {formik.errors.password}
-          </Form.Control.Feedback>
+          <InputGroup className="mb-3">
+            <InputGroup.Text>
+              <KeyFill /> {/* Icon for the password field */}
+            </InputGroup.Text>
+            <Form.Control
+              type="password"
+              name="password"
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              isInvalid={formik.touched.password && formik.errors.password}
+              placeholder="Password"
+            />
+            <Form.Control.Feedback type="invalid">
+              {formik.errors.password}
+            </Form.Control.Feedback>
+          </InputGroup>
         </Form.Group>
         <Form.Control style={{ display: 'none' }} name="honeypot" onChange={formik.handleChange} value={formik.values.honeypot} />
+
         <Button variant="secondary" className='mt-2' type="submit">
           Login
         </Button>

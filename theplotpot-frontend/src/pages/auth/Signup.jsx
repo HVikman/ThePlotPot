@@ -9,6 +9,7 @@ import { Form, Button, Container, Alert, InputGroup } from 'react-bootstrap'
 import { useNotifications } from '../../components/NotificationsContext'
 import { PersonFill, KeyFill } from 'react-bootstrap-icons'
 import { Link } from 'react-router-dom'
+import { useDarkMode } from '../../components/DarkModeContext'
 
 const SignupSchema = Yup.object().shape({
   username: Yup.string().min(3, 'Username must be at least 3 characters').required('Username is required'),
@@ -17,6 +18,7 @@ const SignupSchema = Yup.object().shape({
 })
 
 const Signup = () => {
+  const { isDarkMode } = useDarkMode()
   const { addNotification } = useNotifications()
   const [signupError, setSignupError] = useState(null)
   const [signup] = useMutation(SIGNUP_MUTATION, {
@@ -60,7 +62,7 @@ const Signup = () => {
   if(isAuthenticated){navigate('/'); return <p>You are already logged in.</p>}
   return (
     <Container style={{ maxWidth: '400px', marginTop: '50px' }}>
-      <Form onSubmit={formik.handleSubmit}>
+      <Form onSubmit={formik.handleSubmit} className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
         <Form.Group controlId="formBasicUsername" className='mt-4 custom-form'>
           <Form.Label>Username</Form.Label>
           <InputGroup className="mb-3">

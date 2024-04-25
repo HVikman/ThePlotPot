@@ -27,4 +27,7 @@
 |21.12| 8 | Added seo friendly 404 page, added dark mode, deployed app to render for testing 
 |28.12| 6 | Extensive testing of application on production environment. Writing documentation and updating old documentation.
 |18.4 | 4 | Refactored and improved darkmode functionality, small fixes
-|    | 174     | 
+|20.4 | 1 | Made darkmode toggle look nicer
+|23.4 | 2 | Improved backend error handling to avoid backend crashes, testing
+|25.4 | 6 | Refactored some forms, expanded darkmode functionality to every component and form, fixed bug with liking a chapter
+|    | 183     | 

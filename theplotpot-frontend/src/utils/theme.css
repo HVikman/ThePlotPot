@@ -1,11 +1,35 @@
-.light-mode{
-    color: #333;
-    background-color: #f9f9f9;
-}
-.dark-mode{
+
+.dark-mode,
+.dark-mode .card,
+.dark-mode .list-group-item{
     color: #f9f9f9;
     background-color: #333; 
 }
 .dark-mode .text-muted {
     color: #888  !important;
   }
+  
+.dark-mode .input-group-text,
+.dark-mode .form-control,
+.dark-mode .form-control:focus,
+.dark-mode .form-control:hover {
+    color: #f9f9f9;
+    background-color: #555; 
+}
+
+.dark-mode .accordion-button {
+    background-color: #333;
+    color: #f9f9f9;
+    border-color: #444;
+}
+
+.dark-mode .accordion-button:not(.collapsed) {
+    background-color: #222;
+    color: #fff;
+    border-color: #333;
+}
+
+.dark-mode input::placeholder,
+.dark-mode textarea::placeholder {
+    color: #ccc; 
+}

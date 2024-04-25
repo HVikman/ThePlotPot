@@ -1,5 +1,5 @@
 const striptags = require('striptags')
-
+const { createUserError } = require('./tools.js')
 const Akismet = require('akismet-api')
 
 const client = new Akismet.Client({
@@ -26,9 +26,7 @@ const detectSpam = async (context, content, type, isHtml=false) => {
   try {
     const isSpam = await client.checkSpam(comment)
     if(isSpam){
-      const error = new Error('Spam detected')
-      error.isUserError = true
-      throw error
+      createUserError('Spam detected')
     }
   } catch (err) {
     console.error('Error:', err.message)
