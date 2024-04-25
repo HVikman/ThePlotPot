@@ -22,6 +22,7 @@ const Chapter = ({ chapter, childChapters, onNavigate, onAddChapter, onGoBack, i
   const [isLiked, setIsLiked] = useState(null)
   const [isDisabled, setIsDisabled] = useState(false)
   const { isDarkMode } = useDarkMode()
+  const [likes, setLikes] = useState(chapter.votes_count)
 
   const initialIsLiked = useIsChapterLiked(chapter.id)
   useEffect(() => {
@@ -35,12 +36,12 @@ const Chapter = ({ chapter, childChapters, onNavigate, onAddChapter, onGoBack, i
 
     if (!isLiked) {
       const result = await toggleLikeUnlike(true, chapter.id)
-      chapter.votes_count = chapter.votes_count + 1
       setIsLiked(true)
+      setLikes(likes+1)
       console.log('Like result:', result)}
     else {const result = await toggleLikeUnlike(false, chapter.id)
       setIsLiked(false)
-      chapter.votes_count = chapter.votes_count- 1
+      setLikes(likes-1)
       console.log('Unlike result:', result)}
 
     setTimeout(() => {
@@ -133,7 +134,7 @@ const Chapter = ({ chapter, childChapters, onNavigate, onAddChapter, onGoBack, i
         >
           <Button variant='danger'>Admin delete</Button>
         </Popconfirm> : <></>}
-        <span>{chapter.votes_count}</span>
+        <span>{likes}</span>
       </div>
       <div className="next-chapters m-2">
         {!isLoading && isAuthenticated && childChapters.length < 3 && chapter.branch < 9 && (

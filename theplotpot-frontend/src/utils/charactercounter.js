@@ -12,7 +12,7 @@ class CharacterCounter {
 
   calculate() {
     let text = this.quill.getText()
-    return text.length
+    return text.length -1
   }
 
   update() {

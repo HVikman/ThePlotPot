@@ -1,5 +1,5 @@
 const fetch = require('node-fetch')
-
+const { createUserError } = require('./tools.js')
 const checkCaptcha = async (token) => {
   const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
     method: 'POST',
@@ -13,9 +13,7 @@ const checkCaptcha = async (token) => {
   console.log(data)
 
   if (!data.success || data.score < 0.5) {
-    const error = new Error('Captcha verification failed')
-    error.isUserError = true
-    throw error
+    createUserError('Captcha verification failed')
   }
 
   return false

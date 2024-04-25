@@ -52,9 +52,9 @@ const UserList = () => {
       console.log(err)
     }
   }
-
+  //TODO: handle user activation
   const handleActivate = async (userId) => {
-  //manual user activation
+  //manual user activation will be here if needed
   }
 
 
@@ -133,7 +133,7 @@ const UserList = () => {
                   </Button>
                 </Popconfirm>
               ))}
-              <Popconfirm
+              {!user.has_superpowers && <Popconfirm
                 title="Are you sure you want to delete this user?"
                 onConfirm={() => handleDelete(user.id)}
                 okText="Yes"
@@ -142,7 +142,7 @@ const UserList = () => {
                 <Button variant="outline-danger" size="sm" className='mx-2'>
                   Delete
                 </Button>
-              </Popconfirm>
+              </Popconfirm>}
             </td>
           </tr>
         ))}

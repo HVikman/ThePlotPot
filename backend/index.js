@@ -24,13 +24,22 @@ let redisClient = createClient({
   },
   password: process.env.REDIS_PASS
 })
-redisClient.connect().catch(console.error)
+redisClient.connect().catch((error) => {
+  console.error('Redis connection error:', error)
+})
 
 let redisStore = new RedisStore({
   client: redisClient
 })
 
 app.use(limiter)
+
+app.use((req, res, next) => {
+  if (!redisClient.isOpen) {
+    return res.status(503).send('Service temporarily unavailable')
+  }
+  next()
+})
 
 const scheduleChapterCountsUpdate = require('./db/batchJobs')
 scheduleChapterCountsUpdate()

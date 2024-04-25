@@ -4,6 +4,7 @@ import { Form, Button } from 'react-bootstrap'
 import { useNotifications } from '../../components/NotificationsContext'
 import { useMutation } from '@apollo/client'
 import { ADD_COMMENT_MUTATION } from '../../api/queries'
+import { useDarkMode } from '../../components/DarkModeContext'
 
 const validationSchema = Yup.object({
   content: Yup.string()
@@ -21,6 +22,7 @@ const AddCommentForm = ({ chapterId, addNewComment }) => {
   const { addNotification } = useNotifications()
 
   const [addComment] = useMutation(ADD_COMMENT_MUTATION)
+  const { isDarkMode } = useDarkMode()
 
   const formik = useFormik({
     initialValues,
@@ -64,9 +66,10 @@ const AddCommentForm = ({ chapterId, addNewComment }) => {
       <h2>Add a Comment</h2>
       <Form onSubmit={formik.handleSubmit}>
 
-        <Form.Group controlId="commentContent" className='my-2 custom-form'>
+        <Form.Group controlId="commentContent" className={`my-2 custom-form ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
           <Form.Control
             as="textarea"
+            className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}
             name="content"
             placeholder="Your comment..."
             onChange={formik.handleChange}

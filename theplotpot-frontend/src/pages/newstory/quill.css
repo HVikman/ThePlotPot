@@ -1,3 +1,38 @@
 .ql-editor{
     min-height:400px;
+    background-color: #444;
+}
+.dark-mode .ql-toolbar {
+    background-color: #333;
+    color: #f9f9f9;
+}
+
+.dark-mode .ql-toolbar .ql-picker-label:hover,
+.dark-mode .ql-toolbar .ql-picker-item:hover,
+.dark-mode .ql-toolbar button:hover {
+    background-color: #444;
+    color: #ccc !important; 
+}
+
+.dark-mode .ql-toolbar .ql-stroke {
+    stroke: #ccc; /* For SVG icons in the toolbar */
+}
+
+.dark-mode .ql-toolbar .ql-fill,
+.dark-mode .ql-toolbar .ql-picker-label {
+    color: #ccc;
+    fill: #ccc; /* For filled SVG icons or elements */
+}
+
+.dark-mode .ql-picker-options {
+    background-color: #333; 
+    color: #ccc; 
+}
+
+.dark-mode .ql-picker-options .ql-picker-item {
+    color: #ccc !important; /* Text color for each option */
+}
+
+.dark-mode .ql-picker-options .ql-picker-item:active {
+    color: #f9f9f9 !important;
 }

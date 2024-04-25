@@ -3,8 +3,10 @@ import { useQuery } from '@apollo/client'
 import { Card, Accordion, Container, Row, Col, ListGroup } from 'react-bootstrap'
 import { GET_USER_PROFILE } from '../../api/queries'
 import { CupHot } from 'react-bootstrap-icons'
+import { useDarkMode } from '../../components/DarkModeContext'
 
 const UserPage = () => {
+  const { isDarkMode } = useDarkMode()
   const { id } = useParams()
   const { loading, error, data } = useQuery(GET_USER_PROFILE, {
     variables: { getUserProfileId: id }
@@ -33,21 +35,23 @@ const UserPage = () => {
   }, {})
 
   return (
-    <Container>
+    <Container >
       <Row className="mt-5">
         <Col md={4}>
-          <Card style={{ width: '18rem' }}>
-            <Card.Body>
+          <Card style={{ width: '18rem' }} className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+            <Card.Body >
               <Card.Img variant="top" src={`https://www.gravatar.com/avatar/${user.email}?d=robohash&r=g&s=100`} />
               <Card.Title className="mt-2">{user.username}</Card.Title>
-              {user.coffee && <Card.Text><Link to={user.coffee}>Buy Me a Coffee</Link> <CupHot /> </Card.Text>}
-              <Card.Text>{user.email}</Card.Text>
+              {user.coffee && <Card.Text><Link to={user.coffee} style={{ color: 'inherit', textDecoration: 'none' }} target="_blank" rel="noopener noreferrer">
+  Buy Me a Coffee
+              </Link> <CupHot /> </Card.Text>}
+              <Card.Text>Some day user could have nice description or bio here!</Card.Text>
             </Card.Body>
           </Card>
         </Col>
         <Col md={8}>
           <Accordion defaultActiveKey="0">
-            <Accordion.Item eventKey="1">
+            <Accordion.Item eventKey="1" className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
               <Accordion.Header>Stories</Accordion.Header>
               <Accordion.Body>
                 <ListGroup>
@@ -57,7 +61,7 @@ const UserPage = () => {
                 </ListGroup>
               </Accordion.Body>
             </Accordion.Item>
-            <Accordion.Item eventKey="2">
+            <Accordion.Item eventKey="2" className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
               <Accordion.Header >Chapters</Accordion.Header>
               <Accordion.Body >
                 {Object.keys(groupedChapters).map(storyId => (

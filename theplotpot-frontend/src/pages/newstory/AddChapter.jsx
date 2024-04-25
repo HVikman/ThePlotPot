@@ -1,14 +1,15 @@
 import { useLocation } from 'react-router-dom'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import { Input, Form, Alert } from 'antd'
-import { Button } from 'react-bootstrap'
+import { Form, FormControl } from 'react-bootstrap'
 import ReactQuill from 'react-quill'
 import 'quill/dist/quill.snow.css'
 import '../../utils/charactercounter'
 import { useCreateChapter } from '../../hooks/createChapter'
 import { useNotifications } from '../../components/NotificationsContext'
 import './quill.css'
+import { useDarkMode } from '../../components/DarkModeContext'
+
 
 // Form validation schema
 const validationSchema = Yup.object({
@@ -25,7 +26,7 @@ const initialValues = {
 }
 
 const AddChapter = () => {
-
+  const { isDarkMode } = useDarkMode()
   const location = useLocation()
   const { storyId, parentChapter, navigationStack } = location.state
   const { addNotification } = useNotifications()
@@ -63,27 +64,30 @@ const AddChapter = () => {
   return (
     <div className="add-chapter-container mx-4">
       <h2>Add a New Chapter</h2>
-      <Form layout="vertical" onSubmit={formik.handleSubmit}>
-        <Form.Item label="Title" help={formik.touched.title && formik.errors.title}>
-          <Input
+      <Form onSubmit={formik.handleSubmit} className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+        <Form.Group controlId="formTitle">
+          <Form.Label>Title</Form.Label>
+          <FormControl
             type="text"
-            name="title"
             placeholder="Chapter title"
+            name="title"
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.title}
           />
-        </Form.Item>
-        <Form.Item style={{ display: 'none' }}>
-          <Input
+          {formik.touched.title && formik.errors.title && <Form.Text className="text-danger">{formik.errors.title}</Form.Text>}
+        </Form.Group>
+        <Form.Group style={{ display: 'none' }} controlId="formHoneypot">
+          <FormControl
             type="text"
             name="honeypot"
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.honeypot}
           />
-        </Form.Item>
-        <Form.Item label="Content" help={formik.touched.content && formik.errors.content}>
+        </Form.Group>
+        <Form.Group controlId="formContent">
+          <Form.Label>Content</Form.Label>
           <ReactQuill
             value={formik.values.content}
             placeholder='Chapter content goes here...'
@@ -102,10 +106,13 @@ const AddChapter = () => {
             }}
           />
           <div id='char-count'></div>
-        </Form.Item>
-        <Button variant='secondary' onClick={() => formik.handleSubmit()}>Submit</Button>
+          {formik.touched.content && formik.errors.content && <Form.Text className="text-danger">{formik.errors.content}</Form.Text>}
+        </Form.Group>
       </Form>
-      {error && <Alert type="error" message={error.message} className="mt-3" />}
+
+      {/*
+      {error && <Alert type="error" message={error.message} className="mt-3" />} */}
+      {error}
     </div>
   )
 }
