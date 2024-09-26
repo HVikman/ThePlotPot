@@ -1,16 +1,20 @@
 #!/bin/bash
 
-# Navigate to frontend directory and build
-cd ./frontend
+# Navigate to frontend directory and install dependencies
+cd frontend
 npm install
+
+# Build frontend
 npm run build
 
-# Move to backend and remove old dist folder contents
+# Navigate to backend directory
 cd ../backend
+
+# Clean old dist folder
 rm -rf ./dist/*
 
-# Copy the new build to dist folder
+# Copy new build files to dist folder
 cp -r ../frontend/build/* ./dist/
 
-# Install backend dependencies and build backend if necessary
+# Install backend dependencies
 npm install
