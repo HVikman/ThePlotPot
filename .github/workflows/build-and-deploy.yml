@@ -11,12 +11,12 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Node.js for frontend
-      uses: actions/setup-node@v2
-      with:
-        node-version: '18'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
 
     - name: Install dependencies for frontend
       run: |
@@ -34,9 +34,9 @@ jobs:
         cp -r frontend/build/* backend/dist/
 
     - name: Set up Node.js for backend
-      uses: actions/setup-node@v2
-      with:
-        node-version: '18'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
 
     - name: Install dependencies for backend
       run: |
