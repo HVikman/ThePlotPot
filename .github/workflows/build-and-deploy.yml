@@ -17,24 +17,21 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20.x'
-        
-    - name: List files in the current directory
-      run: ls -la
 
     - name: Install dependencies for frontend
       run: |
-        cd frontend
+        cd theplotpot-frontend
         npm install
 
     - name: Build frontend
       run: |
-        cd frontend
+        cd theplotpot-frontend
         npm run build
 
     - name: Copy frontend build to backend dist
       run: |
         rm -rf backend/dist/* 
-        cp -r frontend/build/* backend/dist/
+        cp -r theplotpot-frontend/build/* backend/dist/
 
     - name: Set up Node.js for backend
       uses: actions/setup-node@v4
@@ -48,6 +45,6 @@ jobs:
 
     - name: Deploy to Render
       env:
-        RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}  
+        RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
       run: |
         curl -X POST $RENDER_DEPLOY_HOOK_URL
