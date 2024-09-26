@@ -14,7 +14,6 @@ type Mutation {
     likeChapter(id: ID!): Response!
     unlikeChapter(id: ID!): Response!
     addComment(input: CommentInput!, token: String!): Comment!
-    editComment(commentId: ID!, content: String!): Response!
     deleteComment(commentId: ID!): Response!
     banUser(id: ID!): Response!
     unbanUser(id: ID!): Response!

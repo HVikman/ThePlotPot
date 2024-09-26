@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
 import ErrorComponent from '../../components/Error'
 import '../../utils/theme.css'
 import { useDarkMode } from '../../components/DarkModeContext'
-
+import { formatDistanceToNow } from 'date-fns'
 
 const LoadingPlaceholder = () => {
   return (
@@ -21,9 +21,15 @@ const Home = () => {
   if (error) return <ErrorComponent message={error.message} />
 
   let latestStories = []
+  let featuredStories = []
+
   if (data) {
-    const sortedStories = [...data.getAllStories].sort((a, b) => b.id - a.id)
-    latestStories = sortedStories.slice(0, 9)
+    console.log(data.getAllStories[0].createdAt)
+    const sortedByReads = [...data.getAllStories].sort((a, b) => b.read_count - a.read_count)
+    featuredStories = sortedByReads.slice(0, 5) // Otetaan 5 tarinaa esiin carouselia varten
+
+    const sortedByCreatedAt = [...data.getAllStories].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    latestStories = sortedByCreatedAt.slice(0, 9)
   }
 
   return (
@@ -35,7 +41,7 @@ const Home = () => {
             <Carousel.Item key={index}>
               <LoadingPlaceholder />
             </Carousel.Item>
-          )) : data.getAllStories.slice(0, 5).map((story, index) => (
+          )) : featuredStories.map((story, index) => (
             <Carousel.Item key={story.id}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '400px', width: '100%' }}>
                 <Card className="shadow" style={{ textAlign: 'center', width: '80%', minHeight: '70%' }}>
@@ -44,7 +50,8 @@ const Home = () => {
                     <Card.Title className="truncate-text">{story.title}</Card.Title>
                     <Card.Text className="truncate-text">{story.description}</Card.Text>
                     <Card.Text>Genre: {story.genre}</Card.Text>
-                    <Card.Text><small className="text-muted">By:<Link style={{ color: 'inherit', textDecoration: 'inherit' }} to={`/user/${story.author.id}`}>{story.author.username}</Link> </small></Card.Text>
+                    <Card.Text><small className="text-muted">Reads: {story.read_count}</small></Card.Text>
+                    <Card.Text><small className="text-muted">By:<Link style={{ color: 'inherit', textDecoration: 'inherit' }} to={`/user/${story.author.id}`}>{story.author.username}</Link></small></Card.Text>
                     <Link to={`/story/${story.id}`}>
                       <Button variant="secondary">Read Story</Button>
                     </Link>
@@ -69,9 +76,18 @@ const Home = () => {
                 <Card.Body>
                   <Card.Title>{story.title}</Card.Title>
                   <Card.Text>{story.description}</Card.Text>
-                  <Card.Text>Genre: {story.genre}</Card.Text>
-                  <Card.Text><small className="text-muted">By: <Link style={{ color: 'inherit', textDecoration: 'inherit' }} to={`/user/${story.author.id}`}>{story.author.username}</Link></small></Card.Text>
-                  <Link to={`/story/${story.id}`}>
+                  <Card.Text>
+                    <span>Genre: {story.genre}</span>
+                    <small className="text-muted" style={{ display: 'block', marginTop: '5px' }}>
+                      Created {formatDistanceToNow(new Date(Number(story.createdAt)))} ago by:&nbsp;
+                      <Link
+                        style={{ color: 'inherit', textDecoration: 'inherit' }}
+                        to={`/user/${story.author.id}`}
+                      >
+                        {story.author.username}
+                      </Link>
+                    </small>
+                  </Card.Text>                  <Link to={`/story/${story.id}`}>
                     <Button variant="secondary">Read Story</Button>
                   </Link>
                 </Card.Body>

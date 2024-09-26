@@ -84,6 +84,8 @@ const GET_ALL_STORIES = gql`
       description
       id
       genre
+      read_count
+      createdAt
       author {
         id
         username
