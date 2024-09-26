@@ -2,6 +2,7 @@
 
 |  day  | hours | things done  |
 | :----:|:-----| :-----|
+|2023|
 | 25.8  | 2    | creating documentation and planning the project |
 | 26.8  | 8    | designed sql database, started backend: created some graphql resolvers and session management, learning about session based authentication and options|
 | 27.8 |   6 |    frontend basic functionality, login and signup. story writing form. small changes to backend to make frontend functionalities work
@@ -26,8 +27,10 @@
 |20.12| 6 | Learning about redis, converted banned status cache and session storage to use redis
 |21.12| 8 | Added seo friendly 404 page, added dark mode, deployed app to render for testing 
 |28.12| 6 | Extensive testing of application on production environment. Writing documentation and updating old documentation.
+|2024|
 |18.4 | 4 | Refactored and improved darkmode functionality, small fixes
 |20.4 | 1 | Made darkmode toggle look nicer
 |23.4 | 2 | Improved backend error handling to avoid backend crashes, testing
 |25.4 | 6 | Refactored some forms, expanded darkmode functionality to every component and form, fixed bug with liking a chapter
-|    | 183     | 
+|26.9| 7| Fixed forms i broke earlier, replaced Akismet with simple spam detection, fixed a ton of bugs and a lot of useless console log spam, updated all packages, updated icon for website
+|    | 190    | 
