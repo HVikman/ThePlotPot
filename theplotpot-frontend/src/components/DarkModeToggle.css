@@ -11,8 +11,7 @@
   position: fixed;
   bottom: 80px;
   right: 10px;
-  background-color: transparent;
-
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 .bulb-icon {

@@ -32,7 +32,9 @@ const ChapterResolvers = {
         console.log('Logged in user ID:', IDorIP)
       } else {
         // User is not logged in, use their IP address
-        IDorIP = context.req.ip
+        const forwarded = context.req.headers['x-forwarded-for']
+        const ip = forwarded ? forwarded.split(',')[0].trim() : context.req.connection.remoteAddress
+        IDorIP = ip
         console.log('Unauthenticated user IP:', IDorIP)
       }
       // Insert row to chapter_reads to add a read count
@@ -55,7 +57,7 @@ const ChapterResolvers = {
     },
     async isChapterLiked(_, { id }, context) {
       // Get user from session and decode id
-      const userId = await checkLoggedIn(context)
+      const userId = await checkLoggedIn(context, false)
       const result = await queryDB('SELECT COUNT(*) as count FROM votes WHERE chapterId = ? AND userId = ? ', [id, userId], true)
       if (result.count === 1){return true} else {return false}
 

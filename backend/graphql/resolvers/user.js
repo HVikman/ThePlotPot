@@ -34,6 +34,12 @@ const UserResolvers = {
     },
     // Fetch the current logged-in user
     me: async (_, args, context) => {
+
+      // Check if the user is logged in
+      if (!context.req.session || !context.req.session.user) {
+        return null
+      }
+
       const original = hashids.decode(context.req.session.user)
       const userId = original[0]
       const user = await queryDB('SELECT * FROM users WHERE id = ?', [userId], true)

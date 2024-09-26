@@ -1,5 +1,7 @@
 .ql-editor{
     min-height:400px;
+}
+.dark-mode .ql-editor {
     background-color: #444;
 }
 .dark-mode .ql-toolbar {
