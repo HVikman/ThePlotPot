@@ -12,7 +12,7 @@ function containsUrlsOrEmails(text) {
 }
 
 const detectSpam = (context, content, type, isHtml = false) => {
-  console.log(context.ip) //For future use
+  console.log(context.ip, type) //For future use
 
   if (isHtml) {
     content = striptags(content)

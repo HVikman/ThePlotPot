@@ -5,13 +5,28 @@ const hashids = new Hashids(process.env.IDSECRET, 20)
 const sanitizeHtml = require('sanitize-html')
 const { detectSpam } = require('../../utils/detectspam')
 const checkCaptcha  = require('../../utils/captcha.js')
-const { checkLoggedIn, createUserError } = require('../../utils/tools.js')
+const { checkLoggedIn, createUserError, validateNumber } = require('../../utils/tools.js')
+
+// Define allowed HTML tags for the content field
+const allowedTags = [
+  'p', 'br', 'span', 'strong', 'em', 'u', 'blockquote',
+  'h1', 'h2', 'h3', 'ol', 'ul', 'li', 'b', 'i', 's', 'del',
+  'sup', 'sub', 'code', 'pre', 'hr', 'ins', 'mark'
+]
+
+// Define max length constants
+const MAX_TITLE_LENGTH = 200
+const MAX_DESCRIPTION_LENGTH = 1000
+const MAX_GENRE_LENGTH = 50
+const MAX_CONTENT_LENGTH = 30000 // 30k characters including HTML tags
 
 const StoryResolvers = {
   Query: {
     // Fetch a single story
-    getStory: async (_, { id, chapterId }, context) => {
-      const story = await queryDB('SELECT * FROM stories WHERE id = ? AND deleted_at IS NULL', [id], true)
+    getStory: async (_, { id, chapterId }) => {
+      const parsedStoryId = validateNumber(id, true, 'Invalid story ID')
+
+      const story = await queryDB('SELECT * FROM stories WHERE id = ? AND deleted_at IS NULL', [parsedStoryId], true)
 
       if (!story) {
         createUserError('Story not found')
@@ -19,37 +34,20 @@ const StoryResolvers = {
 
       let chapter
       if (chapterId) {
-        // Fetch chapter based on provided chapter id
-        chapter = await queryDB('SELECT * FROM chapters WHERE id=? AND deleted_at IS NULL', [chapterId], true)
+        const parsedChapterId = validateNumber(chapterId, true, 'Invalid chapter ID')
+
+        chapter = await queryDB('SELECT * FROM chapters WHERE id = ? AND deleted_at IS NULL', [parsedChapterId], true)
         if (!chapter) {
           createUserError('Chapter not found')
         }
       } else {
-        // Fetch first chapter (branch = 0)
-        chapter = await queryDB('SELECT * FROM chapters WHERE storyId= ? AND branch = 0', [id], true)
+        chapter = await queryDB('SELECT * FROM chapters WHERE storyId= ? AND branch = 0', [parsedStoryId], true)
       }
 
       if (chapter) {
-        // Fetch comments for the chapter
         const comments = await queryDB('SELECT * FROM comments WHERE chapterId = ? AND deletedAt IS NULL', [chapter.id])
         chapter.comments = comments
 
-        let IDorIP
-
-        if (context.req.session && context.req.session.user) {
-          // Decode the user ID from the session
-          const userId = await checkLoggedIn(context)
-          IDorIP = userId.toString() // Convert User ID to a string
-          console.log('Logged in user ID:', IDorIP)
-        } else {
-          // User is not logged in, use their IP address
-          IDorIP = context.req.ip
-          console.log('Unauthenticated user IP:', IDorIP)
-        }
-        // Insert row to chapter_reads to add a read count
-        if(IDorIP){
-          const query = 'INSERT INTO chapter_reads (chapterId, IDorIP, viewedAt)VALUES (?, ?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE viewedAt = CURRENT_TIMESTAMP'
-          await queryDB(query, [chapter.id, IDorIP])}
       }
 
       return {
@@ -68,19 +66,32 @@ const StoryResolvers = {
     createStory: async (_, { input, token }, context) => {
       const userId = await checkLoggedIn(context)
 
-      //Check captcha
+      // Check captcha
       await checkCaptcha(token)
-
 
       const { title, description, genre, firstChapterContent } = input
 
-      //Sanitize content
-      const sanitizedContent = sanitizeHtml(firstChapterContent)
+      // Validate input lengths
+      if (title.length > MAX_TITLE_LENGTH) createUserError(`Title exceeds maximum length of ${MAX_TITLE_LENGTH} characters.`)
+      if (description.length > MAX_DESCRIPTION_LENGTH) createUserError(`Description exceeds maximum length of ${MAX_DESCRIPTION_LENGTH} characters.`)
+      if (genre.length > MAX_GENRE_LENGTH) createUserError(`Genre exceeds maximum length of ${MAX_GENRE_LENGTH} characters.`)
+      if (firstChapterContent.length > MAX_CONTENT_LENGTH) createUserError(`Content exceeds maximum length of ${MAX_CONTENT_LENGTH} characters.`)
 
-      //Check for spam and throw error if spam
-      await detectSpam(context, firstChapterContent, 'forum-post')
-      await detectSpam(context, title, 'forum-post', true)
-      await detectSpam(context, description, 'forum-post')
+      // Sanitize inputs:
+      // Remove all tags and attributes from title and description
+      const sanitizedTitle = sanitizeHtml(title, { allowedTags: [] })
+      const sanitizedDescription = sanitizeHtml(description, { allowedTags: [] })
+
+      // Only allow specified tags (no attributes) in the content
+      const sanitizedContent = sanitizeHtml(firstChapterContent, {
+        allowedTags: allowedTags,
+        allowedAttributes: {} // No attributes allowed
+      })
+
+      // Check for spam
+      await detectSpam(context, sanitizedContent, 'forum-post')
+      await detectSpam(context, sanitizedTitle, 'forum-post', true)
+      await detectSpam(context, sanitizedDescription, 'forum-post')
 
       return new Promise((resolve, reject) => {
         // Obtain a connection from the pool
@@ -100,7 +111,7 @@ const StoryResolvers = {
             let storyId
 
             // Insert story
-            queryDB('INSERT INTO stories (title, description, genre, authorId) VALUES (?, ?, ?, ?)', [title, description, genre, userId])
+            queryDB('INSERT INTO stories (title, description, genre, authorId) VALUES (?, ?, ?, ?)', [sanitizedTitle, sanitizedDescription, genre, userId])
               .then((storyResults) => {
                 storyId = storyResults.insertId
                 // Insert first chapter for the story
@@ -122,8 +133,8 @@ const StoryResolvers = {
                     message: 'Story and first chapter created successfully',
                     story: {
                       id: storyId,
-                      title,
-                      description,
+                      title: sanitizedTitle,
+                      description: sanitizedDescription,
                       genre,
                       authorId: userId
                     },
@@ -131,7 +142,6 @@ const StoryResolvers = {
                 })
               })
               .catch((transactionError) => {
-                // Rollback the transaction in case of errors
                 connection.rollback(() => {
                   connection.release()
                   reject(transactionError)
@@ -141,39 +151,33 @@ const StoryResolvers = {
         })
       })
     },
+
     // Softdelete a story and its root chapter
     deleteStory: async(_, { id }, context) => {
       const userId = await checkLoggedIn(context)
 
+      const parsedStoryId = validateNumber(id, true, 'Invalid story ID')
+
       // Count the number of chapters associated with the story
-      const chapterCountResult = await queryDB('SELECT COUNT(*) as count FROM chapters WHERE storyId = ? AND deleted_at IS NULL', [id], true)
+      const chapterCountResult = await queryDB('SELECT COUNT(*) as count FROM chapters WHERE storyId = ? AND deleted_at IS NULL', [parsedStoryId], true)
       const chapterCount = chapterCountResult.count
 
-      const story = await queryDB('SELECT * FROM stories WHERE id = ?', [id], true)
+      const story = await queryDB('SELECT * FROM stories WHERE id = ?', [parsedStoryId], true)
       if (userId !== story.authorId && !context.req.session.admin) createUserError('This is someone else\'s story')
 
-      // Don't delete the story if there are more than one chapters
       if (chapterCount > 1) {
         return { success: false, message: 'Cannot delete a story with more than one chapters' }
       }
 
-      //find chapter id
-
-      const chapter = await queryDB('SELECT * FROM chapters WHERE storyId = ?', [id],true)
-      console.log(chapter.id)
-      //Mark comments as deleted
+      const chapter = await queryDB('SELECT * FROM chapters WHERE storyId = ?', [parsedStoryId], true)
       const res = await queryDB('Call DeleteComments(?)', [chapter.id])
       console.log(res)
-
-      // Softdelete the initial chapter if exists
       if (chapterCount === 1) {
-        await queryDB('UPDATE chapters SET deleted_at = NOW() WHERE storyId = ?', [id])
+        await queryDB('UPDATE chapters SET deleted_at = NOW() WHERE storyId = ?', [parsedStoryId])
       }
 
-      // Softdelete the story
-      await queryDB('UPDATE stories SET deleted_at = NOW() WHERE id = ? AND authorId = ?', [id, userId], true)
-      const result = await queryDB('SELECT COUNT(*) as count FROM stories WHERE id = ? AND deleted_at IS NOT NULL ', [id],true)
-      console.log(result)
+      await queryDB('UPDATE stories SET deleted_at = NOW() WHERE id = ? AND authorId = ?', [parsedStoryId, userId], true)
+      const result = await queryDB('SELECT COUNT(*) as count FROM stories WHERE id = ? AND deleted_at IS NOT NULL', [parsedStoryId], true)
       if (result.count === 1) {
         return { success: true, message: 'Story and initial chapter soft-deleted successfully' }
       } else {
@@ -188,7 +192,6 @@ const StoryResolvers = {
       author.id = hashids.encode(author.id)
       return author
     },
-
   }
 }
 
