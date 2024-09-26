@@ -1,0 +1,50 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js for frontend
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+
+    - name: Install dependencies for frontend
+      run: |
+        cd frontend
+        npm install
+
+    - name: Build frontend
+      run: |
+        cd frontend
+        npm run build
+
+    - name: Copy frontend build to backend dist
+      run: |
+        rm -rf backend/dist/*  # Puhdista vanhat tiedostot
+        cp -r frontend/build/* backend/dist/
+
+    - name: Set up Node.js for backend
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+
+    - name: Install dependencies for backend
+      run: |
+        cd backend
+        npm install
+
+    - name: Deploy to Render
+      env:
+        RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}  
+      run: |
+        curl -X POST $RENDER_DEPLOY_HOOK_URL
