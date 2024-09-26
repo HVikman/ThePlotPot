@@ -13,13 +13,17 @@
     text-align: center;
   }
   .carousel-section{
+    max-width: 1400px;
     width:100%;
     overflow: hidden;
   }
   .card-grid-container {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-around; 
+    align-items: center;
+    justify-content: center; 
+    max-width: 1400px; 
+    margin: 0 auto; 
   }
   
   .card-grid-container .card {
@@ -27,6 +31,11 @@
     margin: 15px;
     border-radius: 10px;
     overflow: hidden;
+  }
+  .truncate-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   /* Responsive breakpoint for smaller screens */

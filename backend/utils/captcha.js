@@ -1,4 +1,3 @@
-const fetch = require('node-fetch')
 const { createUserError } = require('./tools.js')
 const checkCaptcha = async (token) => {
   const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {

@@ -1,32 +1,31 @@
 const striptags = require('striptags')
 const { createUserError } = require('./tools.js')
-const Akismet = require('akismet-api')
+const spamcheck = require('spam-detection')
 
-const client = new Akismet.Client({
-  key: process.env.AKISMET_KEY,
-  blog: process.env.URL
-})
+function containsUrlsOrEmails(text) {
+  // match URLs
+  const urlRegex = /(?:(?:https?|ftp):\/\/|www\.)[^\s/$.?#].[^\s]*/gi
+  // match email addresses
+  const emailRegex = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi
 
-const detectSpam = async (context, content, type, isHtml=false) => {
-  const { ip, userAgent, referrer } = context
+  return urlRegex.test(text) || emailRegex.test(text)
+}
 
-  if (isHtml){
+const detectSpam = (context, content, type, isHtml = false) => {
+  console.log(context.ip) //For future use
+
+  if (isHtml) {
     content = striptags(content)
   }
 
-  const comment = {
-    ip: ip || context.req.ip,
-    useragent: userAgent || context.req.headers['user-agent'],
-    content: content,
-    referrer: referrer || context.req.get('referrer'),
-    type: type,
-    name: context.req.session.username,
-    email: context.req.session.email
+  if (containsUrlsOrEmails(content)) {
+    throw createUserError('Spam detected: content contains URLs or email addresses.')
   }
+
   try {
-    const isSpam = await client.checkSpam(comment)
-    if(isSpam){
-      createUserError('Spam detected')
+    const result = spamcheck.detect(content) // returns 'spam' or 'ham'
+    if (result === 'spam') {
+      throw createUserError('Spam detected by content analysis.')
     }
   } catch (err) {
     console.error('Error:', err.message)
@@ -35,5 +34,5 @@ const detectSpam = async (context, content, type, isHtml=false) => {
 }
 
 module.exports = {
-  detectSpam
+  detectSpam,
 }

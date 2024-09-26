@@ -149,7 +149,7 @@ const StoryResolvers = {
       const chapterCountResult = await queryDB('SELECT COUNT(*) as count FROM chapters WHERE storyId = ? AND deleted_at IS NULL', [id], true)
       const chapterCount = chapterCountResult.count
 
-      const story = await queryDB('SELECT * FROM stories WHERE storyId = ?', [id], true)
+      const story = await queryDB('SELECT * FROM stories WHERE id = ?', [id], true)
       if (userId !== story.authorId && !context.req.session.admin) createUserError('This is someone else\'s story')
 
       // Don't delete the story if there are more than one chapters

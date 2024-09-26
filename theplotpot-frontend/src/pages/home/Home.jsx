@@ -41,8 +41,8 @@ const Home = () => {
                 <Card className="shadow" style={{ textAlign: 'center', width: '80%', minHeight: '70%' }}>
                   {index === 0 && <span className="badge badge-secondary badge-corner">Top Story</span>}
                   <Card.Body>
-                    <Card.Title>{story.title}</Card.Title>
-                    <Card.Text>{story.description}</Card.Text>
+                    <Card.Title className="truncate-text">{story.title}</Card.Title>
+                    <Card.Text className="truncate-text">{story.description}</Card.Text>
                     <Card.Text>Genre: {story.genre}</Card.Text>
                     <Card.Text><small className="text-muted">By:<Link style={{ color: 'inherit', textDecoration: 'inherit' }} to={`/user/${story.author.id}`}>{story.author.username}</Link> </small></Card.Text>
                     <Link to={`/story/${story.id}`}>
