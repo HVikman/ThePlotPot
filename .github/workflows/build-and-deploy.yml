@@ -17,6 +17,9 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20.x'
+        
+    - name: List files in the current directory
+      run: ls -la
 
     - name: Install dependencies for frontend
       run: |
