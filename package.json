@@ -9,7 +9,7 @@
   },
     "dependencies": {
       "concurrently": "^7.0.0",
-      "wait-on": "^6.0.0"
+      "wait-on": "^8.0.1"
     }
   }
   
