@@ -1,20 +1,43 @@
-
+/* Dark Mode Styles */
 .dark-mode,
 .dark-mode .card,
-.dark-mode .list-group-item{
-    color: #f9f9f9;
-    background-color: #333; 
+.dark-mode .list-group-item {
+  color: #f9f9f9;
+  background-color: #333;
 }
+
 .dark-mode .text-muted {
-    color: #888  !important;
-  }
-  
+  color: #888 !important;
+}
+
+.dark-mode input::placeholder,
+.dark-mode textarea::placeholder {
+  color: #ccc; 
+}
+
 .dark-mode .input-group-text,
 .dark-mode .form-control,
 .dark-mode .form-control:focus,
 .dark-mode .form-control:hover {
-    color: #f9f9f9;
-    background-color: #555; 
+  color: #f9f9f9;
+  background-color: #555;
+  border-color: #444; 
+}
+
+/* Dropdown styles for dark mode */
+.dark-mode .dropdown-menu {
+  background-color: #333;
+  color: #f9f9f9;
+}
+
+.dark-mode .dropdown-item {
+  background-color: #333;
+  color: #f9f9f9;
+}
+
+.dark-mode .dropdown-item:hover {
+  background-color: #444;
+  color: #fff;
 }
 
 .dark-mode .accordion-button {
@@ -26,10 +49,46 @@
 .dark-mode .accordion-button:not(.collapsed) {
     background-color: #222;
     color: #fff;
-    border-color: #333;
+}
+/* Light Mode Styles */
+.light-mode,
+.light-mode .card,
+.light-mode .list-group-item {
+  color: #000;
+  background-color: #fff;
 }
 
-.dark-mode input::placeholder,
-.dark-mode textarea::placeholder {
-    color: #ccc; 
+.light-mode .input-group-text,
+.light-mode .form-control,
+.light-mode .form-control:focus,
+.light-mode .form-control:hover {
+  color: #000; 
+  background-color: #fff; 
+}
+
+.light-mode .dropdown-menu {
+  background-color: #fff;
+  color: #000;
+}
+
+.light-mode .dropdown-item {
+  background-color: #fff;
+  color: #000;
+}
+
+.light-mode .dropdown-item:hover {
+  background-color: #e9ecef;
+  color: #000;
+}
+
+/* Modal dark mode */
+.dark-mode .modal-content {
+  background-color: #333;
+  color: #f9f9f9;
+}
+
+/* Modal light mode */
+.light-mode .modal-content {
+  background-color: #fff;
+  color: #000;
 }

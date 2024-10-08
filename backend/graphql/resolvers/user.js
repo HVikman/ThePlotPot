@@ -7,12 +7,18 @@ const sanitizeHtml = require('sanitize-html')
 const checkCaptcha = require('../../utils/captcha.js')
 const { checkLoggedIn, createUserError, validateNumber } = require('../../utils/tools.js')
 const { clearUserFromCache, setCachedBannedStatus } = require('../../utils/cache.js')
+const { RateLimiterMemory } = require('rate-limiter-flexible')
 
 // Define max length constants
 const MAX_USERNAME_LENGTH = 50
 const MAX_EMAIL_LENGTH = 100
 const MAX_PASSWORD_LENGTH = 100
 const MAX_LINK_LENGTH = 200
+
+const loginRateLimiter = new RateLimiterMemory({
+  points: 5,
+  duration: 15 * 60,
+})
 
 const UserResolvers = {
   // Queries
@@ -126,38 +132,54 @@ const UserResolvers = {
     },
     // Log in a user
     login: async (_, { email, password }, context) => {
-      // Sanitize email input
-      const sanitizedEmail = sanitizeHtml(email.trim().toLowerCase(), { allowedTags: [], allowedAttributes: {} })
+      const clientIp = context.clientIp
+      try {
+        await loginRateLimiter.consume(clientIp)
 
-      if (sanitizedEmail.length > MAX_EMAIL_LENGTH) createUserError(`Email too long (max ${MAX_EMAIL_LENGTH} characters)`)
+        // Sanitize email input
+        const sanitizedEmail = sanitizeHtml(email.trim().toLowerCase(), {
+          allowedTags: [],
+          allowedAttributes: {}
+        })
 
-      // Check if the email exists
-      const user = await queryDB('SELECT * FROM users WHERE email = ?', [sanitizedEmail], true)
-      if (!user) {
-        return { success: false, message: 'Email doesn\'t exist or incorrect password' }
+        if (sanitizedEmail.length > MAX_EMAIL_LENGTH) {
+          createUserError(`Email too long (max ${MAX_EMAIL_LENGTH} characters)`)
+        }
+
+        // Check if the email exists
+        const user = await queryDB('SELECT * FROM users WHERE email = ?', [sanitizedEmail], true)
+        if (!user) {
+          return { success: false, message: 'Invalid credentials' } // Generic error message
+        }
+
+        // Check if the password is correct
+        const valid = await bcrypt.compare(password, user.password)
+        if (!valid) {
+          return { success: false, message: 'Invalid credentials' } // Generic error message
+        }
+
+        if (user.bannedAt !== null) {
+          return { success: false, message: 'You are banned' }
+        }
+
+        // Store user session
+        context.req.session.user = hashids.encode(user.id)
+        context.req.session.username = user.username
+        context.req.session.email = user.email
+        context.req.session.admin = user.has_superpowers ? true : false
+        user.id = hashids.encode(user.id)
+
+        // Hash the email for privacy
+        user.email = crypto.createHash('sha256').update(user.email.trim().toLowerCase()).digest('hex')
+
+        return { success: true, message: 'Logged in successfully', user }
+
+      } catch (rateLimiterRes) {
+        return {
+          success: false,
+          message: 'Too many login attempts. Please try again in 15 minutes.',
+        }
       }
-
-      // Check if the password is correct
-      const valid = await bcrypt.compare(password, user.password)
-      if (!valid) {
-        return { success: false, message: 'Email doesn\'t exist or incorrect password' }
-      }
-
-      if (user.bannedAt !== null) {
-        return { success: false, message: 'You are banned' }
-      }
-
-      // Store user session
-      context.req.session.user = hashids.encode(user.id)
-      context.req.session.username = user.username
-      context.req.session.email = user.email
-      context.req.session.admin = user.has_superpowers ? true : false
-      user.id = hashids.encode(user.id)
-
-      // Hash the email for privacy
-      user.email = crypto.createHash('sha256').update(user.email.trim().toLowerCase()).digest('hex')
-
-      return { success: true, message: 'Logged in successfully', user }
     },
     // Change the user's password
     changePassword: async (_, { oldPassword, newPassword }, context) => {
