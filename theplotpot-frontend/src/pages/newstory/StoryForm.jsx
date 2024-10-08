@@ -14,15 +14,15 @@ import { useDarkMode } from '../../components/DarkModeContext'
 
 // Quill modules
 const quillModules = {
-  characterCounter: {
-    container: '#character-count',
-    maxChars: 12000
-  },
   toolbar: [
     [{ 'header': [1, 2, 3, false] }],
     ['bold', 'italic', 'underline', 'blockquote'],
     [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-  ]
+  ],
+  counter: {
+    container: '#character-count',
+    maxChars: 12000
+  }
 }
 
 // Form validation schema

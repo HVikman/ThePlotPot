@@ -34,4 +34,5 @@
 |25.4 | 6 | Refactored some forms, expanded darkmode functionality to every component and form, fixed bug with liking a chapter
 |26.9| 7 | Fixed forms i broke earlier, replaced Akismet with simple spam detection, fixed a ton of bugs and a lot of useless console log spam, updated all packages, updated icon for website
 |27.9| 12 | A lot more validation for user inputs, sanitizing user inputs, added csrf and allowed origins to protect graphql, changed front page to display most read stories in carousel and most recent ones in the grid, updated mysql tables, procedures and install script, automated frontend build in render
-|    | 202    | 
+|7.10 | 10 | Fixed Quill character counter, improved genre selection on all stories page, added rate limiting for login attempts, hopefully fixed CSRF on production...
+|    | 212    | 

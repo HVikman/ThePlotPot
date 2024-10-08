@@ -49,8 +49,7 @@ const ChapterResolvers = {
         const userId = await checkLoggedIn(context)
         IDorIP = userId.toString() // Convert User ID to string
       } else {
-        const forwarded = context.req.headers['x-forwarded-for']
-        let ip = forwarded ? forwarded.split(',')[0].trim() : context.req.connection.remoteAddress
+        let ip = context.clientIp || context.req.headers['x-forwarded-for'] || context.req.connection.remoteAddress
         if (ip === '::1' || ip === '127.0.0.1') {
           ip = 'localhost' // Handle localhost safely
         }

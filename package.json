@@ -1,0 +1,15 @@
+{
+    "name": "theplotpot",
+    "version": "1.0.0",
+    "scripts": {
+    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "npm run dev --prefix ./backend",
+    "frontend": "wait-on http://localhost:4000 && npm start --prefix ./theplotpot-frontend",
+    "restart": "npm run frontend"
+  },
+    "dependencies": {
+      "concurrently": "^7.0.0",
+      "wait-on": "^6.0.0"
+    }
+  }
+  

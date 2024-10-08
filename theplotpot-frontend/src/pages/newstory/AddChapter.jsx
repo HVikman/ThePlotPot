@@ -12,17 +12,16 @@ import { useDarkMode } from '../../components/DarkModeContext'
 import '../../utils/theme.css'
 // Quill modules
 const quillModules = {
-  characterCounter: {
-    container: '#char-count',
-    maxChars: 12000
-  },
   toolbar: [
     [{ 'header': [1, 2, 3, false] }],
     ['bold', 'italic', 'underline', 'blockquote'],
     [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-  ]
+  ],
+  counter: {
+    container: '#character-count',
+    maxChars: 12000
+  }
 }
-
 // Form validation schema
 const validationSchema = Yup.object({
   title: Yup.string()

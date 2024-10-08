@@ -9,8 +9,10 @@ import { setContext } from '@apollo/client/link/context'
 import 'bootstrap/dist/css/bootstrap.css'
 
 const getCsrfToken = () => {
-  const token = document.cookie.split('; ').find(row => row.startsWith('XSRF-TOKEN='))
-  return token ? token.split('=')[1] : null
+  const token = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('XSRF-TOKEN='))
+  return token ? decodeURIComponent(token.split('=')[1]) : null
 }
 
 const httpLink = new HttpLink({

@@ -1,31 +1,28 @@
 import Quill from 'quill'
 
-class CharacterCounter {
+class Counter {
   constructor(quill, options) {
     this.quill = quill
     this.options = options
     this.container = document.querySelector(options.container)
 
-    quill.on('text-change', this.update.bind(this))
-    this.update()
+    // Bind the update function to the 'text-change' event
+    quill.on(Quill.events.TEXT_CHANGE, this.update.bind(this))
   }
 
+  // Calculate the character count
   calculate() {
-    let text = this.quill.getText()
-    return text.length -1
+    const text = this.quill.getText().trim() // Get trimmed text
+
+    return text.length // Return the length of the text as character count
   }
 
+  // Update the character count display
   update() {
-    let charCount = this.calculate()
-    if (charCount > this.options.maxChars) {
-      let currentText = this.quill.getText()
-      let newText = currentText.substring(0, this.options.maxChars)
-      this.quill.setText(newText)
-    }
-    this.container.innerText = charCount + ' / ' + this.options.maxChars
+    const length = this.calculate()
+    const maxChars = this.options.maxChars
+    this.container.innerText = `${length} / ${maxChars} characters`
   }
 }
 
-Quill.register('modules/characterCounter', CharacterCounter)
-
-export default CharacterCounter
+Quill.register('modules/counter', Counter)
