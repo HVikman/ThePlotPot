@@ -1,1 +1,1 @@
-export { default } from './CookieConsentPopup'
+export { default } from './CookieConsentPopup.jsx'
