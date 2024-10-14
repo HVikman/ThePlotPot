@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Modal, Button } from 'react-bootstrap'
-import './privacypolicy.css'
-import '../utils/theme.css'
-import { useDarkMode } from './DarkModeContext'
+import './PrivacyPolicy.css'
+import '../../../utils/theme.css'
+import { useDarkMode } from '../../../context/DarkModeContext'
 
 const PrivacyPolicyModal = () => {
   const { isDarkMode } = useDarkMode()

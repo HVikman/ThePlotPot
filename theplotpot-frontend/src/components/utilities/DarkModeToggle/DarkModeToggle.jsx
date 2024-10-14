@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './DarkModeToggle.css'
-import { useDarkMode } from './DarkModeContext'
+import { useDarkMode } from '../../../context/DarkModeContext'
 import { LightbulbFill } from 'react-bootstrap-icons'
 
 const DarkModeToggle = () => {

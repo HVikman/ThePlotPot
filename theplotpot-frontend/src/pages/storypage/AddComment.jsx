@@ -1,10 +1,10 @@
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { Form, Button } from 'react-bootstrap'
-import { useNotifications } from '../../components/NotificationsContext'
+import { useNotifications } from '../../context/NotificationsContext'
 import { useMutation } from '@apollo/client'
 import { ADD_COMMENT_MUTATION } from '../../api/queries'
-import { useDarkMode } from '../../components/DarkModeContext'
+import { useDarkMode } from '../../context/DarkModeContext'
 
 const validationSchema = Yup.object({
   content: Yup.string()

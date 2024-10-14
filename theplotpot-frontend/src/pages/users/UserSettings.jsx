@@ -4,8 +4,8 @@ import * as Yup from 'yup'
 import { Accordion, Form, Button, Container, Alert, Row, Col, Card, InputGroup } from 'react-bootstrap'
 import { useMutation } from '@apollo/client'
 import { EDIT_COFFEE, CHANGE_PASSWORD } from '../../api/queries'
-import { useNotifications } from '../../components/NotificationsContext'
-import { useDarkMode } from '../../components/DarkModeContext'
+import { useNotifications } from '../../context/NotificationsContext'
+import { useDarkMode } from '../../context/DarkModeContext'
 
 
 const UserSettings = () => {

@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import { Modal, Button, Container, Row, Col, Card, ListGroup, Form, InputGroup, Dropdown } from 'react-bootstrap'
 import { GET_ALL_STORIES } from '../../api/queries'
-import ErrorComponent from '../../components/Error'
-import { useDarkMode } from '../../components/DarkModeContext'
+import ErrorComponent from '../../components/utilities/Error'
+import { useDarkMode } from '../../context/DarkModeContext'
 import '../../utils/theme.css'
 
 const StoriesPage = () => {

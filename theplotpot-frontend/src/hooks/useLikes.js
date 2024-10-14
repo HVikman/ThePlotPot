@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@apollo/client'
 import { LIKE_CHAPTER, IS_CHAPTER_LIKED, UNLIKE_CHAPTER } from '../api/queries'
-import { useNotifications } from '../components/NotificationsContext'
+import { useNotifications } from '../context/NotificationsContext'
 
 export const useIsChapterLiked = (id) => {
   const { data } = useQuery(IS_CHAPTER_LIKED, {

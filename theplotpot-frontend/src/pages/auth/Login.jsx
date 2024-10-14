@@ -4,12 +4,12 @@ import * as Yup from 'yup'
 import { useMutation } from '@apollo/client'
 import { LOGIN_MUTATION } from '../../api/queries'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from './AuthContext'
+import { useAuth } from '../../context/AuthContext'
 import { Form, Button, Container, Alert, InputGroup } from 'react-bootstrap'
-import { useNotifications } from '../../components/NotificationsContext'
+import { useNotifications } from '../../context/NotificationsContext'
 import { Link } from 'react-router-dom'
 import { KeyFill } from 'react-bootstrap-icons'
-import { useDarkMode } from '../../components/DarkModeContext'
+import { useDarkMode } from '../../context/DarkModeContext'
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email('Invalid email').required('Email is required'),

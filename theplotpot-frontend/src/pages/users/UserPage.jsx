@@ -3,7 +3,7 @@ import { useQuery } from '@apollo/client'
 import { Card, Accordion, Container, Row, Col, ListGroup } from 'react-bootstrap'
 import { GET_USER_PROFILE } from '../../api/queries'
 import { CupHot } from 'react-bootstrap-icons'
-import { useDarkMode } from '../../components/DarkModeContext'
+import { useDarkMode } from '../../context/DarkModeContext'
 
 const UserPage = () => {
   const { isDarkMode } = useDarkMode()

@@ -5,10 +5,10 @@ import { Form, FormControl, Button } from 'react-bootstrap'
 import ReactQuill from 'react-quill'
 import 'quill/dist/quill.snow.css'
 import '../../utils/charactercounter'
-import { useCreateChapter } from '../../hooks/createChapter'
-import { useNotifications } from '../../components/NotificationsContext'
+import { useCreateChapter } from '../../hooks/useCreateChapter.js'
+import { useNotifications } from '../../context/NotificationsContext'
 import './quill.css'
-import { useDarkMode } from '../../components/DarkModeContext'
+import { useDarkMode } from '../../context/DarkModeContext'
 import '../../utils/theme.css'
 // Quill modules
 const quillModules = {

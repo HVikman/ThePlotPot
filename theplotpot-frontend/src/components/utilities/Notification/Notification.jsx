@@ -1,6 +1,6 @@
 import { notification } from 'antd'
 import { useEffect } from 'react'
-import { useNotifications } from './NotificationsContext'
+import { useNotifications } from '../../../context/NotificationsContext'
 
 const Notification = () => {
   const { notifications } = useNotifications()

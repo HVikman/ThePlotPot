@@ -1,4 +1,4 @@
-import { useAuth } from '../../pages/auth/AuthContext'
+import { useAuth } from '../../context/AuthContext'
 import NotFoundPage from '../../pages/notfound/NotFoundPage'
 
 const ProtectedRoute = ({ children }) => {

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Container } from 'react-bootstrap'
 import CommentCard from './CommentCard'
 import AddCommentForm from './AddComment'
-import { useAuth } from '../auth/AuthContext'
+import { useAuth } from '../../context/AuthContext'
 
 const Comments = ({ comments: initialComments, chapterId }) => {
   const { user } = useAuth()

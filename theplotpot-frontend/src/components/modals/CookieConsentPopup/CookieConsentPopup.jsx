@@ -1,7 +1,7 @@
 import './CookieConsentPopup.css'
 import { Button } from 'react-bootstrap'
 import { lazy, Suspense } from 'react'
-const PrivacyPolicyModal = lazy(() => import('./PrivacyPolicy'))
+const PrivacyPolicyModal = lazy(() => import('../PrivacyPolicy/PrivacyPolicy'))
 
 const CookieConsentPopup = ({ onConsent }) => {
   return (

@@ -1,6 +1,6 @@
 import { Container, Row, Col } from 'react-bootstrap'
 import { lazy, Suspense } from 'react'
-const PrivacyPolicyModal = lazy(() => import('./PrivacyPolicy'))
+const PrivacyPolicyModal = lazy(() => import('../../modals/PrivacyPolicy'))
 
 const Footer = () => {
   return (

@@ -2,10 +2,10 @@ import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Navbar, Nav, NavDropdown, Button } from 'react-bootstrap'
 import { useMutation } from '@apollo/client'
-import { LOGOUT_MUTATION } from '../api/queries'
-import { useAuth } from '../pages/auth/AuthContext'
+import { LOGOUT_MUTATION } from '../../../api/queries'
+import { useAuth } from '../../../context/AuthContext'
 import './Navbar.css'
-import { useNotifications } from '../components/NotificationsContext'
+import { useNotifications } from '../../../context/NotificationsContext'
 
 
 const Navigation = () => {
