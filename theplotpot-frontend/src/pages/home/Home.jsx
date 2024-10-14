@@ -1,11 +1,11 @@
 import { useQuery } from '@apollo/client'
 import { Carousel, Card, Button, CardGroup } from 'react-bootstrap'
 import { GET_ALL_STORIES } from '../../api/queries'
-import './home.css'
+import './Home.css'
 import { Link } from 'react-router-dom'
-import ErrorComponent from '../../components/Error'
+import ErrorComponent from '../../components/utilities/Error'
 import '../../utils/theme.css'
-import { useDarkMode } from '../../components/DarkModeContext'
+import { useDarkMode } from '../../context/DarkModeContext'
 import { formatDistanceToNow } from 'date-fns'
 
 const LoadingPlaceholder = () => {

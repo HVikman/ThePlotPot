@@ -1,6 +1,6 @@
 import { Spin } from 'antd'
 import { Card } from 'react-bootstrap'
-import { useDarkMode } from '../../components/DarkModeContext'
+import { useDarkMode } from '../../context/DarkModeContext'
 import '../../utils/theme.css'
 
 const loadingTexts = [

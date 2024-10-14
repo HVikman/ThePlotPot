@@ -4,12 +4,12 @@ import * as Yup from 'yup'
 import { useMutation } from '@apollo/client'
 import { SIGNUP_MUTATION } from '../../api/queries'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from './AuthContext'
+import { useAuth } from '../../context/AuthContext'
 import { Form, Button, Container, Alert, InputGroup } from 'react-bootstrap'
-import { useNotifications } from '../../components/NotificationsContext'
+import { useNotifications } from '../../context/NotificationsContext'
 import { PersonFill, KeyFill } from 'react-bootstrap-icons'
 import { Link } from 'react-router-dom'
-import { useDarkMode } from '../../components/DarkModeContext'
+import { useDarkMode } from '../../context/DarkModeContext'
 
 const SignupSchema = Yup.object().shape({
   username: Yup.string().min(3, 'Username must be at least 3 characters').required('Username is required'),

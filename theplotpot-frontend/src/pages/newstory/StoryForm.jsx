@@ -7,10 +7,10 @@ import 'quill/dist/quill.snow.css'
 import '../../utils/charactercounter'
 import './quill.css'
 import '../../utils/theme.css'
-import { useAuth } from '../auth/AuthContext'
-import { useNotifications } from '../../components/NotificationsContext'
-import { useCreateStory } from '../../hooks/createStory'
-import { useDarkMode } from '../../components/DarkModeContext'
+import { useAuth } from '../../context/AuthContext'
+import { useNotifications } from '../../context/NotificationsContext'
+import { useCreateStory } from '../../hooks/useCreateStory.js'
+import { useDarkMode } from '../../context/DarkModeContext'
 
 // Quill modules
 const quillModules = {

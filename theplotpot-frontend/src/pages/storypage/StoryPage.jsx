@@ -5,8 +5,8 @@ import Chapter from './Chapter'
 import { Container, Row, Col, Card } from 'react-bootstrap'
 import { GET_STORY_BY_ID, GET_CHAPTER_CHILDREN, GET_CHAPTER } from '../../api/queries'
 import LoadingComponent from './Loading'
-import ErrorComponent from '../../components/Error'
-import { useDarkMode } from '../../components/DarkModeContext'
+import ErrorComponent from '../../components/utilities/Error'
+import { useDarkMode } from '../../context/DarkModeContext'
 
 const StoryPage = () => {
   const { isDarkMode } = useDarkMode()

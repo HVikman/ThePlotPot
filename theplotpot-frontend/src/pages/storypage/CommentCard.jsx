@@ -4,8 +4,8 @@ import { Popconfirm } from 'antd'
 import { Link } from 'react-router-dom'
 import { useMutation } from '@apollo/client'
 import { DELETE_COMMENT } from '../../api/queries'
-import { useNotifications } from '../../components/NotificationsContext'
-import { useDarkMode } from '../../components/DarkModeContext'
+import { useNotifications } from '../../context/NotificationsContext'
+import { useDarkMode } from '../../context/DarkModeContext'
 
 const CommentCard = ({ comment, user, deleteComment }) => {
   const { addNotification } = useNotifications()

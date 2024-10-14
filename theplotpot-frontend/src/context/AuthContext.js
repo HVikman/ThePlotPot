@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext } from 'react'
 import { useQuery } from '@apollo/client'
-import { ME } from '../../api/queries'
+import { ME } from '../api/queries'
 
 const AuthContext = createContext({
   user: null,
