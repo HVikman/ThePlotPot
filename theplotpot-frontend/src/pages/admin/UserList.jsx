@@ -53,12 +53,7 @@ const UserList = () => {
     }
   }
   //TODO: handle user activation
-  const handleActivate = async (userId) => {
-  //manual user activation will be here if needed
-  }
 
-
-  //TODO: handle user deletion
   const handleDelete = async (userId) => {
     if (window.confirm('Are you absolutely sure you want to delete this user? This action cannot be undone.')) {
       try {
@@ -101,7 +96,7 @@ const UserList = () => {
               {!user.has_superpowers && (
                 <Popconfirm
                   title="Are you sure you want to activate this user?"
-                  onConfirm={() => handleActivate(user.id)}
+                  onConfirm={() => {}}
                   okText="Yes"
                   cancelText="No"
                 >

@@ -347,6 +347,7 @@ const BAN_USER = gql `
 mutation Mutation($id: ID!) {
   banUser(id: $id) {
     success
+    message
   }
 }
 `
@@ -354,13 +355,15 @@ const UNBAN_USER = gql `
 mutation Mutation($id: ID!) {
   unbanUser(id: $id) {
     success
+    message
   }
 }
 `
 const DELETE_USER = gql `
 mutation Mutation($id: ID!) {
-  unbanUser(id: $id) {
+  deleteUser(id: $id) {
     success
+    message
   }
 }
 `

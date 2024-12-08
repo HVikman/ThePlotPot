@@ -24,7 +24,6 @@ const Home = () => {
   let featuredStories = []
 
   if (data) {
-    console.log(data.getAllStories[0].createdAt)
     const sortedByReads = [...data.getAllStories].sort((a, b) => b.read_count - a.read_count)
     featuredStories = sortedByReads.slice(0, 5) // Otetaan 5 tarinaa esiin carouselia varten
 
