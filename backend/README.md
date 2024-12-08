@@ -58,26 +58,43 @@ Install MySQL. You can download MySQL Community Server from [MySQL Downloads](ht
     code .env
     ```
 
-3. Replace the placeholder values with your actual configuration details. Edit the following variables:
+3. Generate 3 Secure Secrets 
+- On Windows:  
+  Use the following PowerShell command to generate a secure, random Base64-encoded secret:
+  ```powershell
+  [Convert]::ToBase64String((New-Object Byte[] 32 | % { [void][System.Security.Cryptography.RNGCryptoServiceProvider]::Create().GetBytes($_); $_ }))
+  ```
+- On Linux:
+  Use the openssl command to generate a secure, random Base64-encoded secret:
+  ```bash
+  openssl rand -base64 32
+  ```
+
+4. Replace the placeholder values with your actual configuration details. Edit the following variables:
+- Database Configuration:
    - `DB_HOST`
    - `DB_PORT` (If not default 3306)
    - `DB_USER`
    - `DB_PASSWORD`
    - `DB_NAME`
+
+- Redis Configuration:
    - `REDIS_HOST`
    - `REDIS_PASS`
    - `REDIS_PORT` (If not default 6379)
+
+- Application Configuration:
    - `PORT`
    - `URL`
    - `Domain`
-   - `AKISMET_KEY` (replace with your Akismet API key)
+   
+- Secret Keys
    - `RECAPTCHA_SECRET_KEY` (replace with your Google reCAPTCHA secret key)
    - `IDSECRET` (generate a strong and unique secret)
    - `SECRET` (generate a strong and unique secret)
-
-   You can use tools like [RandomKeygen](https://randomkeygen.com/) or your preferred method to generate secure random strings for `IDSECRET` and `SECRET`. Do not use same string for both.
-
-4. Save the `.env` file.
+   - `CSRF_SECRET` (generate a strong and unique secret)
+    
+5. Save the `.env` file.
 
 
 ### Installing Dependencies

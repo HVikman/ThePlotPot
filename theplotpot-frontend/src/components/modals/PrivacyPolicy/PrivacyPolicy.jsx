@@ -30,7 +30,7 @@ const PrivacyPolicyModal = () => {
         </Modal.Header>
         <Modal.Body className={`content ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
           <div >
-            <h4>Last Updated: 06.11.2023</h4>
+            <h4>Last Updated: 29.10.2024</h4>
             <h3>Welcome to ThePlotPot</h3>
             <p>This Privacy Policy is designed to inform you about how we handle your personal information.</p>
 
@@ -50,7 +50,6 @@ const PrivacyPolicyModal = () => {
             <h5>Anti-Spam Measures</h5>
             <ul>
               <li><strong>Google reCAPTCHA:</strong> We implement reCAPTCHA v3 to prevent spam and abuse of our services. reCAPTCHA analyzes your interactions to differentiate between human users and bots without requiring explicit user interaction. Google may collect hardware and software information, such as device and application data, and send that data to Google for analysis. For more information, please visit <a href="https://policies.google.com/privacy">Google&apos;s Privacy Policy</a>.</li>
-              <li><strong>Akismet:</strong> We use Akismet to filter out spam from comments and stories submitted by users. When comments or stories are submitted, certain information about the user, such as username, email address, IP address, user agent, and the content itself may be sent to Akismet for analysis and spam detection. For more information, please visit <a href="https://akismet.com/privacy/">Akismet&apos;s Privacy Policy</a>.</li>
             </ul>
             <h5>Content you generate:</h5>
             <ul>

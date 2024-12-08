@@ -33,7 +33,10 @@ const checkLoggedIn = async (context, message = true) => {
  * @param {string} message - The error message to display.
  */
 const createUserError = (message) => {
-  throw new Error(message)
+  const error = new Error(message)
+  error.isUserError = true
+  console.log(error)
+  throw error
 }
 
 /**

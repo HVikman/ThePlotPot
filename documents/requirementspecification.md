@@ -11,13 +11,13 @@
 * Any user can start a new story by writing the initial chapter.
 * Title, genre and content for each story/chapter.
 #### Collaborative Writing:
-* After an initial chapter is posted, users can suggest continuations for a set number of branches by writing a next chapter (e.g., two or three).
-* For each chapter, the system should show a branching option, allowing users to either continue Branch 1 or Branch 2.
+* After an initial chapter is posted, any user can write continuation for a maximum of three branches by writing a next chapter.
+* For each chapter, there can be another 3 branches. Maximum length is 10 chapters.
 #### Story Viewing:
 * Stories can be read linearly.
 * At the end of each chapter, readers are presented with options to explore each branch.
-#### Commenting (Optional):
-* Readers can leave comments or feedback on each chapter.
+#### Commenting:
+* Readers can leave comments or feedback and likes on each chapter.
 
 ## Technical Requirements
 
@@ -27,6 +27,7 @@
 * users table: Store user data, including login details and profile information.
 * stories table: Store individual stories with reference to its author.
 * chapters table: Storing individual chapters, with references to parent chapters and their respective branches.
+* Other tables: Views and likes are stored in separate tables of which they are updated periodically
 
 ##### Cache Database REDIS
 * Sessions: stores user session data
@@ -35,7 +36,6 @@
 ##### GraphQL Schema
 * Queries: Fetch user details, stories, chapters, and comments.
 * Mutations: Add or update user details, stories, chapters, upvotes, and comments.
-* Subscriptions: Real-time updates when a new chapter is added or when a chapter gets upvotes.
 
 #### Frontend
 * React for building the UI components.
@@ -47,8 +47,9 @@
 * Secure sign-up, login, and session management.
 
 ## Challenges and Constraints
-* Maintaining content quality. -> Bot detection with Google Recaptcha v3 and spam detection with Akismet.
+* Maintaining content quality. -> Bot detection with Google Recaptcha v3 and basic spam detection.
 * Managing spam contributions and ensuring platform integrity. -> Admins are able to delete stories, chapters and comments, ban, unban and delete users.
+
 ## Future Scope 
 * Implementation of user profiles with more details and achievements.
 * Introduction of a tree view to visualize story progression.

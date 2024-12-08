@@ -52,7 +52,6 @@ const UserSettings = () => {
   const handleCoffeeLinkChange = async () => {
     try {
       const fullLink = `https://www.buymeacoffee.com/${formik.values.coffeeName}`
-      console.log(fullLink)
       await editCoffee({ variables: { link: fullLink } })
       formik.setSubmitting(false)
       formik.resetForm()

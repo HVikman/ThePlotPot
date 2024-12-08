@@ -8,6 +8,7 @@ type Mutation {
     editCoffee(link:String!):Response!
     deleteStory(id: ID!): Response!
     deleteChapter(id: ID!): Response!
+    deleteUser(id: ID!): Response!
     createChapter(content: String!, storyId: ID!, title: String!, branch: Int!, parentChapterId: ID!, token: String!): Chapter!
     login(email: String!, password: String!): LoginResponse!
     logout: Response!

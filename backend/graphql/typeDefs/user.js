@@ -9,6 +9,7 @@ module.exports = gql`
         stories: [Story]
         has_superpowers: Boolean
         bannedAt: String
+        deletedAt: String
     }
     type LoginResponse {
         success: Boolean!

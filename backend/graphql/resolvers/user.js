@@ -31,7 +31,7 @@ const UserResolvers = {
       // Validate and decode the user ID
       const parsedId = validateNumber(id, true, 'Invalid user ID')
 
-      const user = await queryDB('SELECT * FROM users WHERE id = ?', [parsedId], true)
+      const user = await queryDB('SELECT * FROM users WHERE id = ? AND deletedAt IS NULL', [parsedId], true)
       if (!user) createUserError('User not found')
 
       // Hash the email for privacy
@@ -44,7 +44,7 @@ const UserResolvers = {
       await checkLoggedIn(context)
       if (!context.req.session.admin) createUserError('You are not admin')
 
-      const users = await queryDB('SELECT * FROM users')
+      const users = await queryDB('SELECT * FROM users WHERE deletedAt IS NULL')
 
       // Encode each user's ID
       users.forEach(user => {
@@ -62,7 +62,7 @@ const UserResolvers = {
 
       const original = hashids.decode(context.req.session.user)
       const userId = original[0]
-      const user = await queryDB('SELECT * FROM users WHERE id = ?', [userId], true)
+      const user = await queryDB('SELECT * FROM users WHERE id = ? AND deletedAt IS NULL', [userId], true)
       if (!user) createUserError('User not found')
 
       // Hash the email for privacy
@@ -74,7 +74,7 @@ const UserResolvers = {
     getUserProfile: async (_, { id }) => {
       const original = hashids.decode(id)
       const userId = original[0]
-      const user = await queryDB('SELECT * FROM users WHERE id = ?', [userId], true)
+      const user = await queryDB('SELECT * FROM users WHERE id = ? AND deletedAt IS NULL', [userId], true)
       if (!user) createUserError('User not found')
 
       // Hash the email for privacy
@@ -273,7 +273,34 @@ const UserResolvers = {
       } else {
         createUserError('Failed to unban user.')
       }
-    }
+    },
+
+    // Delete user (admin only)
+    deleteUser: async (_, { id }, context) => {
+      await checkLoggedIn(context)
+      if (!context.req.session.admin) createUserError('You are not an admin')
+    
+      const original = hashids.decode(id)
+      const userId = original[0]
+      if (!userId) createUserError('Invalid user ID')
+    
+      const deleteUserQuery = 'UPDATE users SET deletedAt = CURRENT_TIMESTAMP WHERE id = ?'
+      const deleteUserResult = await queryDB(deleteUserQuery, [userId])
+    
+      if (deleteUserResult.affectedRows > 0) {
+        clearUserFromCache(userId)
+    
+        const deleteCommentsQuery = 'UPDATE comments SET deletedAt = CURRENT_TIMESTAMP WHERE userId = ?'
+        await queryDB(deleteCommentsQuery, [userId]);
+    
+        return {
+          success: true,
+          message: 'User deleted successfully',
+        }
+      }
+    
+      createUserError('Failed to delete user.')
+    },
   },
 
   // Fetching stories where user is an author

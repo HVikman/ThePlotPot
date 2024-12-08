@@ -36,4 +36,6 @@
 |27.9| 12 | A lot more validation for user inputs, sanitizing user inputs, added csrf and allowed origins to protect graphql, changed front page to display most read stories in carousel and most recent ones in the grid, updated mysql tables, procedures and install script, automated frontend build in render
 |7.10 | 10 | Fixed Quill character counter, improved genre selection on all stories page, added rate limiting for login attempts, hopefully fixed CSRF on production...
 |13.10 | 6 | Restructuring frontend component organization and naming for better maintainability
-|    | 218    | 
+|29.10 | 4 | Added user deletion for admins and updated privacy policy
+|8.12| 4 | More testing, tidying up the code for submitting. Some work on documentation
+|    | 226    | 
