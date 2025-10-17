@@ -6,6 +6,7 @@ const { createClient } = require('redis')
 const lusca = require('lusca')
 
 const path = require('path')
+const fs = require('fs')
 const cors = require('cors')
 const rateLimit = require('express-rate-limit')
 
@@ -13,12 +14,18 @@ const app = express()
 const dotenv = require('dotenv')
 dotenv.config()
 
+const secretsFile = path.join(__dirname, "secrets", ".secrets.env")
+if (fs.existsSync(secretsFile)) {
+  dotenv.config({ path: secretsFile })
+  console.log("Loaded secrets from", secretsFile)
+}
+
 const scheduleChapterCountsUpdate = require('./db/batchJobs')
 const createDatabase = require('./db/createDatabase')
 
 const limiter = rateLimit({
   windowMs: 5 * 60 * 1000, // 5 minutes
-  max: 200, // limit each IP to 200 requests per windowMs
+  max: Number(process.env.MAX_REQUESTS) || 200, // limit each IP to 200 requests per windowMs or amount specified in environment variables
 })
 
 let redisClient = createClient({

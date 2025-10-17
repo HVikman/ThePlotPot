@@ -27,7 +27,8 @@
 |20.12| 6 | Learning about redis, converted banned status cache and session storage to use redis
 |21.12| 8 | Added seo friendly 404 page, added dark mode, deployed app to render for testing 
 |28.12| 6 | Extensive testing of application on production environment. Writing documentation and updating old documentation.
-|2024| | Total hours for 2023: 170
+| **Total hours for 2023** | **170** |  |
+| **2024** |  |  |
 |18.4 | 4 | Refactored and improved darkmode functionality, small fixes
 |20.4 | 1 | Made darkmode toggle look nicer
 |23.4 | 2 | Improved backend error handling to avoid backend crashes, testing
@@ -38,8 +39,10 @@
 |13.10 | 6 | Restructuring frontend component organization and naming for better maintainability
 |29.10 | 4 | Added user deletion for admins and updated privacy policy
 |8.12| 4 | More testing, tidying up the code for submitting. Some work on documentation
-|2025| | Total hours for 2024: 56
+| **Total hours for 2024** | **56** |  |
+| **2025** |  |  |
 |23.4| 5 | Switched from Quill to Tiptap due to broken character counter after update and better theming support. Separated text editor into its own component.
 |29.4| 7 | Fixed broken notifications after Ant Design update, replaced static grecaptcha script and inline calls with reusable recaptcha utility.
 |16.10| 4 | Added database initialization script to backend startup
-|    | 242    | 
+|17.10| 10 | Dockerfile and docker-compose files for using Docker, Minor improvements. Testing Docker deployment. Rewriting documentation.
+|    | 252    | 
