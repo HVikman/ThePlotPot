@@ -1,0 +1,99 @@
+.editor-content {
+    min-height: 400px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    overflow-y: auto;
+    line-height: 1.6;
+    font-size: 16px;
+    cursor: text;
+  }
+/* remove outline */
+.ProseMirror:focus {
+    outline: none;
+  }
+  /* set */
+  .ProseMirror {        
+    min-height: 400px;
+  }
+  
+  .editor-content:focus-within {
+    outline: none;
+  }
+  
+  .editor-content:empty::before {
+    content: attr(data-placeholder);
+    color: #aaa;
+    pointer-events: none;
+    display: block;
+    height: 100%;
+  }
+  
+  .dark-mode .editor-content {
+    background-color: #444;
+    color: #f9f9f9;
+    border-color: #666;
+  }
+  
+  .editor-toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    padding: 5px;
+    border-radius: 5px;
+  }
+  
+  .dark-mode .editor-toolbar {
+    background-color: #333;
+    border-color: #444;
+    color: #f9f9f9;
+  }
+  
+  .editor-toolbar button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  
+  .editor-toolbar button.active {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .editor-toolbar button:hover {
+    background-color: #f4f4f4;
+  }
+  
+  .dark-mode .editor-toolbar button {
+    color: #ccc;
+  }
+  
+  .dark-mode .editor-toolbar button:hover {
+    background-color: #444;
+    color: #f9f9f9;
+  }
+  
+  .dark-mode .editor-toolbar button.active {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .editor-toolbar button svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .dark-mode .editor-toolbar button svg {
+    fill: #ccc;
+  }
+  

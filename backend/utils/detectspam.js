@@ -1,6 +1,5 @@
 const striptags = require('striptags')
 const { createUserError } = require('./tools.js')
-const spamcheck = require('spam-detection')
 
 function containsUrlsOrEmails(text) {
   // match URLs
@@ -22,15 +21,6 @@ const detectSpam = (context, content, type, isHtml = false) => {
     throw createUserError('Spam detected: content contains URLs or email addresses.')
   }
 
-  try {
-    const result = spamcheck.detect(content) // returns 'spam' or 'ham'
-    if (result === 'spam') {
-      throw createUserError('Spam detected by content analysis.')
-    }
-  } catch (err) {
-    console.error('Error:', err.message)
-    throw new Error('Unable to check for spam at this time.')
-  }
 }
 
 module.exports = {

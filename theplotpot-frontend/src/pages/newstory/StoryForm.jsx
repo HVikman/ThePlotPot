@@ -2,28 +2,14 @@ import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { Form, Button, Accordion, FormControl,FormSelect } from 'react-bootstrap'
 import genres from './genres'
-import ReactQuill from 'react-quill'
-import 'quill/dist/quill.snow.css'
-import '../../utils/charactercounter'
-import './quill.css'
+import TextEditor from '../../components/utilities/TextEditor'
 import '../../utils/theme.css'
 import { useAuth } from '../../context/AuthContext'
 import { useNotifications } from '../../context/NotificationsContext'
 import { useCreateStory } from '../../hooks/useCreateStory.js'
 import { useDarkMode } from '../../context/DarkModeContext'
-
-// Quill modules
-const quillModules = {
-  toolbar: [
-    [{ 'header': [1, 2, 3, false] }],
-    ['bold', 'italic', 'underline', 'blockquote'],
-    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-  ],
-  counter: {
-    container: '#character-count',
-    maxChars: 12000
-  }
-}
+import { useLoadReCaptcha } from '../../hooks/useLoadReCaptcha'
+import { executeRecaptcha } from '../../utils/executeRecaptcha'
 
 // Form validation schema
 const validationSchema = Yup.object({
@@ -37,6 +23,8 @@ const validationSchema = Yup.object({
   genre: Yup.string().required('Required')
 })
 
+const MAX_CHARACTERS = 12000
+
 const initialValues = {
   title: '',
   description: '',
@@ -46,6 +34,7 @@ const initialValues = {
 }
 
 const StoryForm = () => {
+  useLoadReCaptcha('6LfY0fooAAAAAKaljIbo723ZiMGApMCVg6ZU805o')
   const { addNotification } = useNotifications()
   const { user } = useAuth()
   const isAuthenticated = !!user
@@ -55,16 +44,25 @@ const StoryForm = () => {
   const formik = useFormik({
     initialValues,
     validationSchema,
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
+      console.log('Form submitted!', values)
+
       if (values.honeypot) {
         console.log('Bot detected')
         return
       }
-      // eslint-disable-next-line no-undef
-      grecaptcha.ready(async () => {
-        // eslint-disable-next-line no-undef
-        const token = await grecaptcha.execute('6LfY0fooAAAAAKaljIbo723ZiMGApMCVg6ZU805o', { action: 'submit' })
-        createStory({
+
+      let token
+      try {
+        token = await executeRecaptcha()
+      } catch (error) {
+        console.error('Error generating reCAPTCHA token:', error)
+        addNotification('Failed to verify reCAPTCHA. Please try again.', 3000, 'error')
+        return
+      }
+
+      try {
+        await createStory({
           variables: {
             title: values.title,
             description: values.description,
@@ -72,11 +70,12 @@ const StoryForm = () => {
             firstChapterContent: values.content,
             token
           }
-        }).catch(error => {
-          console.error('There was an error creating the chapter:', error)
-          addNotification(error.message, 3000, 'error')
         })
-      })
+        addNotification('Story created successfully!', 3000, 'success')
+      } catch (error) {
+        console.error('Error creating story:', error)
+        addNotification('Failed to create story. Please try again.', 3000, 'error')
+      }
     },
   })
 
@@ -84,8 +83,18 @@ const StoryForm = () => {
     return <p>You are not logged in.</p>
   }
 
+  const handleEditorUpdate = (updatedContent) => {
+    formik.setFieldValue('content', updatedContent)
+  }
+
+
   return (
-    <Form onSubmit={formik.handleSubmit}>
+    <Form
+      onSubmit={(e) => {
+        e.preventDefault() // Prevent default behavior
+        formik.handleSubmit(e) // Call Formik's submit handler
+      }}
+    >
       <Accordion defaultActiveKey="0">
         <Accordion.Item eventKey="0" className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
           <Accordion.Header>Step 1: Basic Details</Accordion.Header>
@@ -100,6 +109,16 @@ const StoryForm = () => {
                 onBlur={formik.handleBlur}
                 value={formik.values.title}
               />
+              <div
+                className={`character-counter ${
+                  formik.values.title.length > 80 ? 'warning' : ''
+                }`}
+              >
+                {formik.values.title.length}/100 characters
+              </div>
+              {formik.touched.title && formik.errors.title && (
+                <Form.Text className="text-danger">{formik.errors.title}</Form.Text>
+              )}
             </Form.Group>
             <Form.Group controlId="formDescription">
               <Form.Label>Description</Form.Label>
@@ -108,10 +127,22 @@ const StoryForm = () => {
                 rows={4}
                 placeholder="Captivating description goes here!"
                 name="description"
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  formik.handleChange(e)
+                }}
                 onBlur={formik.handleBlur}
                 value={formik.values.description}
               />
+              <div
+                className={`character-counter ${
+                  formik.values.description.length > 450 ? 'warning' : ''
+                }`}
+              >
+                {formik.values.description.length}/500 characters
+              </div>
+              {formik.touched.description && formik.errors.description && (
+                <Form.Text className="text-danger">{formik.errors.description}</Form.Text>
+              )}
             </Form.Group>
             <Form.Group controlId="formGenre">
               <Form.Label>Genre</Form.Label>
@@ -141,14 +172,14 @@ const StoryForm = () => {
         <Accordion.Item eventKey="1" className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
           <Accordion.Header>Step 2: Story Content</Accordion.Header>
           <Accordion.Body>
-            <ReactQuill
-              value={formik.values.content}
-              onChange={value => formik.setFieldValue('content', value)}
-              onBlur={() => formik.setFieldTouched('content', true)}
-              theme="snow"
-              modules={quillModules}
+            <TextEditor
+              content={formik.values.content}
+              onUpdate={handleEditorUpdate}
+              characterLimit={MAX_CHARACTERS}
             />
-            <div id="character-count"></div>
+            {formik.touched.content && formik.errors.content && (
+              <Form.Text className="text-danger">{formik.errors.content}</Form.Text>
+            )}
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>

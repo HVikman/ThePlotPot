@@ -6,6 +6,7 @@ import { AuthProvider } from './context/AuthContext'
 import { NotificationsProvider } from './context/NotificationsContext'
 import { DarkModeProvider } from './context/DarkModeContext'
 import { setContext } from '@apollo/client/link/context'
+import { App as AntdApp } from 'antd' // <-- ADD THIS
 import 'bootstrap/dist/css/bootstrap.css'
 
 const getCsrfToken = () => {
@@ -38,14 +39,16 @@ const client = new ApolloClient({
 const root = ReactDOM.createRoot(document.getElementById('root'))
 root.render(
   <React.StrictMode>
-    <ApolloProvider client={client}>
-      <AuthProvider>
-        <NotificationsProvider>
-          <DarkModeProvider>
-            <App />
-          </DarkModeProvider>
-        </NotificationsProvider>
-      </AuthProvider>
-    </ApolloProvider>
+    <AntdApp> {/* <-- Wrap with Antd App */}
+      <ApolloProvider client={client}>
+        <AuthProvider>
+          <NotificationsProvider>
+            <DarkModeProvider>
+              <App />
+            </DarkModeProvider>
+          </NotificationsProvider>
+        </AuthProvider>
+      </ApolloProvider>
+    </AntdApp>
   </React.StrictMode>
 )

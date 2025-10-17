@@ -25,9 +25,9 @@ const Home = () => {
 
   if (data) {
     const sortedByReads = [...data.getAllStories].sort((a, b) => b.read_count - a.read_count)
-    featuredStories = sortedByReads.slice(0, 5) // Otetaan 5 tarinaa esiin carouselia varten
+    featuredStories = sortedByReads.slice(0, 5)
 
-    const sortedByCreatedAt = [...data.getAllStories].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    const sortedByCreatedAt = [...data.getAllStories].sort((a, b) => b.createdAt - a.createdAt)
     latestStories = sortedByCreatedAt.slice(0, 9)
   }
 
@@ -86,7 +86,7 @@ const Home = () => {
                         {story.author.username}
                       </Link>
                     </small>
-                  </Card.Text>                  <Link to={`/story/${story.id}`}>
+                  </Card.Text><Link to={`/story/${story.id}`}>
                     <Button variant="secondary">Read Story</Button>
                   </Link>
                 </Card.Body>
