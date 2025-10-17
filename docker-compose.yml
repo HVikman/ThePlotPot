@@ -1,0 +1,55 @@
+services:
+  backend:
+    build: 
+      context: .
+      args:
+        REACT_APP_RECAPTCHA_PUBLIC_KEY: "" # Set reCAPTCHAv3 site key here or leave empty to disable
+    ports:
+      - "4000:4000"
+    environment:
+      DOMAIN: localhost
+      URL: http://localhost:4000
+      PORT: 4000
+      DB_HOST: mysql
+      DB_USER: your_user
+      DB_PASSWORD: your_password
+      DB_NAME: theplotpot
+      REDIS_PASS: redis_password
+      REDIS_HOST: redis
+      RECAPTCHA_SECRET_KEY: # Set reCAPTCHAv3 secret key here or leave empty to disable
+      MAX_REQUEST: 2000 # App defaults to 200 if left empty
+    depends_on:
+      - mysql
+      - redis
+    command: >
+      sh -c "
+        mkdir -p /app/backend/secrets &&
+        if [ ! -f /app/backend/secrets/.secrets.env ]; then
+          echo 'Generating secrets...';
+          echo IDSECRET=$(openssl rand -hex 32) > /app/backend/secrets/.secrets.env;
+          echo SECRET=$(openssl rand -hex 32) >> /app/backend/secrets/.secrets.env;
+          echo CSRF_SECRET=$(openssl rand -hex 32) >> /app/backend/secrets/.secrets.env;
+        else
+          echo 'Using existing secrets...';
+        fi;
+        export $(cat /app/backend/secrets/.secrets.env | xargs);
+        cat /app/backend/secrets/.secrets.env;
+        until nc -z mysql 3306; do echo 'Waiting for MySQL...'; sleep 1; done;
+        node index.js
+      "
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: your_password
+      MYSQL_DATABASE: theplotpot
+      MYSQL_USER: your_user
+      MYSQL_PASSWORD: your_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:7
+    command: ["redis-server", "--requirepass", "redis_password"]
+
+volumes:
+  mysql_data:

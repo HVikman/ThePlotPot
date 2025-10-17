@@ -1,5 +1,10 @@
 const { createUserError } = require('./tools.js')
 const checkCaptcha = async (token) => {
+
+  if (!process.env.RECAPTCHA_SECRET_KEY) {
+    return true
+  }
+  
   const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
     method: 'POST',
     headers: {

@@ -1,4 +1,4 @@
-const siteKey = '6LfY0fooAAAAAKaljIbo723ZiMGApMCVg6ZU805o'
+const siteKey = process.env.REACT_APP_RECAPTCHA_PUBLIC_KEY
 
 export const executeRecaptcha = (action = 'submit') => {
   return new Promise((resolve, reject) => {
