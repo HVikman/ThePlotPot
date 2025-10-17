@@ -1,31 +1,33 @@
-import { notification } from 'antd'
-import { useEffect } from 'react'
+import { App as AntdApp } from 'antd'
+import { useEffect, useRef } from 'react'
 import { useNotifications } from '../../../context/NotificationsContext'
 
 const Notification = () => {
   const { notifications } = useNotifications()
-
+  const displayedNotifications = useRef(new Set())
+  const { notification } = AntdApp.useApp()
 
   useEffect(() => {
-    notifications.forEach(notification => {
-      openAntDesignNotification(notification.message, notification.duration/1000, notification.type)
+    notifications.forEach((notif) => {
+      if (!displayedNotifications.current.has(notif.id)) {
+        openAntDesignNotification(notif.message, notif.duration / 1000, notif.type)
+        displayedNotifications.current.add(notif.id)
+      }
     })
-  }, [notifications])
+  },)
 
   const openAntDesignNotification = (message, duration, type) => {
-    const notificationStyle = {
-      backgroundColor: 'rgba(52, 58, 64, 0.9)',
-      border: 'none',
-      borderRadius: '4px',
-      boxShadow: '0 3px 5px rgba(0, 0, 0, 0.3)'
-    }
-
     notification.open({
-      description: (<div style={{ color: 'white' }}>{message}</div>),
+      message: message,
       duration: duration,
       type: type,
-      style: notificationStyle,
-      placement: 'bottomRight'
+      placement: 'bottomRight',
+      style: {
+        backgroundColor: 'rgba(52, 58, 64, 0.9)',
+        borderRadius: 4,
+        boxShadow: '0 3px 5px rgba(0,0,0,0.3)',
+        color: 'white',
+      },
     })
   }
 

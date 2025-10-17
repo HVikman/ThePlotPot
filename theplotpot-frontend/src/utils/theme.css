@@ -92,3 +92,12 @@
   background-color: #fff;
   color: #000;
 }
+.character-counter {
+  font-size: 0.9rem;
+  margin-top: 5px;
+  text-align: right;
+}
+
+.character-counter.warning {
+  color: #dc3545; 
+}

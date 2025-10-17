@@ -2,6 +2,7 @@
 
 ## Table of Contents
 - [Introduction](#introduction)
+
 - [Installation](#installation)
   - [Node.js and npm](#nodejs-and-npm)
   - [Redis](#redis)
@@ -11,7 +12,7 @@
   - [Installing Dependencies](#installing-dependencies)
   - [Running the Application](#running-the-application)
   - [Integrating Frontend with Backend](#integrating-frontend-with-backend)
-
+- [Development server](#dev-server)
 ## Introduction
 This is the backend for the ThePlotPot project. It is responsible for handling hosting the frontend and commnunication between frontend and database.
 
@@ -155,3 +156,9 @@ Visit url:your_port to access the application, replacing `url` `your_port` with 
 
 Now, your application should be up and running with the integrated frontend and backend.
 
+## Development server
+You can start the development server by running the following command at project root directory:
+```bash
+npm start
+```
+This starts the backend and frontend. **You will need to have Redis and MySQL with database set up running and environment variables configured.**

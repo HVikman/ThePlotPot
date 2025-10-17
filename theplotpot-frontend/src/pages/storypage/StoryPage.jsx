@@ -1,3 +1,10 @@
+/**
+ * StoryPage displays story chapters and handles navigation between them.
+ * - Supports branching stories (chapters can have children)
+ * - Tracks custom chapter navigation stack for backtracking
+ * - Loads story and chapter data via GraphQL
+ */
+
 import { useState, useEffect } from 'react'
 import { useQuery, useLazyQuery } from '@apollo/client'
 import { useNavigate, useParams, useLocation, Link } from 'react-router-dom'
@@ -22,11 +29,15 @@ const StoryPage = () => {
 
   const location = useLocation()
   const { chapter, navigationStack: newNavigationStack } = location.state || {}
+  // Incoming chapter and navigationStack from navigation state (after adding a chapter)
+  // navigationStack tracks the user's path through branching chapters
 
   const [currentChapter, setCurrentChapter] = useState(null)
   const [navigationStack, setNavigationStack] = useState([])
 
   useEffect(() => {
+    // If chapter is passed via navigation, use it and preserve navigation history
+    // Otherwise fallback to the first chapter of the story
     if (chapter) {
       setCurrentChapter(chapter)
       window.history.replaceState(null, '', `/story/${storyId}/chapter/${chapter.id}`)
@@ -52,6 +63,7 @@ const StoryPage = () => {
   if (loading) return <LoadingComponent />
   if (error) return <ErrorComponent message={error.message} />
 
+  // Navigates to a child chapter and pushes the current one to the navigation stack
   const navigateToChapter = (chapterId) => {
     let chaptersArray
 
@@ -67,11 +79,14 @@ const StoryPage = () => {
       console.log('Chapter not found with the given ID:', chapterId)
       return
     }
+    // Find selected chapter from loaded children or fallback to initial chapters
     setCurrentChapter(selectedChapter)
     window.history.replaceState(null, '', `/story/${storyId}/chapter/${selectedChapter.id}`)
     getChildChapters({ variables: { id: selectedChapter.id } })
   }
 
+  // Navigates back to the previous chapter using custom navigation stack
+  // Falls back to parent chapter via query if stack is empty
   const goBack = () => {
     const lastChapter = navigationStack.pop()
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -87,6 +102,7 @@ const StoryPage = () => {
     }
   }
 
+  // Navigates to the "Add Chapter" page with context about the current chapter and navigation history
   const handleAddChapter = ( ) => {
     navigate('/add-chapter', {
       state: {

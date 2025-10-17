@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunktheplotpot_frontend=self.webpackChunktheplotpot_frontend||[]).push([[202],{202:(t,e,n)=>{n.r(e),n.d(e,{default:()=>r});var o=n(5043),c=n(3216),s=n(579);const r=function(){const t=(0,c.zy)();return(0,o.useEffect)((()=>{const e=new URLSearchParams(t.search).get("token");e&&console.log(e)}),[t]),(0,s.jsx)("div",{children:"Activating your account..."})}}}]);
-//# sourceMappingURL=202.79444f3a.chunk.js.map

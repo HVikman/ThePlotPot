@@ -10,6 +10,8 @@ import { useNotifications } from '../../context/NotificationsContext'
 import { PersonFill, KeyFill } from 'react-bootstrap-icons'
 import { Link } from 'react-router-dom'
 import { useDarkMode } from '../../context/DarkModeContext'
+import { useLoadReCaptcha } from '../../hooks/useLoadReCaptcha'
+import { executeRecaptcha } from '../../utils/executeRecaptcha'
 
 const SignupSchema = Yup.object().shape({
   username: Yup.string().min(3, 'Username must be at least 3 characters').required('Username is required'),
@@ -18,6 +20,7 @@ const SignupSchema = Yup.object().shape({
 })
 
 const Signup = () => {
+  useLoadReCaptcha('6LfY0fooAAAAAKaljIbo723ZiMGApMCVg6ZU805o')
   const { isDarkMode } = useDarkMode()
   const { addNotification } = useNotifications()
   const [signupError, setSignupError] = useState(null)
@@ -51,12 +54,27 @@ const Signup = () => {
         console.log('Bot detected')
         return
       }
-      // eslint-disable-next-line no-undef
-      grecaptcha.ready(async () => {
-        // eslint-disable-next-line no-undef
-        const token = await grecaptcha.execute('6LfY0fooAAAAAKaljIbo723ZiMGApMCVg6ZU805o', { action: 'submit' })
-        signup({ variables: { ...values, token } })
-      })
+
+      let token
+      try {
+        token = await executeRecaptcha()
+      } catch (error) {
+        console.error('reCAPTCHA failed:', error)
+        addNotification?.('reCAPTCHA failed. Please try again.', 3000, 'error')
+        return
+      }
+
+      try {
+        await signup({
+          variables: {
+            ...values,
+            token,
+          }
+        })
+      } catch (error) {
+        console.error('Signup failed:', error)
+        addNotification?.(error.message || 'Signup failed. Try again.', 3000, 'error')
+      }
     },
   })
   if(isAuthenticated){navigate('/'); return <p>You are already logged in.</p>}

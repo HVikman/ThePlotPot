@@ -5,6 +5,8 @@ import { useNotifications } from '../../context/NotificationsContext'
 import { useMutation } from '@apollo/client'
 import { ADD_COMMENT_MUTATION } from '../../api/queries'
 import { useDarkMode } from '../../context/DarkModeContext'
+import { useLoadReCaptcha } from '../../hooks/useLoadReCaptcha'
+import { executeRecaptcha } from '../../utils/executeRecaptcha'
 
 const validationSchema = Yup.object({
   content: Yup.string()
@@ -19,6 +21,7 @@ const initialValues = {
 }
 
 const AddCommentForm = ({ chapterId, addNewComment }) => {
+  useLoadReCaptcha('6LfY0fooAAAAAKaljIbo723ZiMGApMCVg6ZU805o')
   const { addNotification } = useNotifications()
 
   const [addComment] = useMutation(ADD_COMMENT_MUTATION)
@@ -28,36 +31,41 @@ const AddCommentForm = ({ chapterId, addNewComment }) => {
     initialValues,
     validationSchema,
     onSubmit: async (values) => {
-      console.log(chapterId)
+      console.log('Chapter ID:', chapterId)
+
       if (values.honeypot) {
         console.log('Bot detected')
         return
       }
-      // eslint-disable-next-line no-undef
-      grecaptcha.ready(async () => {
-        // eslint-disable-next-line no-undef
-        const token = await grecaptcha.execute('6LfY0fooAAAAAKaljIbo723ZiMGApMCVg6ZU805o', { action: 'submit' })
 
+      let token
+      try {
+        token = await executeRecaptcha()
+      } catch (error) {
+        console.error('Error generating reCAPTCHA token:', error)
+        addNotification('Failed to verify reCAPTCHA. Please try again.', 3000, 'error')
+        return
+      }
 
-        try {
+      try {
+        const { data } = await addComment({
+          variables: {
+            Input: {
+              content: values.content,
+              chapterId
+            },
+            token
+          }
+        })
 
-          const { data } = await addComment({
-            variables: {
-              Input: {
-                content: values.content,
-                chapterId
-              },
-              token: token
-            }
-          })
+        addNewComment(data.addComment)
+        addNotification('Comment added successfully!', 3000, 'success')
+        formik.resetForm()
 
-          addNewComment(data.addComment)
-          addNotification('Comment added successfully!', 3000, 'success')
-          formik.resetForm()
-        } catch (error) {
-          console.error('There was an error adding the comment:', error)
-          addNotification(error.message, 3000, 'error')
-        }})
+      } catch (error) {
+        console.error('There was an error adding the comment:', error)
+        addNotification(error.message, 3000, 'error')
+      }
     },
   })
 
