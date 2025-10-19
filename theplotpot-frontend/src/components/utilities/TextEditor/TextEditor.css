@@ -9,11 +9,9 @@
     font-size: 16px;
     cursor: text;
   }
-/* remove outline */
 .ProseMirror:focus {
     outline: none;
   }
-  /* set */
   .ProseMirror {        
     min-height: 400px;
   }

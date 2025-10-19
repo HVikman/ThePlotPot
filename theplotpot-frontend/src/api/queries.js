@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client'
 
 const SIGNUP_MUTATION = gql`
-mutation Mutation($username: String!, $email: String!, $password: String! $token: String!) {
+mutation Mutation($username: String!, $email: String!, $password: String! $token: String) {
     createUser(username: $username, email: $email, password: $password, token: $token) {
       message
       success
@@ -51,7 +51,7 @@ query Me {
 
 `
 const CREATE_STORY = gql`
-  mutation CreateStory($title: String!, $description: String!, $genre: String!, $firstChapterContent: String!, $token: String!) {
+  mutation CreateStory($title: String!, $description: String!, $genre: String!, $firstChapterContent: String!, $token: String) {
     createStory(
       input: {
         title: $title, 
@@ -137,7 +137,7 @@ query GetStory($id: ID!, $chapterId: ID) {
 }
 `
 const CREATE_CHAPTER = gql`
-mutation CreateChapter($content: String!, $storyId: ID!, $title: String!, $branch: Int!, $parentChapterId: ID!, $token: String!) {
+mutation CreateChapter($content: String!, $storyId: ID!, $title: String!, $branch: Int!, $parentChapterId: ID!, $token: String) {
   createChapter(content: $content, storyId: $storyId, title: $title, branch: $branch, parentChapterId: $parentChapterId, token: $token) {
     branch
     content
@@ -319,7 +319,7 @@ query GetUserProfile($getUserProfileId: ID!) {
 }
 `
 const ADD_COMMENT_MUTATION = gql`
-  mutation AddComment($Input: CommentInput!, $token: String!) {
+  mutation AddComment($Input: CommentInput!, $token: String) {
     addComment(input: $Input, token: $token) {
       content
       id
