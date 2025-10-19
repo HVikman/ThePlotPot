@@ -19,8 +19,10 @@ const SignupSchema = Yup.object().shape({
   password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
 })
 
+const siteKey = process.env.REACT_APP_RECAPTCHA_PUBLIC_KEY
+
 const Signup = () => {
-  useLoadReCaptcha('6LfY0fooAAAAAKaljIbo723ZiMGApMCVg6ZU805o')
+  useLoadReCaptcha()
   const { isDarkMode } = useDarkMode()
   const { addNotification } = useNotifications()
   const [signupError, setSignupError] = useState(null)
@@ -55,14 +57,15 @@ const Signup = () => {
         return
       }
 
-      let token
-      try {
-        token = await executeRecaptcha()
-      } catch (error) {
-        console.error('reCAPTCHA failed:', error)
-        addNotification?.('reCAPTCHA failed. Please try again.', 3000, 'error')
-        return
-      }
+      let token = null
+      if (siteKey){
+        try {
+          token = await executeRecaptcha()
+        } catch (error) {
+          console.error('reCAPTCHA verification failed:', error)
+          addNotification('Failed to verify you are human. Please try again.', 3000, 'error')
+          return
+        }}
 
       try {
         await signup({

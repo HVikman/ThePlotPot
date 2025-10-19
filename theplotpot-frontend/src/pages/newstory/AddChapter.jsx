@@ -27,8 +27,10 @@ const initialValues = {
   honeypot: '',
 }
 
+const siteKey = process.env.REACT_APP_RECAPTCHA_PUBLIC_KEY
+
 const AddChapter = () => {
-  useLoadReCaptcha('6LfY0fooAAAAAKaljIbo723ZiMGApMCVg6ZU805o')
+  useLoadReCaptcha()
   const { isDarkMode } = useDarkMode()
   const location = useLocation()
   const { storyId, parentChapter, navigationStack } = location.state
@@ -43,15 +45,16 @@ const AddChapter = () => {
         console.log('Bot detected')
         return
       }
-
-      let token
-      try {
-        token = await executeRecaptcha()
-      } catch (error) {
-        console.error('reCAPTCHA verification failed:', error)
-        addNotification('Failed to verify you are human. Please try again.', 3000, 'error')
-        return
-      }
+      let token = null
+      if (siteKey){
+        try {
+          token = await executeRecaptcha()
+        } catch (error) {
+          console.error('reCAPTCHA verification failed:', error)
+          addNotification('Failed to verify you are human. Please try again.', 3000, 'error')
+          return
+        }}
+      else {console.log('reCaptcha skipped')}
 
       try {
         await createChapter({

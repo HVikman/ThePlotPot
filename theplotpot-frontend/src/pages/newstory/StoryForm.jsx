@@ -33,8 +33,10 @@ const initialValues = {
   honeypot: '',
 }
 
+const siteKey = process.env.REACT_APP_RECAPTCHA_PUBLIC_KEY
+
 const StoryForm = () => {
-  useLoadReCaptcha('6LfY0fooAAAAAKaljIbo723ZiMGApMCVg6ZU805o')
+  useLoadReCaptcha()
   const { addNotification } = useNotifications()
   const { user } = useAuth()
   const isAuthenticated = !!user
@@ -52,14 +54,15 @@ const StoryForm = () => {
         return
       }
 
-      let token
-      try {
-        token = await executeRecaptcha()
-      } catch (error) {
-        console.error('Error generating reCAPTCHA token:', error)
-        addNotification('Failed to verify reCAPTCHA. Please try again.', 3000, 'error')
-        return
-      }
+      let token = null
+      if (siteKey){
+        try {
+          token = await executeRecaptcha()
+        } catch (error) {
+          console.error('reCAPTCHA verification failed:', error)
+          addNotification('Failed to verify you are human. Please try again.', 3000, 'error')
+          return
+        }}
 
       try {
         await createStory({

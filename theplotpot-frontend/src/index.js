@@ -6,7 +6,7 @@ import { AuthProvider } from './context/AuthContext'
 import { NotificationsProvider } from './context/NotificationsContext'
 import { DarkModeProvider } from './context/DarkModeContext'
 import { setContext } from '@apollo/client/link/context'
-import { App as AntdApp } from 'antd' // <-- ADD THIS
+import { App as AntdApp } from 'antd'
 import 'bootstrap/dist/css/bootstrap.css'
 
 const getCsrfToken = () => {
