@@ -46,4 +46,5 @@
 |16.10| 4 | Added database initialization script to backend startup
 |17.10| 10 | Dockerfile and docker-compose files for using Docker, Minor improvements. Testing Docker deployment. Rewriting documentation.
 |19.10| 2 | Testing and bugfixes with using the app without reCaptcha
+|23.10| 4 | Docker for development mode, updating documentation, small bug fixes
 |    | 252    | 

@@ -7,15 +7,16 @@ This is a project for the [Full Stack Web Development Project Course](https://gi
 ---
 ## 📑 Table of Contents
 
-- [Short Description](#-short-description)
-- [Setup & Installation](#️-setup--installation)
-  - [Normal setup (local development)](#-normal-setup-local-development)
-  - [Docker Deployment](#-docker-deployment)
-- [Documentation](#-documentation)
-- [Authors](#-authors)
+- [Short Description](#short-description)
+- [Setup & Installation](#️setup--installation)
+  - [Normal setup (local development)](#normal-setup-local-development)
+  - [Docker Development Mode (Compose Watch)](#docker-development-mode-compose-watch)
+  - [Docker Deployment](#docker-deployment-production)
+- [Documentation](#documentation)
+- [Authors](#authors)
 ---
 
-### 📝 Short Description
+### Short Description
 
 **The PlotPot** is a collaborative story writing platform where any user can start a story and other users can continue it by adding chapters.  
 Each chapter can branch into up to three different paths, allowing stories to grow in unique directions.  
@@ -23,17 +24,28 @@ Users can also comment on chapters.
 
 ---
 
-### ⚙️ Setup & Installation
+### Setup & Installation
 
 #### Normal setup (local development)
 
-Instructions for setting up the app locally (without Docker) can be found in the backend README:
-
-📄 [backend/README.md](./backend/README.md)
+Instructions for setting up the app locally (without Docker) can be found in the backend README:📄 [backend/README.md](./backend/README.md)
 
 ---
 
-### 🐳 Docker Deployment
+### Docker Development Mode (Compose Watch)
+
+If you want to run the app in development mode with live reload,
+you can use Docker Compose Watch to automatically rebuild and sync changes for both backend and frontend.
+This setup behaves similarly to running npm start locally — both servers and databases run in a single container with hot reload enabled.
+It is ideal for development when you don’t want to install Node, MySQL, or Redis locally.
+
+See detailed instructions here:
+📄 [./README_DEV.md](./README_DEV.md)
+
+---
+
+
+### Docker Deployment (production)
 
 To run the full stack (backend, MySQL, Redis, frontend) in Docker:
 
@@ -75,7 +87,7 @@ Key variables include:
 | `REACT_APP_RECAPTCHA_PUBLIC_KEY` | Frontend reCAPTCHA key (build arg) | *(optional)* |
 | `IDSECRET`, `SECRET`, `CSRF_SECRET` | Backend secret keys used for sessions, CSRF, and ID signing | *(auto-generated)* |
 
-#### 🔐 Automatic secret generation
+#### Automatic secret generation
 
 On the first container startup, the backend will:
 
@@ -99,14 +111,13 @@ docker compose down
 
 ---
 
-### 📚 Documentation
+### Documentation
 
-- [Installation instructions (backend)](./backend/README.md)  
 - [Workhours log](./documents/workhours.md)  
 - [Requirements specification](./documents/requirementspecification.md)
 
 ---
 
-### 🧑‍💻 Authors
+###  Authors
 
 Developed by **Henri Vikman** as part of the University of Helsinki Full Stack Project course.

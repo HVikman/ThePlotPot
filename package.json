@@ -2,14 +2,14 @@
     "name": "theplotpot",
     "version": "1.0.0",
     "scripts": {
-    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
-    "backend": "npm run dev --prefix ./backend",
-    "frontend": "wait-on http://localhost:4000 && npm start --prefix ./theplotpot-frontend",
-    "restart": "npm run frontend"
-  },
+        "start": "concurrently \"npm run backend\" \"npm run frontend\"",
+        "backend": "npm run dev --prefix ./backend",
+        "frontend": "wait-on http://localhost:4000 && cross-env PORT=$FRONTEND_PORT npm start --prefix ./theplotpot-frontend",
+        "restart": "npm run frontend"
+    },
     "dependencies": {
-      "concurrently": "^9.1.0",
-      "wait-on": "^8.0.1"
+        "concurrently": "^9.1.0",
+        "nodemon": "^3.1.10",
+        "wait-on": "^8.0.1"
     }
-  }
-  
+}

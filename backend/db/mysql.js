@@ -13,7 +13,8 @@ const connectWithRetry = () => {
     idleTimeout: 60000,
     queueLimit: 0,
     enableKeepAlive: true,
-    keepAliveInitialDelay: 0
+    keepAliveInitialDelay: 0,
+    multipleStatements: true
   })
 
   pool.on('error', function(err) {

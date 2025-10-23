@@ -4,6 +4,7 @@
 - [Introduction](#introduction)
 
 - [Installation](#installation)
+  - [Running with Docker (Preferred Method)](#running-with-docker-preferred-method)
   - [Node.js and npm](#nodejs-and-npm)
   - [Redis](#redis)
   - [MySQL](#mysql)
@@ -12,11 +13,45 @@
   - [Installing Dependencies](#installing-dependencies)
   - [Running the Application](#running-the-application)
   - [Integrating Frontend with Backend](#integrating-frontend-with-backend)
-- [Development server](#dev-server)
+- [Development server](#development-server)
 ## Introduction
 This is the backend for the ThePlotPot project. It is responsible for handling hosting the frontend and commnunication between frontend and database.
 
+
 ## Installation
+
+### Running with Docker (Preferred Method)
+
+The easiest and **recommended** way to run the backend (together with the frontend, MySQL, and Redis) is using Docker and Docker Compose.
+
+This approach requires no manual installation of Node.js or databases on your local machine.
+
+#### Development mode (hot reload)
+
+If you want automatic live reload for both backend and frontend (like running `npm start` locally), use Docker Compose Watch:
+
+```bash
+docker compose -f docker-compose.dev.yml up --watch --build
+```
+
+See detailed instructions in [README_DEV.md](../README_DEV.md)
+
+#### Production mode
+
+If you just want to run the full stack in a production configuration (without live reload):
+
+```bash
+docker compose up --build
+```
+
+This will:
+- Build the optimized production frontend
+- Start the backend, MySQL, and Redis services
+- Serve everything at [http://localhost:4000](http://localhost:4000)
+
+See [README.md](../README.md) for full Docker setup documentation.
+
+---
 
 ### Node.js and npm
 Ensure you have Node.js and npm installed on your machine. You can download them from [Node.js official website](https://nodejs.org/).
@@ -39,13 +74,7 @@ Install MySQL. You can download MySQL Community Server from [MySQL Downloads](ht
 
    Replace `your_database_name`, `your_username`, and `your_password` with appropriate values.
 
-2. Create necessary tables by running the SQL script provided:
-
-    ```bash
-    mysql -u your_username -p your_database_name < path/to/your/create_db.sql
-    ```
-
-   Replace `your_username`, `your_database_name`, and `path/to/your/create_db.sql` with your MySQL credentials and the path to the SQL script. Script is located in backend folder.
+2. Database is initialized on first startup of the backend
 
 
 ### Configuring Environment Variables
@@ -104,6 +133,11 @@ Run the following command in the project directory to install dependencies:
 ```bash
 npm install
 ```
+
+- Start the backend, MySQL, and Redis services
+- Serve everything at [http://localhost:4000](http://localhost:4000)
+
+See [README.md](../README.md) for full Docker setup documentation.
 
 ## Integrating Frontend with Backend
 

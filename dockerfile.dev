@@ -1,0 +1,18 @@
+FROM node:20
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y netcat-openbsd openssl && rm -rf /var/lib/apt/lists/*
+
+COPY package*.json ./
+COPY backend/package*.json ./backend/
+COPY theplotpot-frontend/package*.json ./theplotpot-frontend/
+
+ENV NODE_ENV=development
+
+RUN npm i -g concurrently wait-on nodemon cross-env\
+ && npm ci \
+ && cd backend && npm ci && cd .. \
+ && cd theplotpot-frontend && npm ci && cd ..
+
+CMD ["npm", "start"]
