@@ -1,5 +1,5 @@
 import React from 'react'
-import { Card, Row, Col, Button } from 'react-bootstrap'
+import { Card, Button } from 'react-bootstrap'
 import { Popconfirm } from 'antd'
 import { Link } from 'react-router-dom'
 import { useMutation } from '@apollo/client'
@@ -29,23 +29,21 @@ const CommentCard = ({ comment, user, deleteComment }) => {
 
 
   return (
-    <Card className={`shadow mt-3 ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
-      <Card.Body >
-        <Row>
-          <Col xs={3} md={1}>
-            <img
-              src={`https://www.gravatar.com/avatar/${comment.user.email}?s=400&d=robohash`}
-              className="img-fluid rounded-circle"
-              alt="User Gravatar"
-            />
-          </Col>
-          <Col xs={8} md={10}>
-            <Card.Title><Link style={{ color: 'inherit', textDecoration: 'inherit' }} to={`/user/${comment.user.id}`}>{comment.user.username}</Link></Card.Title>
-            <Card.Text>{comment.content}</Card.Text>
-          </Col>
-          <Col xs={1} md={1} className="d-flex align-items-start justify-content-end">
+    <Card className={`comment-card ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+      <div className="comment-card__body">
+        <div className="comment-card__avatar">
+          <img
+            src={`https://www.gravatar.com/avatar/${comment.user.email}?s=400&d=robohash`}
+            alt="User Gravatar"
+          />
+        </div>
+        <div className="comment-card__main">
+          <div className="comment-card__header">
+            <Card.Title className="mb-0">
+              <Link to={`/user/${comment.user.id}`}>{comment.user.username}</Link>
+            </Card.Title>
             {user && (
-              <>
+              <div className="comment-card__actions">
                 {user.id === comment.user.id && (
                   <Popconfirm
                     title="Delete your comment?"
@@ -54,7 +52,7 @@ const CommentCard = ({ comment, user, deleteComment }) => {
                     okText="Yes"
                     cancelText="No"
                   >
-                    <Button variant="danger">Delete</Button>
+                    <Button variant="outline-danger" size="sm">Delete</Button>
                   </Popconfirm>
                 )}
 
@@ -66,16 +64,19 @@ const CommentCard = ({ comment, user, deleteComment }) => {
                     okText="Yes"
                     cancelText="No"
                   >
-                    <Button variant="warning">Admin Delete</Button>
+                    <Button variant="outline-warning" size="sm">Admin delete</Button>
                   </Popconfirm>
                 )}
-              </>
+              </div>
             )}
-          </Col>
-        </Row>
-      </Card.Body>
+          </div>
+
+          <p className="comment-card__content">{comment.content}</p>
+        </div>
+      </div>
     </Card>
   )
 }
+
 
 export default CommentCard

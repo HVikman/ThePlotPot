@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import DOMPurify from 'dompurify'
-import './Chapter.css'
+import './StoryPage.css'
 import { Button } from 'react-bootstrap'
 import { useAuth } from '../../context/AuthContext'
 import { ArrowLeft, HandThumbsUpFill } from 'react-bootstrap-icons'
@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom'
 import { useNotifications } from '../../context/NotificationsContext'
 import { useDarkMode } from '../../context/DarkModeContext'
 import '../../utils/theme.css'
+import { Link } from 'react-router-dom'
 
 const Chapter = ({ chapter, childChapters, onNavigate, onAddChapter, onGoBack, isLoading }) => {
   const { addNotification } = useNotifications()
@@ -89,69 +90,108 @@ const Chapter = ({ chapter, childChapters, onNavigate, onAddChapter, onGoBack, i
   const { user } = useAuth()
   const isAuthenticated = !!user
   const sanitizedHTML = DOMPurify.sanitize(chapter.content)
+  const likesLabel = `${likes} ${likes === 1 ? 'like' : 'likes'}`
+  const chapterAuthorId = chapter.author?.id
+  const canToggleLike = isAuthenticated && (!chapterAuthorId || user.id !== chapterAuthorId)
+  const canDeleteChapter = isAuthenticated && chapterAuthorId && user.id === chapterAuthorId && childChapters.length === 0
 
   return (
-    <div className="chapter">
+    <div className="chapter-reader">
+      <div className="chapter-back">
+        <Button
+          variant={isDarkMode ? 'outline-light' : 'outline-dark'}
+          onClick={() => onGoBack()}
+        >
+          <ArrowLeft /> Back
+        </Button>
+      </div>
 
-      <Button variant='secondary' className="mb-3" onClick={() => onGoBack()}>
-        < ArrowLeft />
-      </Button>
-      <div className={`chapter-content shadow my-2 ${isDarkMode ? 'dark-mode' : 'light-mode'}`} dangerouslySetInnerHTML={{ __html: sanitizedHTML }} />
-      <div className="chapter-stats m-2">
-        {
-          isAuthenticated ? (
-            user.id === chapter.author.id ? ( childChapters.length === 0 ?
-              <>
+      <article className={`chapter-card ${isDarkMode ? 'chapter-card--dark' : 'chapter-card--light'}`}>
+        <header className="chapter-card__header">
+          <span className="chapter-card__eyebrow">Chapter {chapter.branch + 1}</span>
+          <h2 className="chapter-card__title">{chapter.title || ''}</h2>
+          <div className="chapter-card__meta">
+            {chapter.author && (
+              <span>
+                By <Link to={`/user/${chapter.author.id}`}>{chapter.author.username}</Link>
+              </span>
+            )}
+            <span>{chapter.reads_count} {chapter.reads_count === 1 ? 'read' : 'reads'}</span>
+            <span>{likesLabel}</span>
+          </div>
+        </header>
+
+        <div
+          className="chapter-card__content"
+          dangerouslySetInnerHTML={{ __html: sanitizedHTML }}
+        />
+
+        <footer className="chapter-card__footer">
+          <div className="chapter-card__toolbar">
+            <div className="chapter-card__likes">
+              <span>{likesLabel}</span>
+              {canToggleLike ? (
+                <Button
+                  disabled={isDisabled}
+                  variant={isLiked ? 'success' : (isDarkMode ? 'outline-light' : 'outline-dark')}
+                  onClick={() => handleButton()}
+                >
+                  <HandThumbsUpFill />
+                </Button>
+              ) : !isAuthenticated ? (
+                <span>Sign in to applaud</span>
+              ) : null}
+            </div>
+
+            <div className="chapter-card__admin">
+              {canDeleteChapter && (
                 <Popconfirm
-                  title={chapter.branch === 0 ?'Delete story' : 'Delete chapter'}
-                  description={chapter.branch === 0 ? 'Are you sure you want to delete this story': 'Are you sure you want to delete this chapter'}
+                  title={chapter.branch === 0 ? 'Delete story' : 'Delete chapter'}
+                  description={chapter.branch === 0 ? 'Are you sure you want to delete this story' : 'Are you sure you want to delete this chapter'}
                   onConfirm={handleDelete}
                   okText='Yes'
                   cancelText='No'
                 >
-                  <Button variant='danger'>Delete</Button>
-                </Popconfirm><span>Likes:</span></>
-              : <span>Likes: </span>) : (
-              <Button
-                disabled={isDisabled}
-                variant={isLiked ? 'success' : 'secondary'}
-                className="mt-2"
-                onClick={() => handleButton()}
-              >
-                <HandThumbsUpFill />
+                  <Button variant='outline-danger'>Delete</Button>
+                </Popconfirm>
+              )}
+              {user?.has_superpowers && (
+                <Popconfirm
+                  title={chapter.branch === 0 ? 'Delete story' : 'Delete chapter'}
+                  description={chapter.branch === 0 ? 'Are you sure you want to delete this story' : 'Are you sure you want to delete this chapter'}
+                  onConfirm={handleDelete}
+                  okText='Yes'
+                  cancelText='No'
+                >
+                  <Button variant='outline-danger'>Admin delete</Button>
+                </Popconfirm>
+              )}
+            </div>
+          </div>
+
+          <div className="chapter-card__choices">
+            {!isLoading && isAuthenticated && childChapters.length < 3 && chapter.branch < 9 && (
+              <Button variant={isDarkMode ? 'outline-light' : 'outline-dark'} onClick={() => onAddChapter()}>
+                Add chapter
               </Button>
-            )
-          ) : (
-            <span>Likes:</span>
-          )
-        }
-        {user ? user.has_superpowers && <Popconfirm
-          title={chapter.branch === 0 ?'Delete story' : 'Delete chapter'}
-          description={chapter.branch === 0 ? 'Are you sure you want to delete this story': 'Are you sure you want to delete this chapter'}
-          onConfirm={handleDelete}
-          okText='Yes'
-          cancelText='No'
-        >
-          <Button variant='danger'>Admin delete</Button>
-        </Popconfirm> : <></>}
-        <span>{likes}</span>
-      </div>
-      <div className="next-chapters m-2">
-        {!isLoading && isAuthenticated && childChapters.length < 3 && chapter.branch < 9 && (
-          <Button variant='secondary' className="mr-3 mt-2" onClick={() => onAddChapter()}>Add Chapter</Button>
-        )}
-        {childChapters.map(child => (
-          <Button variant='secondary' className="mr-3 mt-2" key={child.id} onClick={() => onNavigate(child.id)}>
-            Continue to: {child.title}
-          </Button>
-        ))}
+            )}
+            {childChapters.map(child => (
+              <Button
+                variant={isDarkMode ? 'outline-light' : 'outline-dark'}
+                key={child.id}
+                onClick={() => onNavigate(child.id)}
+              >
+                Continue to {child.title || 'next chapter'}
+              </Button>
+            ))}
+          </div>
+        </footer>
+      </article>
 
-      </div>
-      <Comments key={chapter.id} comments={chapter.comments} chapterId={chapter.id}/>
-
-
+      <Comments key={chapter.id} comments={chapter.comments} chapterId={chapter.id} />
     </div>
   )
 }
+
 
 export default Chapter

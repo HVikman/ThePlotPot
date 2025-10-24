@@ -1,21 +1,192 @@
+.app-navbar {
+  padding: 0.75rem 0;
+  background-color: #343a40;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.navbar-brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #f8f9fa;
+  text-decoration: none;
+}
+.navbar-brand-logo:hover,
+.navbar-brand-logo:focus {
+  color: #e9ecef;
+  text-decoration: none;
+}
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background-color: #f8f9fa;
+  color: #343a40;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+}
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.brand-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+.brand-subtitle {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.65);
+}
+.main-nav {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 1rem;
+}
+@media (min-width: 992px) {
+  .main-nav {
+    margin-top: 0;
+    align-items: center;
+  }
+}
+.main-nav .nav-link {
+  font-size: 1.2rem;
+  font-weight: 500;
+  border-radius: 999px;
+  padding: 1rem;
+  color: #f8f9fa !important;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.main-nav .nav-link:hover,
+.main-nav .nav-link:focus,
+.main-nav .nav-link.active {
+  background: linear-gradient(135deg, rgba(111, 66, 193, 0.12), rgba(111, 66, 193, 0.03));
+}
+.main-nav .nav-link:hover,
+.main-nav .nav-link:focus {
+  text-decoration: none;
+  transform: translateY(-1px);
+}
 
+.main-nav .nav-link.active {
+  font-weight: 600;
+}
+
+.actions-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  margin-top: 1.5rem;
+}
+@media (min-width: 992px) {
+  .actions-wrapper {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1.25rem;
+    margin-top: 0;
+    width: auto;
+  }
+}
+.cta-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+@media (min-width: 576px) {
+  .cta-group {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+.cta-button {
+  font-weight: 700;
+  padding: 0.6rem 1.5rem;
+  border-radius: 999px;
+  border: none;
+  background-color: #ffc107;
+  color: #343a40;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.cta-button:hover,
+.cta-button:focus {
+  background-color: #ffcd39;
+  color: #343a40;
+  transform: translateY(-1px);
+}
+.cta-button-secondary {
+  padding: 0.6rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: #f8f9fa;
+  background-color: transparent;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.cta-button-secondary:hover,
+.cta-button-secondary:focus {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+.auth-nav .nav-link,
+.auth-nav .dropdown-toggle {
+  display: flex;
+  align-items: center;
+}
+.auth-nav-mobile {
+  width: 100%;
+}
+.auth-nav-mobile .dropdown-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 0.75rem;
+  background-color: rgba(52, 58, 64, 0.85);
+  padding: 0.75rem 1rem;
+  color: #f8f9fa;
+}
 .navbar-dark .dropdown-menu {
-    background-color: #343a40;  
+  background-color: #343a40;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
 }
-
-
 .navbar-dark .dropdown-menu .dropdown-item {
-    color: #fff; 
+  color: #ffffff;
+  border-radius: 0.35rem;
+  margin: 0.15rem 0.35rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
-
-
-.navbar-dark .dropdown-menu .dropdown-item:hover, 
+.navbar-dark .dropdown-menu .dropdown-item:hover,
 .navbar-dark .dropdown-menu .dropdown-item:focus {
-    color: #343a40;  
-    background-color: #e9ecef;  
+  background-color: #e9ecef;
+  color: #343a40;
 }
-.navbar-dark .dropdown-menu .no-hover-effect:hover, 
+.navbar-dark .dropdown-menu .no-hover-effect:hover,
 .navbar-dark .dropdown-menu .no-hover-effect:focus {
-    color: #fff;  
-    background-color: #343a40;  
+  color: #ffffff;
+  background-color: #343a40;
+}
+.navbar-dark .dropdown-menu .dropdown-header {
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 600;
+}
+.navbar-dark .dropdown-divider {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+@media (max-width: 575.98px) {
+  .cta-group {
+    width: 100%;
+  }
+  .cta-group .btn {
+    width: 100%;
+  }
 }

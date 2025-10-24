@@ -32,6 +32,8 @@ const StoryResolvers = {
         createUserError('Story not found')
       }
 
+      const { chapterCount: total_chapters } = await queryDB('SELECT COUNT(*) AS chapterCount FROM chapters WHERE storyId = ? AND deleted_at IS NULL', [parsedStoryId], true)
+      
       let chapter
       if (chapterId) {
         const parsedChapterId = validateNumber(chapterId, true, 'Invalid chapter ID')
@@ -52,7 +54,8 @@ const StoryResolvers = {
 
       return {
         ...story,
-        chapters: [chapter]
+        chapters: [chapter],
+        total_chapters: total_chapters
       }
     },
 

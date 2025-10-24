@@ -1,158 +1,203 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
-import { Modal, Button, Container, Row, Col, Card, ListGroup, Form, InputGroup, Dropdown } from 'react-bootstrap'
+import { Container, Row, Col, Card, Button, Form, Badge } from 'react-bootstrap'
 import { GET_ALL_STORIES } from '../../api/queries'
 import ErrorComponent from '../../components/utilities/Error'
+import EmptyState from '../../components/utilities/EmptyState'
 import { useDarkMode } from '../../context/DarkModeContext'
 import '../../utils/theme.css'
+import './StoriesPage.css'
+import { useAuth } from '../../context/AuthContext'
 
 const StoriesPage = () => {
   const { loading, error, data } = useQuery(GET_ALL_STORIES)
   const { isDarkMode } = useDarkMode()
+  const { user } = useAuth()
+  const isAuthenticated = Boolean(user)
   const [filteredStories, setFilteredStories] = useState([])
-  const [showModal, setShowModal] = useState(false)
-  const [modalData, setModalData] = useState(null)
-  const [categories, setCategories] = useState([])
-  const [selectedGenre, setSelectedGenre] = useState(null)
+  const [selectedGenres, setSelectedGenres] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [showDropdown, setShowDropdown] = useState(false)
+
+  const categories = useMemo(() => {
+    if (!data?.getAllStories) return []
+    const uniqueCategories = new Set(data.getAllStories.map((story) => story.genre))
+    return Array.from(uniqueCategories).sort((a, b) => a.localeCompare(b))
+  }, [data])
 
   useEffect(() => {
-    if (data && data.getAllStories) {
+    if (data?.getAllStories) {
       setFilteredStories(data.getAllStories)
-      const uniqueCategories = [...new Set(data.getAllStories.map((story) => story.genre))]
-      setCategories(uniqueCategories)
     }
   }, [data])
 
-  const handleClick = (story) => {
-    setModalData(story)
-    setShowModal(true)
-  }
+  useEffect(() => {
+    if (!data?.getAllStories) return
 
-  const handleClose = () => {
-    setShowModal(false)
-  }
-
-  const filterByGenre = (genre) => {
-    setSelectedGenre(genre)
-
-    if (!genre || genre.trim() === '') {
+    if (selectedGenres.length === 0) {
       setFilteredStories(data.getAllStories)
     } else {
-      const filtered = data.getAllStories.filter((story) =>
-        story.genre.toLowerCase().includes(genre.toLowerCase())
+      setFilteredStories(
+        data.getAllStories.filter((story) => selectedGenres.includes(story.genre))
       )
-      setFilteredStories(filtered)
     }
+  }, [selectedGenres, data])
+
+  const toggleGenre = (genre) => {
+    setSelectedGenres((prev) =>
+      prev.includes(genre)
+        ? prev.filter((item) => item !== genre)
+        : [...prev, genre]
+    )
   }
 
-  const handleSearchChange = (e) => {
-    const value = e.target.value
-    setSearchTerm(value)
-    if (value.trim() === '') {
-      filterByGenre('')
-    } else {
-      setShowDropdown(true)
-    }
+  const clearFilters = () => setSelectedGenres([])
+
+  if (loading) {
+    return (
+      <div className="stories-page-loading">
+        <span className="spinner-border text-secondary" role="status" aria-hidden="true"></span>
+        <p className="muted-copy">Loading stories...</p>
+      </div>
+    )
   }
 
-  const handleGenreSelect = (genre) => {
-    setSearchTerm(genre)
-    filterByGenre(genre)
-    setShowDropdown(false)
-  }
-
-  if (loading) return <div>Loading...</div>
   if (error) return <ErrorComponent message={error.message} />
 
+  const filteredCategories = categories.filter((genre) =>
+    genre.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
   return (
-    <Container>
+    <Container className="stories-page-container">
       <Row>
-        <Col>
-          <h1>All Stories</h1>
-
-          <InputGroup className="mb-3">
+        <Col lg={3} className="genre-rail">
+          <div className={`genre-panel ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+            <h2 className="stories-subheading">Discover by genre</h2>
             <Form.Control
-              type="text"
-              placeholder="Search genres..."
+              type="search"
+              placeholder="Search genres"
               value={searchTerm}
-              onChange={handleSearchChange}
-              onFocus={() => setShowDropdown(true)}
-              onBlur={() => setTimeout(() => setShowDropdown(false), 200)} // Delay closing to allow selection
-              className={isDarkMode ? 'dark-mode' : 'light-mode'}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              className="genre-search"
             />
-          </InputGroup>
-
-          {showDropdown && (
-            <Dropdown show={showDropdown}>
-              <Dropdown.Menu style={{ display: 'block', maxHeight: '200px', overflowY: 'auto' }} className={isDarkMode ? 'dark-mode' : 'light-mode'}>
-                {categories
-                  .filter((genre) =>
-                    genre.toLowerCase().includes(searchTerm.toLowerCase())
-                  )
-                  .map((genre, index) => (
-                    <Dropdown.Item
-                      key={index}
-                      active={selectedGenre === genre}
-                      onClick={() => handleGenreSelect(genre)}
+            <div className="genre-chips" role="list">
+              {filteredCategories.length > 0 ? (
+                filteredCategories.map((genre) => {
+                  const isSelected = selectedGenres.includes(genre)
+                  return (
+                    <Button
+                      key={genre}
+                      variant={isSelected ? 'secondary' : 'outline-secondary'}
+                      onClick={() => toggleGenre(genre)}
+                      className="genre-chip"
                     >
                       {genre}
-                    </Dropdown.Item>
-                  ))}
-                {categories.length === 0 && (
-                  <Dropdown.Item disabled>No genres found</Dropdown.Item>
-                )}
-              </Dropdown.Menu>
-            </Dropdown>
-          )}
-
-          <ListGroup>
-            {filteredStories.map((story) => (
-              <ListGroup.Item
-                key={story.id}
-                onClick={() => handleClick(story)}
-                className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}
-              >
-                <Card className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
-                  <Card.Body>
-                    <Row>
-                      <Col xs={8}>
-                        <Card.Title>
-                          {story.title}{' '}
-                          <small className="text-muted">by {story.author.username}</small>
-                          <small style={{ fontSize: '0.6em', paddingLeft: '5px' }}>
-                            (Click for details)
-                          </small>
-                        </Card.Title>
-                        <Card.Subtitle className="mb-2 text-muted">{story.genre}</Card.Subtitle>
-                      </Col>
-                      <Col xs={4} className="text-right">
-                        <Link to={`/story/${story.id}`}>
-                          <Button variant="secondary">Read Story</Button>
-                        </Link>
-                      </Col>
-                    </Row>
-                  </Card.Body>
-                </Card>
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-
-          {modalData && (
-            <Modal show={showModal} onHide={handleClose}>
-              <Modal.Header closeButton className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
-                <Modal.Title>{modalData.title}</Modal.Title>
-              </Modal.Header>
-              <Modal.Body className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
-                <p>{modalData.description}</p>
-                <Link to={`/story/${modalData.id}`}>
-                  <Button variant="secondary">Read Story</Button>
+                    </Button>
+                  )
+                })
+              ) : (
+                <p className="muted-copy">No genres found.</p>
+              )}
+            </div>
+            <div className="genre-meta">
+              <Badge bg="secondary">{categories.length}</Badge>
+              <span className="muted-copy">genres available</span>
+            </div>
+            <Button
+              variant="link"
+              className="clear-filters"
+              onClick={clearFilters}
+              disabled={selectedGenres.length === 0}
+            >
+              Clear filters
+            </Button>
+          </div>
+        </Col>
+        <Col lg={9}>
+          <div className={`stories-header ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+            <div>
+              <h1 className="stories-heading">All Stories</h1>
+              {selectedGenres.length > 0 && (
+                <p className="muted-copy">
+                  Filtering by {selectedGenres.join(', ')}
+                </p>
+              )}
+            </div>
+            {isAuthenticated ? (
+              <Link to="/new-story">
+                <Button variant="secondary">Write a story</Button>
+              </Link>
+            ) : (
+              <div className="stories-header__actions">
+                <Link to="/signup">
+                  <Button variant="secondary">Join</Button>
                 </Link>
-              </Modal.Body>
-            </Modal>
-          )}
+                <Link to="/login">
+                  <Button variant="outline-secondary">Start Writing</Button>
+                </Link>
+              </div>
+            )}
+          </div>
+          <div className="stories-list">
+            {filteredStories.length > 0 ? (
+              filteredStories.map((story) => {
+                const updatedTimestamp = story.updatedAt ?? story.createdAt
+                const formattedUpdatedDate = updatedTimestamp
+                  ? new Date(Number(updatedTimestamp)).toLocaleDateString()
+                  : 'Recently updated'
+
+                return (
+                  <Card
+                    key={story.id}
+                    className={`story-card shadow-sm ${isDarkMode ? 'dark-mode' : 'light-mode'}`}
+                  >
+                    <Card.Body>
+                      <div className="story-card__header">
+                        <div>
+                          <Card.Title>{story.title}</Card.Title>
+                          <Card.Subtitle className="text-muted">
+                            {story.genre} · by {story.author.username}
+                          </Card.Subtitle>
+                        </div>
+                        <Link to={`/story/${story.id}`}>
+                          <Button variant="outline-secondary">Read</Button>
+                        </Link>
+                      </div>
+                      <Card.Text className="story-card__description">{story.description}</Card.Text>
+                      <div className="story-card__footer">
+                        <span className="muted-copy">{story.read_count} reads</span>
+                        <span className="muted-copy">Updated {formattedUpdatedDate}</span>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                )
+              })
+            ) : (
+              <EmptyState
+                title="No stories match these filters"
+                description="Try selecting different genres or clearing your current filters to keep exploring."
+                actionLabel={isAuthenticated ? 'Share your story' : 'Join to share a story'}
+                actionTo={isAuthenticated ? '/new-story' : '/signup'}
+                secondaryAction={(
+                  <>
+                    {!isAuthenticated && (
+                      <Link to="/login" className="empty-state-secondary">
+                        <Button variant="outline-secondary">Sign in to write</Button>
+                      </Link>
+                    )}
+                    <Button
+                      variant="outline-secondary"
+                      onClick={clearFilters}
+                      disabled={selectedGenres.length === 0}
+                    >
+                      Clear filters
+                    </Button>
+                  </>
+                )}
+              />
+            )}
+          </div>
         </Col>
       </Row>
     </Container>

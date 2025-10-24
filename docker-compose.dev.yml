@@ -76,5 +76,18 @@ services:
     image: redis:7
     command: ["redis-server", "--requirepass", "redis_password"]
 
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: your_user
+      PMA_PASSWORD: your_password
+      PMA_ARBITRARY: 1
+    depends_on:
+      - mysql
+
 volumes:
   mysql_data:
