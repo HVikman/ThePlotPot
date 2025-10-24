@@ -133,6 +133,7 @@ query GetStory($id: ID!, $chapterId: ID) {
     description
     genre
     id
+    total_chapters
   }
 }
 `

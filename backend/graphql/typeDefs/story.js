@@ -7,6 +7,7 @@ module.exports = gql`
     genre: String!
     description: String
     author: User!
+    total_chapters: Int!
     read_count: Int!
     createdAt: String!
     chapters: [Chapter]

@@ -7,6 +7,7 @@ import { ADD_COMMENT_MUTATION } from '../../api/queries'
 import { useDarkMode } from '../../context/DarkModeContext'
 import { useLoadReCaptcha } from '../../hooks/useLoadReCaptcha'
 import { executeRecaptcha } from '../../utils/executeRecaptcha'
+import './StoryPage.css'
 
 const validationSchema = Yup.object({
   content: Yup.string()
@@ -20,8 +21,10 @@ const initialValues = {
   honeypot: ''
 }
 
+const siteKey = process.env.REACT_APP_RECAPTCHA_PUBLIC_KEY
+
 const AddCommentForm = ({ chapterId, addNewComment }) => {
-  useLoadReCaptcha('6LfY0fooAAAAAKaljIbo723ZiMGApMCVg6ZU805o')
+  useLoadReCaptcha()
   const { addNotification } = useNotifications()
 
   const [addComment] = useMutation(ADD_COMMENT_MUTATION)
@@ -38,14 +41,15 @@ const AddCommentForm = ({ chapterId, addNewComment }) => {
         return
       }
 
-      let token
-      try {
-        token = await executeRecaptcha()
-      } catch (error) {
-        console.error('Error generating reCAPTCHA token:', error)
-        addNotification('Failed to verify reCAPTCHA. Please try again.', 3000, 'error')
-        return
-      }
+      let token = null
+      if (siteKey){
+        try {
+          token = await executeRecaptcha()
+        } catch (error) {
+          console.error('reCAPTCHA verification failed:', error)
+          addNotification('Failed to verify you are human. Please try again.', 3000, 'error')
+          return
+        }}
 
       try {
         const { data } = await addComment({
@@ -70,16 +74,18 @@ const AddCommentForm = ({ chapterId, addNewComment }) => {
   })
 
   return (
-    <div className="add-comment-container mt-3">
-      <h2>Add a Comment</h2>
-      <Form onSubmit={formik.handleSubmit}>
-
-        <Form.Group controlId="commentContent" className={`my-2 custom-form ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+    <div className={`add-comment-card ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
+      <div>
+        <h3 className="add-comment-card__title">Add a comment</h3>
+        <p className="add-comment-card__subtitle">Keep it kind and constructive to help writers grow.</p>
+      </div>
+      <Form onSubmit={formik.handleSubmit} className="add-comment-card__form">
+        <Form.Group controlId="commentContent" className={`custom-form ${isDarkMode ? 'dark-mode' : 'light-mode'}`}>
           <Form.Control
             as="textarea"
             className={`${isDarkMode ? 'dark-mode' : 'light-mode'}`}
             name="content"
-            placeholder="Your comment..."
+            placeholder="Share your feedback..."
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.content}
@@ -90,9 +96,9 @@ const AddCommentForm = ({ chapterId, addNewComment }) => {
           </Form.Control.Feedback>
         </Form.Group>
 
-        <Form.Control style={{ display: 'none' }} name="honeypot" onChange={formik.handleChange} value={formik.values.honeypot} />
+        <Form.Control style={{ display: 'none' }} name="honeypot" onChange={formik.handleChange} value={formik.values.honeypot}/>
 
-        <Button variant="secondary" type="submit">Submit</Button>
+        <Button variant={isDarkMode ? 'outline-light' : 'outline-dark'} type="submit">Post comment</Button>
       </Form>
     </div>
   )

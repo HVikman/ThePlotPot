@@ -9,7 +9,6 @@ import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import Notification from './components/utilities/Notification'
 import './App.css'
-import InfoModal from './components/modals/InfoModal'
 import DarkModeToggle from './components/utilities/DarkModeToggle'
 
 // Lazy loaded components
@@ -36,7 +35,6 @@ const CookieConsentPopup = lazy(() => import('./components/modals/CookieConsentP
 
 const App = () => {
   const [showCookiePopup, setShowCookiePopup] = useState(false)
-  const [showInfo, setShowInfo] = useState(false)
 
   useEffect(() => {
     if (!Cookies.get('cookieConsent')) {
@@ -47,9 +45,6 @@ const App = () => {
   const handleConsent = () => {
     Cookies.set('cookieConsent', 'true', { expires: 365 })
     setShowCookiePopup(false)
-    setTimeout(() => {
-      setShowInfo(true)
-    }, 5000)
   }
 
   return (
@@ -88,7 +83,6 @@ const App = () => {
           <CookieConsentPopup onConsent={handleConsent} />
         </Suspense>
       )}
-      {showInfo && <InfoModal />}
       <Footer />
       <DarkModeToggle />
     </div>

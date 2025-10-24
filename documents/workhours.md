@@ -47,4 +47,6 @@
 |17.10| 10 | Dockerfile and docker-compose files for using Docker, Minor improvements. Testing Docker deployment. Rewriting documentation.
 |19.10| 2 | Testing and bugfixes with using the app without reCaptcha
 |23.10| 4 | Docker for development mode, updating documentation, small bug fixes
-|    | 252    | 
+|23.10| 4 | Major frontend UI updates.
+|24.10| 6 | More work on UI, small fixes on navigationstack (browser back button works now)
+|    | 266    | 
