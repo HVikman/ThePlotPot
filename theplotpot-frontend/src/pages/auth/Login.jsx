@@ -23,7 +23,7 @@ const Login = () => {
   const { user, setUser } = useAuth()
   const isAuthenticated = !!user
   const navigate = useNavigate()
-  const [login] = useMutation(LOGIN_MUTATION, {
+  const [login, { loading }] = useMutation(LOGIN_MUTATION, {
     update: (cache, { data }) => {
       if (data.login.success) {
         setUser(data.login.user)
@@ -102,13 +102,16 @@ const Login = () => {
         </Form.Group>
         <Form.Control style={{ display: 'none' }} name="honeypot" onChange={formik.handleChange} value={formik.values.honeypot} />
 
-        <Button variant="secondary" className='mt-2' type="submit">
-          Login
+        <Button variant="secondary" className='mt-2' type="submit" disabled={loading}>
+          {loading ? 'Logging in...' : 'Login'}
         </Button>
       </Form>
       {loginError && <Alert variant="danger" className="mt-3">{loginError}</Alert>}
       <div className="mt-3">
         No account yet? <Link to="/signup">Sign up here</Link>
+      </div>
+      <div className="mt-2">
+        <Link to="/forgot-password">Forgot your password?</Link>
       </div>
     </Container>
   )

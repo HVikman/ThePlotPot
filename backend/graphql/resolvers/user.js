@@ -8,12 +8,14 @@ const checkCaptcha = require('../../utils/captcha.js')
 const { checkLoggedIn, createUserError, validateNumber } = require('../../utils/tools.js')
 const { clearUserFromCache, setCachedBannedStatus } = require('../../utils/cache.js')
 const { RateLimiterMemory } = require('rate-limiter-flexible')
+const { sendActivationEmail, sendPasswordResetEmail } = require('../../utils/email.js')
 
 // Define max length constants
 const MAX_USERNAME_LENGTH = 50
 const MAX_EMAIL_LENGTH = 100
 const MAX_PASSWORD_LENGTH = 100
 const MAX_LINK_LENGTH = 200
+const MAX_TOKEN_LENGTH = 255
 
 const loginRateLimiter = new RateLimiterMemory({
   points: 5,
@@ -119,16 +121,23 @@ const UserResolvers = {
       const hashedPassword = await bcrypt.hash(password, 10)
 
       // Insert the new user into the database
-      await queryDB('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', [sanitizedUsername, hashedPassword, sanitizedEmail])
-      const newUser = await queryDB('SELECT * FROM users WHERE email = ?', [sanitizedEmail], true)
+       const activationToken = crypto.randomBytes(32).toString('hex')
 
-      // Store user session
-      context.req.session.user = hashids.encode(newUser.id)
-      context.req.session.username = sanitizedUsername
-      context.req.session.email = sanitizedEmail
-      context.req.session.admin = false
+      // Insert the new user into the database
+      await queryDB('INSERT INTO users (username, password, email, activation_token) VALUES (?, ?, ?, ?)', [sanitizedUsername, hashedPassword, sanitizedEmail, activationToken])
+      const newUser = await queryDB('SELECT id, username, email, coffee, has_superpowers, bannedAt, deletedAt, is_activated FROM users WHERE email = ?', [sanitizedEmail], true)
 
-      return { success: true, message: 'Sign up successful', user: newUser }
+      try {
+        await sendActivationEmail(sanitizedEmail, activationToken, sanitizedUsername, context.req)
+      } catch (error) {
+        console.error('Failed to send activation email:', error)
+        return { success: false, message: 'Failed to send activation email. Please try again later.' }
+      }
+
+      newUser.id = hashids.encode(newUser.id)
+      newUser.email = crypto.createHash('sha256').update(newUser.email.trim().toLowerCase()).digest('hex')
+
+      return { success: true, message: 'Sign up successful. Please check your email to activate your account.', user: newUser }
     },
     // Log in a user
     login: async (_, { email, password }, context) => {
@@ -161,6 +170,42 @@ const UserResolvers = {
         if (user.bannedAt !== null) {
           return { success: false, message: 'You are banned' }
         }
+        
+        const isActivated =
+          user.is_activated === null || user.is_activated === undefined
+            ? true
+            : Boolean(user.is_activated)
+
+        if (!isActivated) {
+          try {
+            const newToken = user.activation_token || crypto.randomBytes(32).toString('hex')
+            if (!user.activation_token) {
+              await queryDB('UPDATE users SET activation_token = ? WHERE id = ?', [newToken, user.id])
+            }
+            await sendActivationEmail(user.email, newToken, user.username, context.req)
+
+            return {
+              success: false,
+              message:
+                'Your account is not activated. A new activation link has been sent to your email address.'
+            }
+          } catch (error) {
+            console.error('Activation email error:', error)
+            if (error.message.includes('Too many email requests')) {
+              return {
+                success: false,
+                message:
+                  'Your account is not activated. Please check your email for the activation link.'
+              }
+            }
+
+            return {
+              success: false,
+              message:
+                'Your account is not activated and the activation email could not be sent. Please try again later.'
+            }
+          }
+        }
 
         // Store user session
         context.req.session.user = hashids.encode(user.id)
@@ -181,6 +226,73 @@ const UserResolvers = {
         }
       }
     },
+
+    activateAccount: async (_, { token }, context) => {
+      const sanitizedToken = sanitizeHtml(token, { allowedTags: [], allowedAttributes: {} }).trim()
+
+      if (!sanitizedToken || sanitizedToken.length > MAX_TOKEN_LENGTH) {
+        return { success: false, message: 'Invalid activation token' }
+      }
+
+      const user = await queryDB('SELECT id, username, email, has_superpowers FROM users WHERE activation_token = ?', [sanitizedToken], true)
+      if (!user) {
+        return { success: false, message: 'Invalid activation token' }
+      }
+
+      await queryDB('UPDATE users SET is_activated = 1, activation_token = NULL WHERE id = ?', [user.id])
+
+      context.req.session.user = hashids.encode(user.id)
+      context.req.session.username = user.username
+      context.req.session.email = user.email
+      context.req.session.admin = user.has_superpowers ? true : false
+
+      return { success: true, message: 'Account activated successfully' }
+    },
+
+    requestPasswordReset: async (_, { email, token: captchaToken }, context) => {
+      await checkCaptcha(captchaToken)
+      const sanitizedEmail = sanitizeHtml(email.trim().toLowerCase(), { allowedTags: [], allowedAttributes: {} })
+
+      if (sanitizedEmail.length > MAX_EMAIL_LENGTH) {
+        createUserError(`Email too long (max ${MAX_EMAIL_LENGTH} characters)`)
+      }
+
+      const user = await queryDB('SELECT id, username, email FROM users WHERE email = ?', [sanitizedEmail], true)
+      if (!user) {
+        return { success: true, message: 'If an account with that email exists, a password reset link has been sent.' }
+      }
+
+      const resetToken = crypto.randomBytes(32).toString('hex')
+      try {
+        await queryDB('UPDATE users SET password_reset_token = ? WHERE id = ?', [resetToken, user.id])
+        await sendPasswordResetEmail(user.email, resetToken, user.usernam, context.req)
+      } catch (error) {
+        console.error('Failed to send password reset email:', error)
+        if (error.message && error.message.includes('Too many email requests')) {
+          return { success: false, message: error.message }
+        }
+        return { success: false, message: 'Failed to send password reset email. Please try again later.' }
+      }
+
+      return { success: true, message: 'If an account with that email exists, a password reset link has been sent.' }
+    },
+    resetPassword: async (_, { token, newPassword }) => {
+      if (newPassword.length > MAX_PASSWORD_LENGTH) createUserError(`Password too long (max ${MAX_PASSWORD_LENGTH} characters)`)
+
+      const sanitizedToken = sanitizeHtml(token, { allowedTags: [], allowedAttributes: {} }).trim()
+      if (!sanitizedToken || sanitizedToken.length > MAX_TOKEN_LENGTH) {
+        return { success: false, message: 'Invalid or expired reset token' }
+      }
+
+      const user = await queryDB('SELECT id FROM users WHERE password_reset_token = ?', [sanitizedToken], true)
+      if (!user) {
+        return { success: false, message: 'Invalid or expired reset token' }
+      }
+      const hashedPassword = await bcrypt.hash(newPassword, 10)
+      await queryDB('UPDATE users SET password = ?, password_reset_token = NULL WHERE id = ?', [hashedPassword, user.id])
+      return { success: true, message: 'Password reset successfully' }
+    },
+
     // Change the user's password
     changePassword: async (_, { oldPassword, newPassword }, context) => {
       const userId = await checkLoggedIn(context)

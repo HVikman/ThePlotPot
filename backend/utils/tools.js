@@ -3,6 +3,66 @@ const hashids = new Hashids(process.env.IDSECRET, 20)
 const { checkBanned } = require('./cache.js')
 
 /**
+ * Extracts the first IP address from a potential header value.
+ *
+ * @param {string|string[]} value - The header value to parse.
+ * @returns {string|null}
+ */
+const normalizeIpValue = (value) => {
+  if (!value) {
+    return null
+  }
+
+  const raw = Array.isArray(value) ? value[0] : value
+  if (typeof raw !== 'string') {
+    return null
+  }
+
+  const ip = raw
+    .split(',')
+    .map(part => part.trim())
+    .find(Boolean)
+
+  return ip || null
+}
+
+/**
+ * Determines the best available client IP address from a request object.
+ *
+ * @param {import('express').Request} req - The incoming HTTP request.
+ * @returns {string|null} - The resolved client IP address, or null if unavailable.
+ */
+const getClientIp = (req) => {
+  if (!req) {
+    return null
+  }
+
+  const headers = req.headers || {}
+
+  const candidates = [
+    normalizeIpValue(headers['x-forwarded-for']),
+    normalizeIpValue(headers['cf-connecting-ip']),
+    normalizeIpValue(headers['x-real-ip']),
+    req.ip,
+    req.connection?.remoteAddress,
+    req.socket?.remoteAddress,
+    req.connection?.socket?.remoteAddress,
+  ]
+
+  const ip = candidates.find(Boolean) || null
+
+  if (!ip) {
+    return null
+  }
+
+  if (ip === '::1' || ip === '127.0.0.1') {
+    return 'localhost'
+  }
+
+  return ip
+}
+
+/**
  * Checks if a user is logged in by verifying their session and decoding the user ID.
  * Also checks if the user is banned. If the user is not logged in or banned, throws an error.
  *
@@ -63,4 +123,5 @@ module.exports = {
   checkLoggedIn,
   createUserError,
   validateNumber,
+  getClientIp,
 }

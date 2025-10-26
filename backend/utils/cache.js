@@ -77,8 +77,40 @@ const checkBanned = async (userId) => {
   return { isBanned: false }
 }
 
+const EMAIL_RATE_LIMIT_MS = 60 * 1000
+
+
+const canSendEmail = async (email, ip) => {
+  if (!email && !ip) {
+    console.error('Email limiter: No email or IP provided — blocking by default')
+    return false
+  }
+
+  try {
+    const keys = []
+    if (email) keys.push(`emailRate:${email}`)
+    if (ip) keys.push(`emailRate:${ip}`)
+
+    const existsResults = await Promise.all(keys.map(k => redisClient.exists(k)))
+    if (existsResults.some(Boolean)) {
+      return false
+    }
+
+    const pipeline = redisClient.multi()
+    keys.forEach((key) => pipeline.set(key, '1', { PX: EMAIL_RATE_LIMIT_MS }))
+    await pipeline.exec()
+
+    return true
+  } catch (error) {
+    console.error('Email rate limit check failed — blocking by default:', error)
+    return false
+  }
+}
+
+
 module.exports = {
   checkBanned,
   clearUserFromCache,
-  setCachedBannedStatus
+  setCachedBannedStatus,
+  canSendEmail
 }

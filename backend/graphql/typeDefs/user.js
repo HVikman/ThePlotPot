@@ -10,6 +10,7 @@ module.exports = gql`
         has_superpowers: Boolean
         bannedAt: String
         deletedAt: String
+        is_activated: Boolean
     }
     type LoginResponse {
         success: Boolean!

@@ -4,6 +4,7 @@ const session = require('express-session')
 const RedisStore = require('connect-redis').default
 const { createClient } = require('redis')
 const lusca = require('lusca')
+const { getClientIp } = require('./utils/tools.js')
 
 const path = require('path')
 const fs = require('fs')
@@ -55,7 +56,7 @@ app.use(session({
   saveUninitialized: true,
   cookie: {
     domain: process.env.DOMAIN,
-    sameSite: 'strict',
+    sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'strict',
     secure: process.env.NODE_ENV === 'production',
     maxAge: 7 * 24 * 60 * 60 * 1000
   }
@@ -108,7 +109,7 @@ const server = new ApolloServer({
     return error
   },
   context: async ({ req, res }) => {
-    const clientIp = req.headers['x-forwarded-for']
+    const clientIp = getClientIp(req)
     return {
       req,
       clientIp,

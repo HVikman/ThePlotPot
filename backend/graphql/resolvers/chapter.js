@@ -2,8 +2,7 @@ const sanitizeHtml = require('sanitize-html')
 const queryDB = require('../../db/query')
 const { detectSpam } = require('../../utils/detectspam')
 const checkCaptcha = require('../../utils/captcha.js')
-const { checkLoggedIn, createUserError, validateNumber } = require('../../utils/tools.js')
-
+const { checkLoggedIn, createUserError, validateNumber, getClientIp } = require('../../utils/tools.js')
 const Hashids = require('hashids/cjs')
 const hashids = new Hashids(process.env.IDSECRET, 20)
 
@@ -49,11 +48,7 @@ const ChapterResolvers = {
         const userId = await checkLoggedIn(context)
         IDorIP = userId.toString() // Convert User ID to string
       } else {
-        let ip = context.clientIp || context.req.headers['x-forwarded-for'] || context.req.connection.remoteAddress
-        if (ip === '::1' || ip === '127.0.0.1') {
-          ip = 'localhost' // Handle localhost safely
-        }
-        IDorIP = ip
+        IDorIP = context.clientIp || getClientIp(context.req)
       }
 
       // Insert row to chapter_reads for tracking view counts

@@ -14,6 +14,9 @@ import DarkModeToggle from './components/utilities/DarkModeToggle'
 // Lazy loaded components
 const Login = lazy(() => import('./pages/auth/Login'))
 const Signup = lazy(() => import('./pages/auth/Signup'))
+const ActivateAccount = lazy(() => import('./pages/auth/ActivateAccount'))
+const RequestPasswordReset = lazy(() => import('./pages/auth/RequestPasswordReset'))
+const ResetPassword = lazy(() => import('./pages/auth/ResetPassword'))
 
 const StoryForm = lazy(() => import('./pages/newstory/StoryForm'))
 const AddChapter = lazy(() => import('./pages/newstory/AddChapter'))
@@ -56,7 +59,10 @@ const App = () => {
             <Routes>
               <Route path="/signup" element={<Signup />} />
               <Route path="/login" element={<Login />} />
-              <Route path='/story' element={<StoryForm />} />
+              <Route path="/activate" element={<ActivateAccount />} />
+              <Route path="/forgot-password" element={<RequestPasswordReset />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path='/new-story' element={<StoryForm />} />
               <Route path='/user/:id' element={<UserPage />} />
               <Route path="/" element={<Home />} />
               <Route path="/story/:storyId/chapter/:chapterId" element={<StoryPage />} />

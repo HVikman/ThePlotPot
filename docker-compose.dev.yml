@@ -35,9 +35,17 @@ services:
       REDIS_PASS: redis_password
       REDIS_HOST: redis
       HOST: 0.0.0.0
-      CHOKIDAR_USEPOLLING: "1"
-      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "false"
+      WATCHPACK_POLLING: "false"
       CI: "false"
+      #Edit these for your email provider. Default settings for icloud mail
+      EMAIL_HOST: smtp.mail.me.com
+      EMAIL_PORT: 587
+      EMAIL_USER: 
+      EMAIL_PASS: 
+      EMAIL_FROM:  #"ThePlotPot <email@address.com>"
+      EMAIL_SECURE: false
+
     volumes:
       - ./:/app
       - /app/node_modules
@@ -88,6 +96,17 @@ services:
       PMA_ARBITRARY: 1
     depends_on:
       - mysql
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: unless-stopped
+    container_name: redis-commander
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379:0:redis_password
+    depends_on:
+      - redis
 
 volumes:
   mysql_data:

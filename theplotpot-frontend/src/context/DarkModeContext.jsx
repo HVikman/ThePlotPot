@@ -5,13 +5,37 @@ export const DarkModeContext = createContext()
 export const useDarkMode = () => useContext(DarkModeContext)
 
 export const DarkModeProvider = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState(
-    () => JSON.parse(localStorage.getItem('darkMode')) || false
+  const [isDarkMode, setIsDarkModeState] = useState(() =>
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  )
+
+  const [userHasSetPreference, setUserHasSetPreference] = useState(
+    localStorage.getItem('darkMode') !== null
   )
 
   useEffect(() => {
-    localStorage.setItem('darkMode', JSON.stringify(isDarkMode))
-  }, [isDarkMode])
+    const saved = localStorage.getItem('darkMode')
+    if (saved !== null) {
+      setIsDarkModeState(JSON.parse(saved))
+    }
+  }, [])
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handler = (e) => {
+      if (!userHasSetPreference) {
+        setIsDarkModeState(e.matches)
+      }
+    }
+    mediaQuery.addEventListener('change', handler)
+    return () => mediaQuery.removeEventListener('change', handler)
+  }, [userHasSetPreference])
+
+  const setIsDarkMode = (value) => {
+    setIsDarkModeState(value)
+    setUserHasSetPreference(true)
+    localStorage.setItem('darkMode', JSON.stringify(value))
+  }
 
   return (
     <DarkModeContext.Provider value={{ isDarkMode, setIsDarkMode }}>
