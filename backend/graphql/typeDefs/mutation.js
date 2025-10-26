@@ -18,5 +18,8 @@ type Mutation {
     deleteComment(commentId: ID!): Response!
     banUser(id: ID!): Response!
     unbanUser(id: ID!): Response!
+    requestPasswordReset(email: String!, token: String): Response!
+    resetPassword(token: String!, newPassword: String!): Response!
+    activateAccount(token: String!): Response!
 }
 `

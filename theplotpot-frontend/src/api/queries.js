@@ -25,8 +25,9 @@ const LOGIN_MUTATION = gql`
           email
           coffee
           has_superpowers
-        }
+          is_activated
       }
+    }
   }
 `
 const LOGOUT_MUTATION = gql`
@@ -38,18 +39,47 @@ mutation Logout {
 }
 `
 
-const ME = gql `
-query Me {
-  me {
+const ACTIVATE_ACCOUNT_MUTATION = gql`
+mutation ActivateAccount($token: String!) {
+  activateAccount(token: $token) {
+    success
+    message
+  }
+}
+`
+
+const REQUEST_PASSWORD_RESET_MUTATION = gql`
+mutation RequestPasswordReset($email: String!, $token: String) {
+  requestPasswordReset(email: $email, token: $token) {
+    success
+    message
+  }
+}
+`
+
+const RESET_PASSWORD_MUTATION = gql`
+mutation ResetPassword($token: String!, $newPassword: String!) {
+  resetPassword(token: $token, newPassword: $newPassword) {
+    success
+    message
+  }
+}
+`
+
+const ME = gql`
+  query Me {
+    me {
       id
       username
       email
       coffee
       has_superpowers
+      is_activated
+    }
   }
-}
-
 `
+
+
 const CREATE_STORY = gql`
   mutation CreateStory($title: String!, $description: String!, $genre: String!, $firstChapterContent: String!, $token: String) {
     createStory(
@@ -369,4 +399,4 @@ mutation Mutation($id: ID!) {
 }
 `
 
-export { DELETE_USER,UNBAN_USER,BAN_USER, GET_ALL_USERS, DELETE_COMMENT,DELETE_CHAPTER, DELETE_STORY, ADD_COMMENT_MUTATION, GET_USER_PROFILE, LOGIN_MUTATION, GET_CHAPTER, IS_CHAPTER_LIKED, SIGNUP_MUTATION, LOGOUT_MUTATION,CREATE_STORY,GET_ALL_STORIES,GET_STORY_BY_ID, ME, CREATE_CHAPTER, GET_CHAPTER_CHILDREN,EDIT_COFFEE,CHANGE_PASSWORD,LIKE_CHAPTER,UNLIKE_CHAPTER }
+export { DELETE_USER,UNBAN_USER,BAN_USER, GET_ALL_USERS, DELETE_COMMENT,DELETE_CHAPTER, DELETE_STORY, ADD_COMMENT_MUTATION, GET_USER_PROFILE, LOGIN_MUTATION, GET_CHAPTER, IS_CHAPTER_LIKED, SIGNUP_MUTATION, LOGOUT_MUTATION,CREATE_STORY,GET_ALL_STORIES,GET_STORY_BY_ID, ME, CREATE_CHAPTER, GET_CHAPTER_CHILDREN,EDIT_COFFEE,CHANGE_PASSWORD,LIKE_CHAPTER,UNLIKE_CHAPTER, ACTIVATE_ACCOUNT_MUTATION, REQUEST_PASSWORD_RESET_MUTATION, RESET_PASSWORD_MUTATION }

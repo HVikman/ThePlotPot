@@ -8,6 +8,7 @@ import { DarkModeProvider } from './context/DarkModeContext'
 import { setContext } from '@apollo/client/link/context'
 import { App as AntdApp } from 'antd'
 import 'bootstrap/dist/css/bootstrap.css'
+import * as serviceWorkerRegistration from './serviceWorkerRegistration'
 
 const getCsrfToken = () => {
   const token = document.cookie
@@ -52,3 +53,5 @@ root.render(
     </AntdApp>
   </React.StrictMode>
 )
+
+serviceWorkerRegistration.register()
